@@ -1,5 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_crm/views/pages/home_page.dart';
+import 'package:flutter_crm/widgets/login/login_desktop.dart';
+import 'package:flutter_crm/widgets/login/login_mobile.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -12,46 +15,44 @@ String _email = '';
 String _password = '';
 
 class _LoginPageState extends State<LoginPage> {
+
   @override
   Widget build(BuildContext context) {
+    bool isMobile = defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS;
+    bool isDesktop = defaultTargetPlatform == TargetPlatform.windows || defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.linux;
+
     return Scaffold(
-      appBar: AppBar(title: Text('Flutter'), centerTitle: true),
+      appBar: AppBar(title: Text('Login Page'), centerTitle: true),
       body: Center(
-        child: Column(
-          children: [
-            Text('Login Page'),
-            SizedBox(
-              width: 250,
-              child: TextField(
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(label: Text("Email")),
-                onChanged: (value) {
-                  setState(() {
-                    _email = value;
-                  });
+        child: isMobile
+            ? LoginMobile(
+                email: _email,
+                password: _password,
+                onEmailChanged: (value) {
+                  setState(() => _email = value);
                 },
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text("Your email: $_email"),
-            SizedBox(
-              width: 250,
-              child: TextField(
-                obscureText: true,
-                decoration: const InputDecoration(label: Text("Senha")),
-                onChanged: (value) {
-                  setState(() {
-                    _password = value;
-                  });
+                onPasswordChanged: (value) {
+                  setState(() => _password = value);
                 },
+                onLoginPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => HomePage()),
+                ),
+              )
+            : LoginDesktop(
+                email: _email,
+                password: _password,
+                onEmailChanged: (value) {
+                  setState(() => _email = value);
+                },
+                onPasswordChanged: (value) {
+                  setState(() => _password = value);
+                },
+                onLoginPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => HomePage()),
+                ),
               ),
-            ),
-            ElevatedButton(onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
-            }, 
-            child: const Text("Login")),
-          ],
-        ),
       ),
     );
   }

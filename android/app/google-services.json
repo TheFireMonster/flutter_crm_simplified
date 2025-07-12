@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "860258832462",
+    "project_id": "smart-crm-firebase",
+    "storage_bucket": "smart-crm-firebase.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:860258832462:android:5f8467e657c2b0afb3f31f",
+        "android_client_info": {
+          "package_name": "com.example.flutter_crm"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "860258832462-l7ord2n4p7s91ju4lcbr01sqnmbn85a5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQZvXMEjDQ7B1UO4BKSsaNHPEKnImaNKw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "860258832462-l7ord2n4p7s91ju4lcbr01sqnmbn85a5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
