@@ -1,7 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity('customers')
-export class Customer {
+@Entity('users')
+export class User {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -11,25 +11,14 @@ export class Customer {
     @Column({ type: 'varchar', length: 100, unique: true })
     email: string;
 
-    @Column({ type: 'varchar', length: 11 })
-    cpf: string;
+    @Column({ type: 'varchar', length: 255, nullable: true })
+    password?: string;
 
     @Column({ type: 'varchar', length: 20, nullable: true })
     phone?: string;
 
-    @Column({ type: 'text', nullable: true })
-    address?: string;
-
-    @Column({ type: 'varchar', nullable: true, length: 50 })
-    source?: string;
-
-/*     @Column({ type: 'jsonb', nullable: true })
-    customAttributes: {
-        industry?: string;
-        companySize?: 'small' | 'medium' | 'large';
-        lastPurchase?: Date;
-        preferences?: string[];
-    }; */ // Uncomment if needed
+    @Column({ type: 'boolean', default: false})
+    isAdmin?: boolean;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdAt: Date;

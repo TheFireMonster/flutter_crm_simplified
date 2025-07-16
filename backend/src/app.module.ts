@@ -7,6 +7,11 @@ import { SettingsModule } from './settings/settings.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { CustomersModule } from './customers/customers.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { PermissionsModule } from './permissions/permissions.module';
+import { ReportsModule } from './reports/reports.module';
+import { CustomerReportsModule } from './customer-reports/customer-reports.module';
+import { TicketsModule } from './tickets/tickets.module';
+import { SalesModule } from './sales/sales.module';
 
 @Module({
   imports: [AuthModule, CustomersModule, UsersModule, SettingsModule, AppointmentsModule, TypeOrmModule.forRoot({
@@ -21,7 +26,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     synchronize: true, //use false in production
     logging: ['query', 'error'],
     logger: 'advanced-console',
-  })],
+  }), PermissionsModule, ReportsModule, CustomerReportsModule, TicketsModule, SalesModule],
 
   controllers: [AppController],
   providers: [AppService],
