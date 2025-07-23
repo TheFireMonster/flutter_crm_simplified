@@ -87,4 +87,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'smart-crm-firebase.firebasestorage.app',
     measurementId: 'G-0FY0WKRQ2J',
   );
+
 }
