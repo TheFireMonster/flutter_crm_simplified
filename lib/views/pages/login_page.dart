@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_crm/views/pages/home_page.dart';
 import 'package:flutter_crm/widgets/login/login_desktop.dart';
 import 'package:flutter_crm/widgets/login/login_mobile.dart';
+import 'package:flutter_crm/views/pages/register_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -34,7 +35,7 @@ class _LoginPageState extends State<LoginPage> {
                 onPasswordChanged: (value) {
                   setState(() => _password = value);
                 },
-                onLoginPressed: () => Navigator.push(
+                onLoginPressed: () => Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => HomePage()),
                 ),
@@ -48,9 +49,13 @@ class _LoginPageState extends State<LoginPage> {
                 onPasswordChanged: (value) {
                   setState(() => _password = value);
                 },
-                onLoginPressed: () => Navigator.push(
+                onLoginPressed: () => Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => HomePage()),
+                ),
+                onSignUpTapped: () => Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => RegisterPage()),
                 ),
               ),
       ),

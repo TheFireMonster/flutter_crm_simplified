@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_crm/views/pages/home_page.dart';
 import 'package:flutter_crm/views/pages/login_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -19,6 +20,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.green,
         scaffoldBackgroundColor: Colors.green[50],
@@ -28,7 +30,7 @@ class MyApp extends StatelessWidget {
           centerTitle: true,
         ),
       ),
-      home: LoginPage()
+      home: HomePage()
     );
   }
 }

@@ -1,67 +1,94 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter/material.dart';
+
+ValueNotifier<AuthService> authService = ValueNotifier<AuthService>(AuthService());
 
 class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
 
-  User? get currentUser => _auth.currentUser;
-  Stream<User?> get user => _auth.authStateChanges();
+  User? get currentUser => firebaseAuth.currentUser;
+  Stream<User?> get user => firebaseAuth.authStateChanges();
 
-  // Login com email/senha
-  Future<User?> signInWithEmail(String email, String password) async {
-    try {
-      UserCredential result = await _auth.signInWithEmailAndPassword(
-        email: email, 
-        password: password
-      );
-      return result.user;
-    } catch (e) {
-      print(e.toString());
-      return null;
-    }
+  Stream<User?> get authStateChanges => firebaseAuth.authStateChanges();
+
+  Future<UserCredential?> signIn({
+    required String email,
+    required String password,
+  }) async {
+    return await firebaseAuth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    ); 
   }
 
-  // Login com Google
-  Future<User?> signInWithGoogle() async {
-    try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      final GoogleSignInAuthentication? googleAuth = 
-          await googleUser?.authentication;
-      
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth?.accessToken,
-        idToken: googleAuth?.idToken,
-      );
-      
-      UserCredential result = await _auth.signInWithCredential(credential);
-      return result.user;
-    } catch (e) {
-      print(e.toString());
-      return null;
-    }
+  Future<UserCredential?> signInWithGoogle() async {
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+    final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+    if (googleUser == null) return null;
+
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    final AuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    return await firebaseAuth.signInWithCredential(credential);
   }
 
-  // Cadastro
-  Future<User?> registerWithEmail(String email, String password) async {
-    try {
-      UserCredential result = await _auth.createUserWithEmailAndPassword(
-        email: email, 
-        password: password
-      );
-      return result.user;
-    } catch (e) {
-      print(e.toString());
-      return null;
-    }
+  Future<UserCredential?> createAccount({
+    required String email,
+    required String password,
+  }) async {
+    return await firebaseAuth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
   }
 
-  // Logout
   Future<void> signOut() async {
-    await _auth.signOut();
+    await firebaseAuth.signOut();
   }
 
-  // Stream de status de autenticação
-  Stream<User?> get user {
-    return _auth.authStateChanges();
+  Future<void> resetPassword({
+    required String email,
+    }) async {
+    await firebaseAuth.sendPasswordResetEmail(email: email);
+  }
+
+  Future<void> updateUsername({
+    required String name,
+  }) async {
+    if (currentUser != null) {
+      await currentUser!.updateDisplayName(name);
+      await currentUser!.reload();
+    }
+  }
+
+  Future<void> deleteAccount({
+    required String email,
+    required String password,
+  }) async {
+    AuthCredential credential = 
+      EmailAuthProvider.credential(
+      email: email,
+      password: password,
+    );
+    await currentUser!.reauthenticateWithCredential(credential);
+    await currentUser!.delete();
+    await firebaseAuth.signOut();
+  }
+
+  Future<void> resetPasswordFromCurrentPassword({
+    required String currentPassword,
+    required String newPassword,
+    required String email,
+  })async {
+    AuthCredential credential = EmailAuthProvider.credential(
+      email: email,
+      password: currentPassword,
+    );
+    await currentUser!.reauthenticateWithCredential(credential);
+    await currentUser!.updatePassword(newPassword);
   }
 }
