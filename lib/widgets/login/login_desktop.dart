@@ -22,16 +22,14 @@ class LoginDesktop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double w = MediaQuery.of(context).size.width * 0.5;
-    double h = MediaQuery.of(context).size.height * 0.6;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
             padding: const EdgeInsets.all(20.0),
-            height: 300,
-            width: 500,
+            height: 500,
+            width: 700,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: Colors.white,
@@ -52,7 +50,7 @@ class LoginDesktop extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(
-                    width: 250,
+                    width: 400,
                     height: 48,
                     child: TextField(
                       keyboardType: TextInputType.emailAddress,
@@ -86,7 +84,7 @@ class LoginDesktop extends StatelessWidget {
                     ),
                   ),
                   SizedBox(
-                    width: 250,
+                    width: 400,
                     height: 48,
                     child: TextField(
                       obscureText: true,

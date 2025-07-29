@@ -11,7 +11,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   bool isDrawerOpen = false;
 
-  @override
+@override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -27,29 +27,53 @@ class _HomePageState extends State<HomePage> {
             },
             child: Text('Logout', style: TextStyle(color: Colors.white)),
           ),
+          IconButton(
+            icon: Icon(Icons.account_circle_rounded, color: Colors.white),
+            onPressed: () {
+              setState(() {
+                isDrawerOpen = !isDrawerOpen;
+              });
+            },
+          ),
         ],
       ),
       body: Row(
         children: [
           AnimatedContainer(
             duration: Duration(milliseconds: 500),
-            width: isDrawerOpen ? 250 : 60,
+            width: isDrawerOpen ? 350 : 150,
             color: Colors.green[800],
             child: Stack(
               children: [
-                if (isDrawerOpen)
-                  Positioned(
-                    left: 20,
-                    top: 100,
-                    child: Column(
+                isDrawerOpen
+                    ? Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Item 1", style: TextStyle(color: Colors.white)),
+                        GestureDetector(
+                          onTap: () {},
+                          child: Text(
+                            "Chat",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
                         SizedBox(height: 10),
-                        Text("Item 2", style: TextStyle(color: Colors.white)),
+                        GestureDetector(
+                          onTap: () {},
+                          child: Text(
+                            "Settings",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    )
+                    : Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Icon(Icons.chat, color: Colors.white, size: 30),
+                        Icon(Icons.settings, color: Colors.white, size: 30),
+                        Icon(Icons.settings, color: Colors.white, size: 30),
                       ],
                     ),
-                  ),
                 Align(
                   alignment: Alignment.centerRight,
                   child: IconButton(
@@ -69,8 +93,6 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
-
-          // This container likely shouldn't be 600 wide inside a Row. Adjusted for layout.
           Expanded(
             child: Container(
               color: Colors.green[50],

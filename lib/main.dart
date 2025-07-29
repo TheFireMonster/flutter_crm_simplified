@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
           centerTitle: true,
         ),
       ),
-      home: HomePage()
+      home: LoginPage()
     );
   }
 }
