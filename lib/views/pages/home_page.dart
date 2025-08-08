@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_crm/views/pages/chat_page.dart';
 import 'package:flutter_crm/views/pages/login_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -50,7 +51,12 @@ class _HomePageState extends State<HomePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         GestureDetector(
-                          onTap: () {},
+                          onTap: (){
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => ChatPage()),
+                            );
+                          },
                           child: Text(
                             "Chat",
                             style: TextStyle(color: Colors.white),
