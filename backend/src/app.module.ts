@@ -11,23 +11,26 @@ import { PermissionsModule } from './permissions/permissions.module';
 import { CustomerReportsModule } from './customer-reports/customer-reports.module';
 import { TicketsModule } from './tickets/tickets.module';
 import { SalesModule } from './sales/sales.module';
-import { WebhookModule } from './webhook/webhook.module';
-
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import dataSource from './data-source'; 
+import { AiAgentsModule } from './ai-agents/ai-agents.module';
+import { AuditModule } from './audit/audit.module';
 @Module({
-  imports: [AuthModule, CustomersModule, UsersModule, SettingsModule, AppointmentsModule, TypeOrmModule.forRoot({
-    type: 'postgres',
-    host: 'localhost',
-    port: 5432,
-    username: 'your_username',
-    password: 'your_password',  
-    database: 'your_database',
-    entities: [__dirname + '/**/*.entity{.ts,.js}'],
-    autoLoadEntities: true,
-    synchronize: true, //use false in production
-    logging: ['query', 'error'],
-    logger: 'advanced-console',
-  }), PermissionsModule, CustomerReportsModule, TicketsModule, SalesModule, WebhookModule],
-
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    AuthModule,
+    CustomersModule,
+    UsersModule,
+    SettingsModule,
+    AppointmentsModule,
+    TypeOrmModule.forRoot(dataSource.options),
+    PermissionsModule,
+    CustomerReportsModule,
+    TicketsModule,
+    SalesModule,
+    AiAgentsModule,
+    AuditModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

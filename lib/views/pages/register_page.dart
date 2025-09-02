@@ -2,8 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_crm/views/pages/home_page.dart';
-import 'package:flutter_crm/widgets/login/login_desktop.dart';
-import 'package:flutter_crm/widgets/login/login_mobile.dart';
 import 'package:flutter_crm/views/pages/login_page.dart';
 import 'package:flutter_crm/widgets/register/resgister_desktop.dart';
 import 'package:flutter_crm/services/auth_service.dart';
@@ -40,7 +38,9 @@ void _handleRegister() async {
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
-
+    
+    final user = authService.value.currentUser;
+    final idToken = await user?.getIdToken();
       // Navigate only if registration succeeds
       Navigator.pushReplacement(
         context,
