@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_crm/routes/router.dart';
 import 'package:flutter_crm/views/pages/login_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -27,7 +28,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
+      routerConfig: router,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.green,
@@ -38,7 +40,6 @@ class MyApp extends StatelessWidget {
           centerTitle: true,
         ),
       ),
-      home: LoginPage()
     );
   }
 }

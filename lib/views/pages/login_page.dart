@@ -4,9 +4,11 @@ import 'package:flutter_crm/views/pages/home_page.dart';
 import 'package:flutter_crm/widgets/login/login_desktop.dart';
 import 'package:flutter_crm/widgets/login/login_mobile.dart';
 import 'package:flutter_crm/views/pages/register_page.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -93,11 +95,11 @@ class _LoginPageState extends State<LoginPage> {
                             setState(() => _password = value);
                           },
                           onLoginPressed:
-                              () => Navigator.pushReplacement(
-                                context,
+                              () => context.go('/home') //Navigator.pushReplacement(
+                                //context,
                     
-                                MaterialPageRoute(builder: (context) => HomePage()),
-                              ),
+                                //MaterialPageRoute(builder: (context) => HomePage()),
+                              //),
                         )
                         : LoginDesktop(
                           email: _email,
@@ -109,15 +111,14 @@ class _LoginPageState extends State<LoginPage> {
                             setState(() => _password = value);
                           },
                           onLoginPressed:
-                              () => Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(builder: (context) => HomePage()),
-                              ),
+                              () => context.go('/home'),//Navigator.pushReplacement(
+                                //context,
+                                //MaterialPageRoute(builder: (context) => HomePage()),
+                              //),
                           onSignUpTapped:
-                              () => Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(builder: (context) => RegisterPage()),
-                              ),
+                              () => context.go('/register'),//Navigator.pushReplacement(
+                                //context,
+                                //MaterialPageRoute(builder: (context) => RegisterPage()),
                         ),
                 ),
               ],

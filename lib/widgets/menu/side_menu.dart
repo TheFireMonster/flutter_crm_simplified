@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_crm/views/pages/chat_page.dart';
+import 'package:flutter_crm/views/pages/sales_page.dart';
 import 'package:flutter_crm/views/pages/settings_page.dart';
+import 'package:go_router/go_router.dart';
 
 class SideMenu extends StatefulWidget {
   final bool isDrawerOpen;
@@ -30,24 +32,44 @@ class _SideMenuState extends State<SideMenu> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   GestureDetector(
-                    onTap: () {
-                      Navigator.pushReplacement(
+                    onTap: () => context.go('/chat'), /*  () {
+                     Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => ChatPage()),
-                      );
-                    },
+                      ); 
+                    },*/
                     child: Text("Chat", style: TextStyle(color: Colors.white)),
                   ),
                   SizedBox(height: 10),
                   GestureDetector(
-                    onTap: () {
+                    onTap: () => context.go('/settings'), /* {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => SettingsPage()),
                       );
-                    },
+                    }, */
                     child: Text(
                       "Settings",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  GestureDetector(
+                    onTap: () => context.go('/sales'),
+                      /* Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => SalesPage()),
+                      ); */
+                    child: Text(
+                      "Sales",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  GestureDetector(
+                    onTap: () => context.go('/appointments'),
+                    child: Text(
+                      "Appointments",
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
@@ -58,23 +80,35 @@ class _SideMenuState extends State<SideMenu> {
                 children: [
                   IconButton(
                     icon: Icon(Icons.chat, color: Colors.white, size: 30),
-                    onPressed: () {
+                    onPressed: () => context.go('/chat'), /* {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => ChatPage()),
                       );
-                    },
+                    }, */
                   ),
                   IconButton(
                     icon: Icon(Icons.settings, color: Colors.white, size: 30),
-                    onPressed: () {
+                    onPressed: () => context.go('/settings') /* {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => SettingsPage()),
                       );
-                    },
+                    }, */
                   ),
-                  Icon(Icons.settings, color: Colors.white, size: 30),
+                  IconButton(
+                    icon: Icon(Icons.attach_money, color: Colors.white, size: 30),
+                    onPressed: () => context.go('/sales') //{
+                      //Navigator.pushReplacement(
+                        //context,
+                        //MaterialPageRoute(builder: (context) => SalesPage()),
+                      //);
+                    //},
+                  ),
+                   IconButton(
+                    icon: Icon(Icons.calendar_month, color: Colors.white, size: 30),
+                    onPressed: () => context.go('/appointments')
+                  ),
                 ],
               ),
           Align(
