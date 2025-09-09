@@ -15,6 +15,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import dataSource from './data-source'; 
 import { AiAgentsModule } from './ai-agents/ai-agents.module';
 import { AuditModule } from './audit/audit.module';
+import { ChatModule } from './chat/chat.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -30,6 +31,7 @@ import { AuditModule } from './audit/audit.module';
     SalesModule,
     AiAgentsModule,
     AuditModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],
