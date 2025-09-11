@@ -3,6 +3,7 @@ import 'package:grouped_list/grouped_list.dart';
 import 'package:flutter_crm/widgets/chat/messages.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_crm/widgets/menu/side_menu.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -20,6 +21,39 @@ class _ChatPageState extends State<ChatPage> {
         isDrawerOpen = !isDrawerOpen;
       });
     }
+
+    late IO.Socket socket;
+
+@override
+void initState() {
+  super.initState();
+  connectToServer();
+}
+
+void connectToServer() {
+  socket = IO.io('http://localhost:3000', <String, dynamic>{
+    'transports': ['websocket'],
+    'autoConnect': true,
+  });
+
+  socket.onConnect((_) {
+    print('✅ Connected to server');
+  });
+
+  socket.onDisconnect((_) {
+    print('❌ Disconnected from server');
+  });
+
+  // Recebe mensagens vindas do backend
+  socket.on('receive_message', (data) {
+    final message = Message(
+      text: data['text'],
+      date: DateTime.now(),
+      isSentByMe: false,
+    );
+    setState(() => messages.add(message));
+  });
+}
 
   @override
   Widget build(BuildContext context) {
@@ -142,6 +176,8 @@ class _ChatPageState extends State<ChatPage> {
                                     
                             setState(() => messages.add(message));
                             _controller.clear(); // ✅ Clear text field
+
+                             socket.emit('send_message', {'text': text});
                             print('Message sent: $message');
                           },
                         ),

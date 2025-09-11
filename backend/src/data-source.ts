@@ -8,6 +8,8 @@ import { Appointment } from './appointments/entities/appointments.entity';
 import { Sale } from './sales/entities/sales.entity';
 import { Setting } from './settings/entities/settings.entity';
 import { Ticket } from './tickets/entities/tickets.entity';
+import { Message } from './chat/entities/messages.entity';
+import { Conversation } from './chat/entities/conversations.entity';
 
 config();
 
@@ -25,7 +27,7 @@ export default new DataSource({
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  entities: [User, Permission, Customer, Appointment, Sale, Setting, CustomerReport, Ticket],
+  entities: [User, Permission, Customer, Appointment, Sale, Setting, CustomerReport, Ticket, Message, Conversation],
   migrations: [__dirname + '/migrations/*{.ts,.js}'],
   synchronize: false,
 });
