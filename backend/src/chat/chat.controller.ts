@@ -14,8 +14,7 @@ export class ChatController {
     @InjectRepository(Message)
     private messageRepo: Repository<Message>,
   ) {}
-
-  // Criar conversa e gerar link único
+  
   @Post('conversations')
   async createConversation(@Body('customerName') customerName?: string) {
     const linkId = uuidv4();
@@ -33,7 +32,6 @@ export class ChatController {
     };
   }
 
-  // Buscar histórico pelo linkId (usado no frontend do cliente ou do funcionário)
   @Get('history/:linkId')
   async getHistory(@Param('linkId') linkId: string) {
     return this.messageRepo.find({

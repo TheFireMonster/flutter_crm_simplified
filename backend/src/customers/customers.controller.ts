@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Post, Put } from '@nestjs/common';
+import { Controller, Delete, Get, Post, Put, Param } from '@nestjs/common';
 
 @Controller('customers')
 export class CustomersController {
@@ -11,24 +11,31 @@ export class CustomersController {
     findAll() {
         return 'This action returns all customers';
     }
-    @Get(':id')
-    findOne() {
-        return 'This action returns a single customer';
-    }
-    @Put(':id')
-    update() {
-        return 'This action updates a customer';
-    }
+    
+    // ✅ Put specific routes FIRST, before parameterized routes
     @Get('search')
     search() {
         return 'This action searches for customers';
     }  
+    
     @Get('export')
     export() {
         return 'This action exports customers data';
     }
+    
+    // ✅ Put parameterized routes LAST
+    @Get(':id')
+    findOne(@Param('id') id: string) {
+        return `This action returns customer ${id}`;
+    }
+    
+    @Put(':id')
+    update(@Param('id') id: string) {
+        return `This action updates customer ${id}`;
+    }
+    
     @Delete(':id')
-    remove() {
-        return 'This action removes a customer';
+    remove(@Param('id') id: string) {
+        return `This action removes customer ${id}`;
     }
 }

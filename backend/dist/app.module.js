@@ -26,6 +26,8 @@ const sales_module_1 = require("./sales/sales.module");
 const config_1 = require("@nestjs/config");
 const data_source_1 = __importDefault(require("./data-source"));
 const ai_agents_module_1 = require("./ai-agents/ai-agents.module");
+const audit_module_1 = require("./audit/audit.module");
+const chat_module_1 = require("./chat/chat.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -44,6 +46,8 @@ exports.AppModule = AppModule = __decorate([
             tickets_module_1.TicketsModule,
             sales_module_1.SalesModule,
             ai_agents_module_1.AiAgentsModule,
+            audit_module_1.AuditModule,
+            chat_module_1.ChatModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

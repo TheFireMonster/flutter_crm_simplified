@@ -1,9 +1,9 @@
 export declare class CustomersController {
     create(): string;
     findAll(): string;
-    findOne(): string;
-    update(): string;
     search(): string;
     export(): string;
-    remove(): string;
+    findOne(id: string): string;
+    update(id: string): string;
+    remove(id: string): string;
 }

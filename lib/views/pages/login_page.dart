@@ -1,14 +1,8 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_crm/views/pages/home_page.dart';
-import 'package:flutter_crm/widgets/login/login_desktop.dart';
-import 'package:flutter_crm/widgets/login/login_mobile.dart';
-import 'package:flutter_crm/views/pages/register_page.dart';
 import 'package:go_router/go_router.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:flutter_crm/services/auth_service.dart';
+import 'package:flutter_crm/services/token_manager.dart';
+import 'package:flutter_crm/widgets/login/login_desktop.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -17,10 +11,9 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-String _email = '';
-String _password = '';
-
 class _LoginPageState extends State<LoginPage> {
+  String _email = '';
+  String _password = '';
   bool _loading = false;
   String _error = '';
 
@@ -30,99 +23,63 @@ class _LoginPageState extends State<LoginPage> {
       _error = '';
     });
 
-    final response = await http.post(
-      Uri.parse('http://localhost:3000/auth/login'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': _email, 'password': _password}),
-    );
-
-    setState(() {
-      _loading = false;
-    });
-
-    if (response.statusCode == 200) {
-      // Login successful, navigate to HomePage
-      final data = jsonDecode(response.body);
-      final token = data['token'];
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('auth_token', token);
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomePage()),
+    try {
+      final user = await authService.signIn(
+        email: _email,
+        password: _password,
       );
-    } else {
+
+      if (user == null) {
+        setState(() {
+          _error = 'Usuário não encontrado.';
+          _loading = false;
+        });
+        return;
+      }
+
       if (!mounted) return;
-      // Login failed, show error message
+      context.go('/home');
+    } catch (e) {
       setState(() {
-        _error = 'E-mail ou senha inválidos.';
+        _error = e.toString();
+      });
+    } finally {
+      setState(() {
+        _loading = false;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    bool isMobile =
-        defaultTargetPlatform == TargetPlatform.android ||
-        defaultTargetPlatform == TargetPlatform.iOS;
-    //bool isDesktop = defaultTargetPlatform == TargetPlatform.windows || defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.linux;
-
     return Scaffold(
-      appBar: AppBar(title: Text('Login Page'), centerTitle: true),
+      appBar: AppBar(title: const Text('Login')),
       body: Center(
-        child:
-            Column(
-              children: [
-                if (_loading) CircularProgressIndicator(),
-                if (_error.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      _error,
-                      style: TextStyle(color: Colors.red),
-                    ),
+        child: SizedBox(
+          width: 400,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (_loading) const CircularProgressIndicator(),
+              if (_error.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    _error,
+                    style: const TextStyle(color: Colors.red),
                   ),
-                Expanded(
-                  child: 
-                    isMobile
-                        ? LoginMobile(
-                          email: _email,
-                          password: _password,
-                          onEmailChanged: (value) {
-                            setState(() => _email = value);
-                          },
-                          onPasswordChanged: (value) {
-                            setState(() => _password = value);
-                          },
-                          onLoginPressed:
-                              () => context.go('/home') //Navigator.pushReplacement(
-                                //context,
-                    
-                                //MaterialPageRoute(builder: (context) => HomePage()),
-                              //),
-                        )
-                        : LoginDesktop(
-                          email: _email,
-                          password: _password,
-                          onEmailChanged: (value) {
-                            setState(() => _email = value);
-                          },
-                          onPasswordChanged: (value) {
-                            setState(() => _password = value);
-                          },
-                          onLoginPressed:
-                              () => context.go('/home'),//Navigator.pushReplacement(
-                                //context,
-                                //MaterialPageRoute(builder: (context) => HomePage()),
-                              //),
-                          onSignUpTapped:
-                              () => context.go('/register'),//Navigator.pushReplacement(
-                                //context,
-                                //MaterialPageRoute(builder: (context) => RegisterPage()),
-                        ),
                 ),
-              ],
-            ),
+              LoginDesktop(
+                email: _email,
+                password: _password,
+                onEmailChanged: (value) => setState(() => _email = value),
+                onPasswordChanged: (value) => setState(() => _password = value),
+                onLoginPressed: _login,
+                onSignUpTapped: () => context.go('/register'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

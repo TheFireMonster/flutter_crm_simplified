@@ -21,6 +21,8 @@ let User = class User {
     password;
     phone;
     isAdmin;
+    refreshToken;
+    refreshTokenExpiry;
     createdAt;
     updatedAt;
     permissions;
@@ -50,6 +52,14 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'boolean', default: false }),
     __metadata("design:type", Boolean)
 ], User.prototype, "isAdmin", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 255, nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "refreshToken", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'timestamp', nullable: true }),
+    __metadata("design:type", Date)
+], User.prototype, "refreshTokenExpiry", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' }),
     __metadata("design:type", Date)

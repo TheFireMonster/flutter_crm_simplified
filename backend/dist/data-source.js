@@ -10,6 +10,8 @@ const appointments_entity_1 = require("./appointments/entities/appointments.enti
 const sales_entity_1 = require("./sales/entities/sales.entity");
 const settings_entity_1 = require("./settings/entities/settings.entity");
 const tickets_entity_1 = require("./tickets/entities/tickets.entity");
+const messages_entity_1 = require("./chat/entities/messages.entity");
+const conversations_entity_1 = require("./chat/entities/conversations.entity");
 (0, dotenv_1.config)();
 const requiredEnv = ['DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_NAME'];
 for (const key of requiredEnv) {
@@ -24,7 +26,7 @@ exports.default = new typeorm_1.DataSource({
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    entities: [users_entity_1.User, permissions_entity_1.Permission, customers_entity_1.Customer, appointments_entity_1.Appointment, sales_entity_1.Sale, settings_entity_1.Setting, customer_reports_entity_1.CustomerReport, tickets_entity_1.Ticket],
+    entities: [users_entity_1.User, permissions_entity_1.Permission, customers_entity_1.Customer, appointments_entity_1.Appointment, sales_entity_1.Sale, settings_entity_1.Setting, customer_reports_entity_1.CustomerReport, tickets_entity_1.Ticket, messages_entity_1.Message, conversations_entity_1.Conversation],
     migrations: [__dirname + '/migrations/*{.ts,.js}'],
     synchronize: false,
 });

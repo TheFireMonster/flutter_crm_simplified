@@ -8,6 +8,8 @@ class RegisterDesktop extends StatelessWidget {
   final TextEditingController confirmPasswordController;
   final VoidCallback onRegisterPressed;
   final VoidCallback onLoginTapped;
+  final bool loading;
+  final String error;
 
   const RegisterDesktop({
     super.key,
@@ -18,6 +20,8 @@ class RegisterDesktop extends StatelessWidget {
     required this.confirmPasswordController,
     required this.onRegisterPressed,
     required this.onLoginTapped,
+    this.loading = false,
+    this.error = '',
   });
 
   @override
@@ -36,7 +40,7 @@ class RegisterDesktop extends StatelessWidget {
               color: Colors.grey.withValues(alpha: 0.5),
               spreadRadius: 5,
               blurRadius: 7,
-              offset: Offset(0, 3),
+              offset: const Offset(0, 3),
             ),
           ],
         ),
@@ -46,6 +50,15 @@ class RegisterDesktop extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                if (loading) const CircularProgressIndicator(),
+                if (error.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      error,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ),
                 _buildTextFormField(
                   label: 'Nome',
                   controller: nameController,
@@ -100,19 +113,34 @@ class RegisterDesktop extends StatelessWidget {
                     width: 400,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: onRegisterPressed,
-                      child: const Text(
-                        "Registrar",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
+                      onPressed: loading
+                          ? null
+                          : () {
+                              if (formKey.currentState?.validate() ?? false) {
+                                onRegisterPressed();
+                              }
+                            },
+                      child: loading
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text(
+                              "Registrar",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
                     ),
                   ),
                 ),
                 GestureDetector(
-                  onTap: onLoginTapped,
+                  onTap: loading ? null : onLoginTapped,
                   child: Text(
                     "Já tem conta? Faça login",
                     style: TextStyle(

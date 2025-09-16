@@ -6,6 +6,8 @@ export declare class User {
     password?: string;
     phone?: string;
     isAdmin?: boolean;
+    refreshToken?: string;
+    refreshTokenExpiry?: Date;
     createdAt: Date;
     updatedAt: Date;
     permissions: Permission[];

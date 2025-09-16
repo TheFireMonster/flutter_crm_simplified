@@ -23,6 +23,12 @@ export class User {
     @Column({ type: 'boolean', default: false})
     isAdmin?: boolean;
 
+    @Column({ type: 'varchar', length: 255, nullable: true })
+    refreshToken?: string;
+
+    @Column({ type: 'timestamp', nullable: true })
+    refreshTokenExpiry?: Date;
+
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdAt: Date;
 

@@ -34,8 +34,9 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const admin = __importStar(require("firebase-admin"));
-admin.initializeApp({
-    credential: admin.credential.applicationDefault(),
-});
-exports.default = admin;
+if (!admin.apps.length) {
+    admin.initializeApp({
+        credential: admin.credential.applicationDefault(),
+    });
+}
 //# sourceMappingURL=firebase-admin.config.js.map
