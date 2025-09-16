@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/users.entity';
-import { Permission } from '../permissions/entities/permissions.entity';
+// Permission import removed for simple Firebase login
 import * as crypto from 'crypto';
 import * as admin from 'firebase-admin';
 
@@ -12,8 +12,7 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
-    @InjectRepository(Permission)
-    private readonly permRepo: Repository<Permission>,
+  // Permissions repository removed for simple Firebase login
     private readonly jwtService: JwtService,
   ) {}
 
@@ -28,15 +27,12 @@ export class AuthService {
 
     let user = await this.userRepo.findOne({
       where: { email: decoded.email },
-      relations: ['permissions'],
     });
 
     if (!user) {
-      const defaultPerm = await this.permRepo.findOne({ where: { name: 'user' } });
       user = this.userRepo.create({
         email: decoded.email,
         name: name || decoded.name || '',
-        permissions: defaultPerm ? [defaultPerm] : [],
         refreshToken: crypto.randomBytes(32).toString('hex'),
       });
       await this.userRepo.save(user);
@@ -55,15 +51,12 @@ export class AuthService {
 
     let user = await this.userRepo.findOne({
       where: { email: decoded.email },
-      relations: ['permissions'],
     });
 
     if (!user) {
-      const defaultPerm = await this.permRepo.findOne({ where: { name: 'user' } });
       user = this.userRepo.create({
         email: decoded.email,
         name: decoded.name || '',
-        permissions: defaultPerm ? [defaultPerm] : [],
         refreshToken: crypto.randomBytes(32).toString('hex'),
       });
       await this.userRepo.save(user);
@@ -75,7 +68,6 @@ export class AuthService {
   async refreshToken(refreshToken: string) {
     const user = await this.userRepo.findOne({
       where: { refreshToken },
-      relations: ['permissions'],
     });
 
     if (!user) {
@@ -93,13 +85,11 @@ export class AuthService {
     const payload = {
       sub: user.id,
       email: user.email,
-      roles: user.permissions.map(p => p.name),
     };
     return {
       token: this.jwtService.sign(payload),
       expiry: Date.now() + 3600 * 1000,
       refresh_token: user.refreshToken,
-      roles: payload.roles,
     };
   }
 }

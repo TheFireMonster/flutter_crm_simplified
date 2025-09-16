@@ -7,7 +7,6 @@ import { SettingsModule } from './settings/settings.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { CustomersModule } from './customers/customers.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PermissionsModule } from './permissions/permissions.module';
 import { CustomerReportsModule } from './customer-reports/customer-reports.module';
 import { TicketsModule } from './tickets/tickets.module';
 import { SalesModule } from './sales/sales.module';
@@ -25,7 +24,7 @@ import { ChatModule } from './chat/chat.module';
     SettingsModule,
     AppointmentsModule,
     TypeOrmModule.forRoot(dataSource.options),
-    PermissionsModule,
+  // PermissionsModule removed for simple Firebase login
     CustomerReportsModule,
     TicketsModule,
     SalesModule,

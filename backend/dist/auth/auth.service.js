@@ -51,16 +51,13 @@ const jwt_1 = require("@nestjs/jwt");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const users_entity_1 = require("../users/entities/users.entity");
-const permissions_entity_1 = require("../permissions/entities/permissions.entity");
 const crypto = __importStar(require("crypto"));
 const admin = __importStar(require("firebase-admin"));
 let AuthService = class AuthService {
     userRepo;
-    permRepo;
     jwtService;
-    constructor(userRepo, permRepo, jwtService) {
+    constructor(userRepo, jwtService) {
         this.userRepo = userRepo;
-        this.permRepo = permRepo;
         this.jwtService = jwtService;
     }
     async firebaseRegister(idToken, name) {
@@ -73,14 +70,11 @@ let AuthService = class AuthService {
         }
         let user = await this.userRepo.findOne({
             where: { email: decoded.email },
-            relations: ['permissions'],
         });
         if (!user) {
-            const defaultPerm = await this.permRepo.findOne({ where: { name: 'user' } });
             user = this.userRepo.create({
                 email: decoded.email,
                 name: name || decoded.name || '',
-                permissions: defaultPerm ? [defaultPerm] : [],
                 refreshToken: crypto.randomBytes(32).toString('hex'),
             });
             await this.userRepo.save(user);
@@ -97,14 +91,11 @@ let AuthService = class AuthService {
         }
         let user = await this.userRepo.findOne({
             where: { email: decoded.email },
-            relations: ['permissions'],
         });
         if (!user) {
-            const defaultPerm = await this.permRepo.findOne({ where: { name: 'user' } });
             user = this.userRepo.create({
                 email: decoded.email,
                 name: decoded.name || '',
-                permissions: defaultPerm ? [defaultPerm] : [],
                 refreshToken: crypto.randomBytes(32).toString('hex'),
             });
             await this.userRepo.save(user);
@@ -114,7 +105,6 @@ let AuthService = class AuthService {
     async refreshToken(refreshToken) {
         const user = await this.userRepo.findOne({
             where: { refreshToken },
-            relations: ['permissions'],
         });
         if (!user) {
             throw new common_1.UnauthorizedException('Invalid refresh token');
@@ -128,13 +118,11 @@ let AuthService = class AuthService {
         const payload = {
             sub: user.id,
             email: user.email,
-            roles: user.permissions.map(p => p.name),
         };
         return {
             token: this.jwtService.sign(payload),
             expiry: Date.now() + 3600 * 1000,
             refresh_token: user.refreshToken,
-            roles: payload.roles,
         };
     }
 };
@@ -142,9 +130,7 @@ exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(users_entity_1.User)),
-    __param(1, (0, typeorm_1.InjectRepository)(permissions_entity_1.Permission)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
-        typeorm_2.Repository,
         jwt_1.JwtService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

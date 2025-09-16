@@ -1,7 +1,6 @@
 import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
 import { User } from './users/entities/users.entity';
-import { Permission } from './permissions/entities/permissions.entity';
 import { Customer } from './customers/entities/customers.entity';
 import { CustomerReport } from './customer-reports/entities/customer-reports.entity';
 import { Appointment } from './appointments/entities/appointments.entity';
@@ -27,7 +26,7 @@ export default new DataSource({
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  entities: [User, Permission, Customer, Appointment, Sale, Setting, CustomerReport, Ticket, Message, Conversation],
+  entities: [User, Customer, Appointment, Sale, Setting, CustomerReport, Ticket, Message, Conversation],
   migrations: [__dirname + '/migrations/*{.ts,.js}'],
   synchronize: false,
 });

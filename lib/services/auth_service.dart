@@ -1,9 +1,9 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'token_manager.dart';
+// TokenManager import removed for pure Firebase login
 
-final authService = AuthService();
+final authService = AuthService(); // No TokenManager
 
 class AuthService {
   final firebaseAuth = FirebaseAuth.instance;
@@ -19,31 +19,12 @@ class AuthService {
     );
     if (cred.user != null) {
       await cred.user!.updateDisplayName(name);
-      await _registerBackend(cred.user!);
+      // No backend token registration, only Firebase
     }
     return cred.user;
   }
 
-  Future<void> _registerBackend(User user) async {
-    final idToken = await user.getIdToken();
-    final resp = await http.post(
-      Uri.parse('http://localhost:3000/auth/firebase-register'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $idToken',
-      },
-      body: jsonEncode({'name': user.displayName}),
-    );
-    if (resp.statusCode == 200) {
-      final data = jsonDecode(resp.body);
-      await TokenManager.saveToken(
-        data['token'],
-        data['expiry'],
-        refreshToken: data['refresh_token'],
-        roles: data['roles'] != null ? List<String>.from(data['roles']) : [],
-      );
-    }
-  }
+  // _registerBackend removed for pure Firebase login
 
   Future<User?> signIn({
     required String email,
@@ -53,29 +34,9 @@ class AuthService {
       email: email,
       password: password,
     );
-    if (cred.user != null) {
-      await _loginBackend(cred.user!);
-    }
+    // Only Firebase login, no backend token
     return cred.user;
   }
 
-  Future<void> _loginBackend(User user) async {
-    final idToken = await user.getIdToken();
-    final resp = await http.post(
-      Uri.parse('http://localhost:3000/auth/firebase-login'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $idToken',
-      },
-    );
-    if (resp.statusCode == 200) {
-      final data = jsonDecode(resp.body);
-      await TokenManager.saveToken(
-        data['token'],
-        data['expiry'],
-        refreshToken: data['refresh_token'],
-        roles: data['roles'] != null ? List<String>.from(data['roles']) : [],
-      );
-    }
-  }
+  // _loginBackend removed for pure Firebase login
 }

@@ -1,7 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
-import { ManyToMany} from "typeorm/decorator/relations/ManyToMany";
-import { JoinTable } from "typeorm/decorator/relations/JoinTable";
-import { Permission } from '../../permissions/entities/permissions.entity';
+// Permissions imports removed for simple Firebase login
 
 @Entity('users')
 export class User {
@@ -35,11 +33,5 @@ export class User {
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
     updatedAt: Date;
 
-    @ManyToMany(() => Permission, permission => permission.users)
-    @JoinTable({
-        name: 'user_permissions',
-        joinColumn: { name: 'user_id', referencedColumnName: 'id' },
-        inverseJoinColumn: { name: 'permission_id', referencedColumnName: 'id' },
-    })
-    permissions: Permission[];
+    // Permissions removed for simple Firebase login
 }

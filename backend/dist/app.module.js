@@ -19,7 +19,6 @@ const settings_module_1 = require("./settings/settings.module");
 const appointments_module_1 = require("./appointments/appointments.module");
 const customers_module_1 = require("./customers/customers.module");
 const typeorm_1 = require("@nestjs/typeorm");
-const permissions_module_1 = require("./permissions/permissions.module");
 const customer_reports_module_1 = require("./customer-reports/customer-reports.module");
 const tickets_module_1 = require("./tickets/tickets.module");
 const sales_module_1 = require("./sales/sales.module");
@@ -41,7 +40,6 @@ exports.AppModule = AppModule = __decorate([
             settings_module_1.SettingsModule,
             appointments_module_1.AppointmentsModule,
             typeorm_1.TypeOrmModule.forRoot(data_source_1.default.options),
-            permissions_module_1.PermissionsModule,
             customer_reports_module_1.CustomerReportsModule,
             tickets_module_1.TicketsModule,
             sales_module_1.SalesModule,

@@ -11,9 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const typeorm_1 = require("typeorm");
-const ManyToMany_1 = require("typeorm/decorator/relations/ManyToMany");
-const JoinTable_1 = require("typeorm/decorator/relations/JoinTable");
-const permissions_entity_1 = require("../../permissions/entities/permissions.entity");
 let User = class User {
     id;
     name;
@@ -25,7 +22,6 @@ let User = class User {
     refreshTokenExpiry;
     createdAt;
     updatedAt;
-    permissions;
 };
 exports.User = User;
 __decorate([
@@ -68,15 +64,6 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' }),
     __metadata("design:type", Date)
 ], User.prototype, "updatedAt", void 0);
-__decorate([
-    (0, ManyToMany_1.ManyToMany)(() => permissions_entity_1.Permission, permission => permission.users),
-    (0, JoinTable_1.JoinTable)({
-        name: 'user_permissions',
-        joinColumn: { name: 'user_id', referencedColumnName: 'id' },
-        inverseJoinColumn: { name: 'permission_id', referencedColumnName: 'id' },
-    }),
-    __metadata("design:type", Array)
-], User.prototype, "permissions", void 0);
 exports.User = User = __decorate([
     (0, typeorm_1.Entity)('users')
 ], User);

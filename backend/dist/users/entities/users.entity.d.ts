@@ -1,4 +1,3 @@
-import { Permission } from '../../permissions/entities/permissions.entity';
 export declare class User {
     id: number;
     name: string;
@@ -10,5 +9,4 @@ export declare class User {
     refreshTokenExpiry?: Date;
     createdAt: Date;
     updatedAt: Date;
-    permissions: Permission[];
 }
