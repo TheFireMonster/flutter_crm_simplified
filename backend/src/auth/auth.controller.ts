@@ -25,10 +25,5 @@ export class AuthController {
     return await this.authService.firebaseLogin(idToken);
   }
 
-  @Post('refresh-token')
-  async refreshToken(@Body() body: { refresh_token: string }) {
-    const result = await this.authService.refreshToken(body.refresh_token);
-    if (!result) throw new UnauthorizedException('Invalid refresh token');
-    return result;
-  }
+
 }

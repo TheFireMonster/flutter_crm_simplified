@@ -32,22 +32,12 @@ class _SideMenuState extends State<SideMenu> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   GestureDetector(
-                    onTap: () => context.go('/chat'), /*  () {
-                     Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => ChatPage()),
-                      ); 
-                    },*/
+                    onTap: () => context.go('/chat'),
                     child: Text("Chat", style: TextStyle(color: Colors.white)),
                   ),
                   SizedBox(height: 10),
                   GestureDetector(
-                    onTap: () => context.go('/settings'), /* {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => SettingsPage()),
-                      );
-                    }, */
+                    onTap: () => context.go('/settings'),
                     child: Text(
                       "Settings",
                       style: TextStyle(color: Colors.white),
@@ -56,10 +46,6 @@ class _SideMenuState extends State<SideMenu> {
                   SizedBox(height: 10),
                   GestureDetector(
                     onTap: () => context.go('/sales'),
-                      /* Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => SalesPage()),
-                      ); */
                     child: Text(
                       "Sales",
                       style: TextStyle(color: Colors.white),
@@ -73,6 +59,14 @@ class _SideMenuState extends State<SideMenu> {
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
+                  SizedBox(height: 10),
+                  GestureDetector(
+                    onTap: () => context.go('/costumers'),
+                    child: Text(
+                      "Costumers",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
                 ],
               )
               : Column(
@@ -80,35 +74,24 @@ class _SideMenuState extends State<SideMenu> {
                 children: [
                   IconButton(
                     icon: Icon(Icons.chat, color: Colors.white, size: 30),
-                    onPressed: () => context.go('/chat'), /* {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => ChatPage()),
-                      );
-                    }, */
+                    onPressed: () => context.go('/chat'),
                   ),
                   IconButton(
                     icon: Icon(Icons.settings, color: Colors.white, size: 30),
-                    onPressed: () => context.go('/settings') /* {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => SettingsPage()),
-                      );
-                    }, */
+                    onPressed: () => context.go('/settings'),
                   ),
                   IconButton(
                     icon: Icon(Icons.attach_money, color: Colors.white, size: 30),
-                    onPressed: () => context.go('/sales') //{
-                      //Navigator.pushReplacement(
-                        //context,
-                        //MaterialPageRoute(builder: (context) => SalesPage()),
-                      //);
-                    //},
+                    onPressed: () => context.go('/sales'),
                   ),
                    IconButton(
                     icon: Icon(Icons.calendar_month, color: Colors.white, size: 30),
                     onPressed: () => context.go('/appointments')
                   ),
+                    IconButton(
+                      icon: Icon(Icons.people, color: Colors.white, size: 30),
+                      onPressed: () => context.go('/costumers')
+                    ),
                 ],
               ),
           Align(
@@ -120,11 +103,7 @@ class _SideMenuState extends State<SideMenu> {
                     : Icons.arrow_forward_ios,
                 color: Colors.white,
               ),
-              onPressed: widget.toggleDrawer, //{
-              //setState(() {
-              //widget.isDrawerOpen = !widget.isDrawerOpen;
-              //});
-              //},
+              onPressed: widget.toggleDrawer,
             ),
           ),
         ],

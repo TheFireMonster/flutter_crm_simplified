@@ -11,13 +11,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
-const app_controller_1 = require("./app.controller");
-const app_service_1 = require("./app.service");
 const auth_module_1 = require("./auth/auth.module");
+const customers_module_1 = require("./customers/customers.module");
 const users_module_1 = require("./users/users.module");
 const settings_module_1 = require("./settings/settings.module");
 const appointments_module_1 = require("./appointments/appointments.module");
-const customers_module_1 = require("./customers/customers.module");
+const app_controller_1 = require("./app.controller");
+const app_service_1 = require("./app.service");
 const typeorm_1 = require("@nestjs/typeorm");
 const customer_reports_module_1 = require("./customer-reports/customer-reports.module");
 const tickets_module_1 = require("./tickets/tickets.module");
@@ -27,6 +27,7 @@ const data_source_1 = __importDefault(require("./data-source"));
 const ai_agents_module_1 = require("./ai-agents/ai-agents.module");
 const audit_module_1 = require("./audit/audit.module");
 const chat_module_1 = require("./chat/chat.module");
+const products_services_module_1 = require("./products_services/products_services.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -46,6 +47,7 @@ exports.AppModule = AppModule = __decorate([
             ai_agents_module_1.AiAgentsModule,
             audit_module_1.AuditModule,
             chat_module_1.ChatModule,
+            products_services_module_1.ProductsServicesModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

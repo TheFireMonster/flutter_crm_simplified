@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_crm/routes/router.dart';
-import 'package:flutter_crm/views/pages/login_page.dart';
+import 'package:flutter_crm/views/pages/chat_page_customer.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'firebase_options.dart';
@@ -17,7 +17,21 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(const MyApp());
+  // For Flutter web: extract linkId from URL if present
+  final uri = Uri.base;
+  String? linkId;
+  if (uri.pathSegments.length >= 2 && uri.pathSegments[0] == 'chat') {
+    linkId = uri.pathSegments[1];
+  }
+
+  runApp(
+    linkId != null
+      ? MaterialApp(
+          home: ChatPageCustomer(conversationId: linkId),
+          debugShowCheckedModeBanner: false,
+        )
+      : const MyApp()
+  );
 }
 
 String title = 'Flutter';

@@ -26,6 +26,20 @@ let ChatController = class ChatController {
         this.conversationRepo = conversationRepo;
         this.messageRepo = messageRepo;
     }
+    async updateConversation(linkId, body) {
+        const conv = await this.conversationRepo.findOne({ where: { linkId } });
+        if (!conv) {
+            return { error: 'Conversation not found' };
+        }
+        if (body.customerName !== undefined) {
+            conv.customerName = body.customerName;
+        }
+        if (body.chatGptActive !== undefined) {
+            conv.chatGptActive = body.chatGptActive;
+        }
+        await this.conversationRepo.save(conv);
+        return { success: true, customerName: conv.customerName, chatGptActive: conv.chatGptActive };
+    }
     async createConversation(customerName) {
         const linkId = (0, uuid_1.v4)();
         const conv = this.conversationRepo.create({
@@ -35,7 +49,7 @@ let ChatController = class ChatController {
         const saved = await this.conversationRepo.save(conv);
         return {
             linkId: saved.linkId,
-            url: `https://localhost:3000/chat/${saved.linkId}`,
+            url: `http://localhost:3000/chat/${saved.linkId}`,
         };
     }
     async getHistory(linkId) {
@@ -47,6 +61,14 @@ let ChatController = class ChatController {
     }
 };
 exports.ChatController = ChatController;
+__decorate([
+    (0, common_1.Patch)('conversations/:linkId'),
+    __param(0, (0, common_1.Param)('linkId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], ChatController.prototype, "updateConversation", null);
 __decorate([
     (0, common_1.Post)('conversations'),
     __param(0, (0, common_1.Body)('customerName')),

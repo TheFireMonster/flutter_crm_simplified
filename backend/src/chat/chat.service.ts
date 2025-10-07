@@ -10,7 +10,7 @@ export class ChatService {
     private readonly messageRepo: Repository<Message>,
   ) {}
 
-  async saveMessage(conversationId: string, sender: 'client' | 'staff', text: string) {
+  async saveMessage(conversationId: string, sender: string, text: string) {
     const msg = this.messageRepo.create({
       conversation: { id: conversationId },
       sender,

@@ -10,13 +10,16 @@ exports.AiAgentsModule = void 0;
 const common_1 = require("@nestjs/common");
 const ai_agents_controller_1 = require("./ai-agents.controller");
 const ai_agents_service_1 = require("./ai-agents.service");
+const chatgpt_module_1 = require("./chatgpt.module");
+const chatgpt_controller_1 = require("./chatgpt.controller");
 let AiAgentsModule = class AiAgentsModule {
 };
 exports.AiAgentsModule = AiAgentsModule;
 exports.AiAgentsModule = AiAgentsModule = __decorate([
     (0, common_1.Module)({
-        controllers: [ai_agents_controller_1.AiAgentsController],
-        providers: [ai_agents_service_1.AiAgentsService]
+        imports: [chatgpt_module_1.ChatGptModule],
+        controllers: [ai_agents_controller_1.AiAgentsController, chatgpt_controller_1.ChatGptController],
+        providers: [ai_agents_service_1.AiAgentsService],
     })
 ], AiAgentsModule);
 //# sourceMappingURL=ai-agents.module.js.map

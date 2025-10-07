@@ -14,8 +14,23 @@ async function bootstrap() {
         index: false,
     });
     app.use((req, res, next) => {
+        if (req.path.startsWith('/chat/') && req.path.endsWith('.js')) {
+            const assetPath = req.path.replace('/chat/', '/');
+            console.log('Rewriting asset request:', req.path, '->', assetPath);
+            return res.sendFile((0, path_1.join)(flutterBuildPath, assetPath));
+        }
+        next();
+    });
+    app.use((req, res, next) => {
+        console.log('Request path:', req.path);
+        next();
+    });
+    app.use((req, res, next) => {
         if (req.method === 'GET' &&
             !req.path.startsWith('/api') &&
+            !req.path.startsWith('/chat/history') &&
+            !req.path.startsWith('/chat/conversations') &&
+            !req.path.startsWith('/appointments') &&
             !req.path.includes('.') &&
             req.accepts('html')) {
             return res.sendFile((0, path_1.join)(flutterBuildPath, 'index.html'));

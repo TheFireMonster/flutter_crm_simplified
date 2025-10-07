@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_crm/services/auth_service.dart';
 import 'package:flutter_crm/widgets/login/login_desktop.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -17,18 +18,22 @@ class _LoginPageState extends State<LoginPage> {
   String _error = '';
 
   Future<void> _login() async {
+    print('Login button pressed');
     setState(() {
       _loading = true;
       _error = '';
     });
 
     try {
+      print('Calling authService.signIn with email: $_email');
       final user = await authService.signIn(
         email: _email,
         password: _password,
       );
+      print('authService.signIn returned: $user');
 
       if (user == null) {
+        print('No user found, showing error');
         setState(() {
           _error = 'Usuário não encontrado.';
           _loading = false;
@@ -36,16 +41,28 @@ class _LoginPageState extends State<LoginPage> {
         return;
       }
 
-      if (!mounted) return;
+      if (!mounted) {
+        print('Widget not mounted, aborting navigation');
+        return;
+      }
+      print('Navigating to /home');
       context.go('/home');
     } catch (e) {
-      setState(() {
-        _error = e.toString();
-      });
+      print('Error during login: $e');
+      if (e is FirebaseAuthException) {
+        setState(() {
+          _error = authService.getFirebaseAuthErrorMessage(e.code);
+        });
+      } else {
+        setState(() {
+          _error = 'Ocorreu um erro inesperado.';
+        });
+      }
     } finally {
       setState(() {
         _loading = false;
       });
+      print('Login flow finished');
     }
   }
 

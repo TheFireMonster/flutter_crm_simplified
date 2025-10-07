@@ -17,6 +17,7 @@ let Conversation = class Conversation {
     linkId;
     customerName;
     createdAt;
+    chatGptActive;
     messages;
 };
 exports.Conversation = Conversation;
@@ -36,6 +37,10 @@ __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
 ], Conversation.prototype, "createdAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'boolean', default: false }),
+    __metadata("design:type", Boolean)
+], Conversation.prototype, "chatGptActive", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => messages_entity_1.Message, (message) => message.conversation),
     __metadata("design:type", Array)

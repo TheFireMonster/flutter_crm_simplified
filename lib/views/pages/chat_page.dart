@@ -3,57 +3,191 @@ import 'package:grouped_list/grouped_list.dart';
 import 'package:flutter_crm/widgets/chat/messages.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_crm/widgets/menu/side_menu.dart';
+import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 
 class ChatPage extends StatefulWidget {
-  const ChatPage({super.key});
+  final String? conversationId;
+  const ChatPage({super.key, this.conversationId});
 
   @override
   State<ChatPage> createState() => _ChatPageState();
 }
 
 class _ChatPageState extends State<ChatPage> {
-    final TextEditingController _controller = TextEditingController();
-    bool isDrawerOpen = false;
+  bool chatGptActive = false;
 
-    void toggleDrawer() {
+  Future<void> fetchChatGptStatus() async {
+    if (linkId == null) return;
+    final response = await http.get(
+      Uri.parse('http://localhost:3000/chat/conversations/$linkId'),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
       setState(() {
-        isDrawerOpen = !isDrawerOpen;
+        chatGptActive = data['chatGptActive'] ?? false;
       });
     }
+  }
 
-    late IO.Socket socket;
-
-@override
-void initState() {
-  super.initState();
-  connectToServer();
-}
-
-void connectToServer() {
-  socket = IO.io('http://localhost:3000', <String, dynamic>{
-    'transports': ['websocket'],
-    'autoConnect': true,
-  });
-
-  socket.onConnect((_) {
-    print('✅ Connected to server');
-  });
-
-  socket.onDisconnect((_) {
-    print('❌ Disconnected from server');
-  });
-
-  // Recebe mensagens vindas do backend
-  socket.on('receive_message', (data) {
-    final message = Message(
-      text: data['text'],
-      date: DateTime.now(),
-      isSentByMe: false,
+  Future<void> toggleChatGpt(bool value) async {
+    if (linkId == null) return;
+    final response = await http.patch(
+      Uri.parse('http://localhost:3000/chat/conversations/$linkId'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'chatGptActive': value}),
     );
-    setState(() => messages.add(message));
-  });
-}
+    if (response.statusCode == 200) {
+      setState(() => chatGptActive = value);
+    }
+  }
+  Future<void> loadMessageHistory(String conversationId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://localhost:3000/chat/history/$conversationId'),
+        headers: {'Content-Type': 'application/json'},
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        setState(() {
+          messages = data.map((msg) => Message(
+            text: msg['content'],
+            date: DateTime.parse(msg['createdAt']),
+            isSentByMe: msg['sender'] == 'staff',
+          )).toList();
+        });
+      } else {
+        print('Failed to load message history: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error loading message history: $e');
+    }
+  }
+  final TextEditingController _controller = TextEditingController();
+  bool isDrawerOpen = false;
+  String? generatedCustomerId;
+  List<String> generatedChatLinks = [];
+  Map<String, String> customerNames = {};
+  Future<void> loadChatLinks() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      generatedChatLinks = prefs.getStringList('chatLinks') ?? [];
+      
+      final namesJson = prefs.getString('customerNames');
+      if (namesJson != null) {
+        customerNames = Map<String, String>.from(jsonDecode(namesJson));
+      }
+    });
+  }
+
+  Future<void> saveChatLinks() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('chatLinks', generatedChatLinks);
+    await prefs.setString('customerNames', jsonEncode(customerNames));
+  }
+  bool isGeneratingLink = false;
+  final TextEditingController _customerNameController = TextEditingController();
+  late IO.Socket socket;
+  List<Message> messages = [];
+  bool isSomeoneTyping = false;
+  String typingUser = '';
+  String? url;
+  String? linkId;
+
+  void toggleDrawer() {
+    setState(() {
+      isDrawerOpen = !isDrawerOpen;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  connectToServer();
+  loadChatLinks();
+  
+  if (widget.conversationId != null && widget.conversationId!.isNotEmpty) {
+    linkId = widget.conversationId;
+    loadMessageHistory(linkId!);
+    fetchChatGptStatus();
+  }
+  }
+
+  void connectToServer() {
+    socket = IO.io('http://localhost:3000', <String, dynamic>{
+      'transports': ['websocket'],
+      'autoConnect': true,
+    });
+
+    socket.onConnect((_) {
+      print('✅ Connected to server');
+      if (linkId != null) {
+        socket.emit('join_conversation', linkId);
+      }
+    });
+
+    socket.onDisconnect((_) {
+      print('❌ Disconnected from server');
+    });
+
+    socket.on('receive_message', (data) {
+      final message = Message(
+        text: data['content'] ?? data['text'],
+        date: DateTime.parse(data['createdAt'] ?? DateTime.now().toIso8601String()),
+        isSentByMe: data['sender'] == 'staff',
+      );
+      setState(() => messages.add(message));
+    });
+
+    socket.on('typing', (data) {
+      setState(() {
+        isSomeoneTyping = true;
+        typingUser = data['sender'] ?? '';
+      });
+      Future.delayed(Duration(seconds: 2), () {
+        setState(() {
+          isSomeoneTyping = false;
+        });
+      });
+    });
+  }
+
+        String generateCustomerId(String name) {
+        final timestamp = DateTime.now().millisecondsSinceEpoch;
+        return '${name}_$timestamp';
+      }
+
+      Future<Map<String, dynamic>> fetchConversationInfo(String customerId, String customerName) async {
+        final response = await http.post(
+          Uri.parse('http://localhost:3000/chat/conversations'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({'customerId': customerId, 'customerName': customerName}),
+        );
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          final contentType = response.headers['content-type'] ?? '';
+          if (contentType.contains('application/json')) {
+            try {
+              return jsonDecode(response.body);
+            } catch (e) {
+              throw Exception('Erro ao decodificar JSON: $e');
+            }
+          } else {
+            throw Exception('Resposta não é JSON. Content-Type: $contentType');
+          }
+        } else {
+          String errorMsg = 'Erro ao carregar conversa: status ${response.statusCode}';
+          if (response.body.isNotEmpty) {
+            errorMsg += '\nCorpo da resposta: ${response.body}';
+          }
+          throw Exception(errorMsg);
+        }
+      }
 
   @override
   Widget build(BuildContext context) {
@@ -78,6 +212,206 @@ void connectToServer() {
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                 ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextField(
+                        controller: _customerNameController,
+                        decoration: InputDecoration(
+                          labelText: 'Nome do cliente',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      ElevatedButton.icon(
+                        icon: Icon(Icons.link, color: Colors.green[800]),
+                        label: Text(isGeneratingLink ? 'Gerando...' : 'Gerar link de chat'),
+                        onPressed: isGeneratingLink ? null : () async {
+                          final name = _customerNameController.text.trim();
+                          if (name.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Digite o nome do cliente.')),
+                            );
+                            return;
+                          }
+                          setState(() { isGeneratingLink = true; });
+                          final customerId = DateTime.now().millisecondsSinceEpoch.toString();
+                          try {
+                            final info = await fetchConversationInfo(customerId, name);
+                            linkId = info['linkId'];
+                            final newLink = info['url'];
+                            setState(() {
+                              generatedChatLinks.add(newLink);
+                              customerNames[linkId!] = name;
+                            });
+                            saveChatLinks();
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Row(
+                                    children: [
+                                      CircleAvatar(
+                                        backgroundColor: Colors.green[600],
+                                        child: Icon(Icons.chat, color: Colors.white),
+                                      ),
+                                      SizedBox(width: 8),
+                                      Text('WhatsApp'),
+                                    ],
+                                  ),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Envie este link ao cliente:'),
+                                      SizedBox(height: 8),
+                                      SelectableText(
+                                        newLink,
+                                        style: TextStyle(fontSize: 16, color: Colors.blue[900]),
+                                      ),
+                                    ],
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      child: Text('Fechar'),
+                                      onPressed: () => Navigator.of(context).pop(),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          } catch (e) {
+                            setState(() {
+                              generatedChatLinks.add('Erro ao gerar link.');
+                            });
+                            saveChatLinks();
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text('Erro'),
+                                  content: Text('Erro ao gerar link.'),
+                                  actions: [
+                                    TextButton(
+                                      child: Text('Fechar'),
+                                      onPressed: () => Navigator.of(context).pop(),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }
+                          setState(() { isGeneratingLink = false; });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green[100],
+                          foregroundColor: Colors.green[900],
+                          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 16),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: generatedChatLinks.length,
+                    itemBuilder: (context, index) {
+                      final link = generatedChatLinks[index];
+                      final linkId = link.split('/').last;
+                      final name = customerNames[linkId] ?? '';
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: Card(
+                          color: Colors.green[50],
+                          elevation: 2,
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: Colors.green[600],
+                              child: Icon(Icons.chat, color: Colors.white),
+                            ),
+                            title: Row(
+                              children: [
+                                Expanded(child: Text('Cliente: $name')),
+                                IconButton(
+                                  icon: Icon(Icons.edit, color: Colors.blue[800]),
+                                  onPressed: () async {
+                                    final controller = TextEditingController(text: name);
+                                    final result = await showDialog<String>(
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog(
+                                          title: Text('Editar nome do cliente'),
+                                          content: TextField(
+                                            controller: controller,
+                                            decoration: InputDecoration(labelText: 'Novo nome'),
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              child: Text('Cancelar'),
+                                              onPressed: () => Navigator.of(context).pop(),
+                                            ),
+                                            TextButton(
+                                              child: Text('Salvar'),
+                                              onPressed: () => Navigator.of(context).pop(controller.text.trim()),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                    if (result != null && result.isNotEmpty) {
+                                      setState(() {
+                                        customerNames[linkId] = result;
+                                      });
+                                      saveChatLinks();
+                                      
+                                      await http.patch(
+                                        Uri.parse('http://localhost:3000/chat/conversations/$linkId'),
+                                        headers: {'Content-Type': 'application/json'},
+                                        body: jsonEncode({'customerName': result}),
+                                      );
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                            subtitle: SelectableText(link),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.copy, color: Colors.green[800]),
+                                  onPressed: () {
+                                    Clipboard.setData(ClipboardData(text: link));
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Link copiado!')),
+                                    );
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.delete, color: Colors.red[400]),
+                                  onPressed: () async {
+                                    setState(() {
+                                      generatedChatLinks.removeAt(index);
+                                      customerNames.remove(linkId);
+                                    });
+                                    await saveChatLinks();
+                                  },
+                                ),
+                              ],
+                            ),
+                            onTap: () {
+                              String conversationId = linkId;
+                              GoRouter.of(context).push('/chat/$conversationId');
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
               ],
             ),
           ),
@@ -98,112 +432,149 @@ void connectToServer() {
                   ),
                 ),
                 Expanded(
-                  child: GroupedListView<Message, DateTime>(
-                    padding: const EdgeInsets.all(8),
-                    reverse: true,
-                    order: GroupedListOrder.DESC,
-                    useStickyGroupSeparators: true,
-                    floatingHeader: true,
-                    elements: messages,
-                    groupBy: (message) => DateTime(
-                      message.date.year,
-                      message.date.month,
-                      message.date.day,
-                    ),
-                    groupHeaderBuilder: (Message message) => SizedBox(
-                      height: 50,
-                      child: Center(
-                        child: Card(
-                          color: Colors.blue[100],
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              DateFormat.yMMMd().format(message.date),
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blue[800],
+                  child: Stack(
+                    children: [
+                      GroupedListView<Message, DateTime>(
+                        padding: const EdgeInsets.all(8),
+                        reverse: true,
+                        order: GroupedListOrder.DESC,
+                        useStickyGroupSeparators: true,
+                        floatingHeader: true,
+                        elements: messages,
+                        groupBy: (message) => DateTime(
+                          message.date.year,
+                          message.date.month,
+                          message.date.day,
+                        ),
+                        groupHeaderBuilder: (Message message) => SizedBox(
+                          height: 50,
+                          child: Center(
+                            child: Card(
+                              color: Colors.blue[100],
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  DateFormat.yMMMd().format(message.date),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blue[800],
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                    itemBuilder: (context, Message message) => Align(
-                      alignment: message.isSentByMe
-                          ? Alignment.centerRight
-                          : Alignment.centerLeft,
-                      child: Card(
-                        elevation: 8,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+                        itemBuilder: (context, Message message) => Align(
+                          alignment: message.isSentByMe
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
+                          child: Card(
+                            elevation: 8,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Text(message.text),
+                            ),
+                          ),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Text(message.text),
-                        ),
                       ),
-                    ),
+                      if (isSomeoneTyping)
+                        Positioned(
+                          left: 16,
+                          bottom: 16,
+                          child: Container(
+                            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+                            ),
+                            child: Text('$typingUser está digitando...', style: TextStyle(color: Colors.green[800])),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
-                Container(
-                  color: Colors.grey[200],
-                  child: Row(
+                if (widget.conversationId != null && widget.conversationId!.isNotEmpty)
+                  Column(
                     children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _controller, // ✅ Attach controller
-                          decoration: InputDecoration(
-                            labelText: 'Type your message here',
-                            labelStyle: TextStyle(color: Colors.black54),
-                            floatingLabelStyle: TextStyle(color: Colors.black54),
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.grey),
+                      Container(
+                        color: Colors.grey[100],
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: Row(
+                          children: [
+                            Text('ChatGPT ativo', style: TextStyle(fontWeight: FontWeight.bold)),
+                            Switch(
+                              value: chatGptActive,
+                              onChanged: (value) => toggleChatGpt(value),
+                              activeColor: Colors.green,
                             ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.grey),
-                            ),
-                            filled: true,
-                            fillColor: Colors.white,
-                          ),
-                          onSubmitted: (text) {
-                            if (text.trim().isEmpty) return; // Avoid sending empty messages
-                                    
-                            final message = Message(
-                              text: text,
-                              date: DateTime.now(),
-                              isSentByMe: true,
-                            );
-                                    
-                            setState(() => messages.add(message));
-                            _controller.clear(); // ✅ Clear text field
-
-                             socket.emit('send_message', {'text': text});
-                            print('Message sent: $message');
-                          },
+                          ],
                         ),
                       ),
-                      AnimatedSwitcher(duration: const Duration(seconds: 1),
-                        child: IconButton(
-                          icon: Icon(Icons.send, color: Colors.green[800],size: 30),
-                          onPressed: () {
-                            final text = _controller.text;
-                            if (text.trim().isEmpty) return; // Avoid sending empty messages
-                                    
-                            final message = Message(
-                              text: text,
-                              date: DateTime.now(),
-                              isSentByMe: true,
-                            );
-                                    
-                            setState(() => messages.add(message));
-                            _controller.clear(); // ✅ Clear text field
-                            print('Message sent: $message');
-                          },
+                      Container(
+                        color: Colors.grey[200],
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _controller,
+                                decoration: InputDecoration(
+                                  labelText: 'Type your message here',
+                                  labelStyle: TextStyle(color: Colors.black54),
+                                  floatingLabelStyle: TextStyle(color: Colors.black54),
+                                  border: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.grey),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.grey),
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                ),
+                                onChanged: (text) {
+                                  if (linkId != null && text.isNotEmpty) {
+                                    socket.emit('typing', {
+                                      'conversationId': linkId,
+                                      'sender': 'staff',
+                                    });
+                                  }
+                                },
+                                onSubmitted: (text) {
+                                  if (text.trim().isEmpty) return;
+                                  _controller.clear();
+                                  socket.emit('send_message', {
+                                    'conversationId': linkId,
+                                    'sender': 'staff',
+                                    'text': text,
+                                  });
+                                  print('Message sent: $text');
+                                },
+                              ),
+                            ),
+                            AnimatedSwitcher(duration: const Duration(seconds: 1),
+                              child: IconButton(
+                                icon: Icon(Icons.send, color: Colors.green[800],size: 30),
+                                onPressed: () {
+                                  final text = _controller.text;
+                                  if (text.trim().isEmpty) return;
+                                  _controller.clear();
+                                  socket.emit('send_message', {
+                                    'conversationId': linkId,
+                                    'sender': 'staff',
+                                    'text': text,
+                                  });
+                                  print('Message sent: $text');
+                                },
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                ),
               ],
             ),
           ),

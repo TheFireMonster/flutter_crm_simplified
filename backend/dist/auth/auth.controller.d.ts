@@ -4,21 +4,6 @@ export declare class AuthController {
     constructor(authService: AuthService);
     firebaseRegister(req: any, body: {
         name?: string;
-    }): Promise<{
-        token: string;
-        expiry: number;
-        refresh_token: string | undefined;
-    }>;
-    firebaseLogin(req: any): Promise<{
-        token: string;
-        expiry: number;
-        refresh_token: string | undefined;
-    }>;
-    refreshToken(body: {
-        refresh_token: string;
-    }): Promise<{
-        token: string;
-        expiry: number;
-        refresh_token: string | undefined;
-    }>;
+    }): Promise<import("../users/entities/users.entity").User>;
+    firebaseLogin(req: any): Promise<import("../users/entities/users.entity").User>;
 }

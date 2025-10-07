@@ -19,19 +19,27 @@ const chat_service_1 = require("./chat.service");
 const conversations_entity_1 = require("./entities/conversations.entity");
 const typeorm_1 = require("typeorm");
 const typeorm_2 = require("@nestjs/typeorm");
+const chatgpt_service_1 = require("../ai-agents/chatgpt.service");
 let ChatGateway = class ChatGateway {
     chatService;
     conversationRepo;
+    chatGptService;
+    handleTyping(data, client) {
+        this.server.to(data.conversationId).emit('typing', {
+            sender: data.sender,
+        });
+    }
     server;
-    constructor(chatService, conversationRepo) {
+    constructor(chatService, conversationRepo, chatGptService) {
         this.chatService = chatService;
         this.conversationRepo = conversationRepo;
+        this.chatGptService = chatGptService;
     }
     handleConnection(client) {
-        console.log('Client connected:', client.id);
+        console.log('🔗 Socket.IO client connected:', client.id, 'from', client.handshake.address);
     }
     handleDisconnect(client) {
-        console.log('Client disconnected:', client.id);
+        console.log('❌ Socket.IO client disconnected:', client.id, 'from', client.handshake.address);
     }
     handleJoin(conversationId, client) {
         client.join(conversationId);
@@ -45,9 +53,23 @@ let ChatGateway = class ChatGateway {
         }
         const savedMessage = await this.chatService.saveMessage(conversation.id, data.sender, data.text);
         this.server.to(data.conversationId).emit('receive_message', savedMessage);
+        client.emit('receive_message', savedMessage);
+        if (conversation.chatGptActive) {
+            const gptReply = await this.chatGptService.ask(data.text);
+            const botMessage = await this.chatService.saveMessage(conversation.id, 'chatgpt', gptReply);
+            this.server.to(data.conversationId).emit('receive_message', botMessage);
+        }
     }
 };
 exports.ChatGateway = ChatGateway;
+__decorate([
+    (0, websockets_1.SubscribeMessage)('typing'),
+    __param(0, (0, websockets_1.MessageBody)()),
+    __param(1, (0, websockets_1.ConnectedSocket)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, socket_io_1.Socket]),
+    __metadata("design:returntype", void 0)
+], ChatGateway.prototype, "handleTyping", null);
 __decorate([
     (0, websockets_1.WebSocketServer)(),
     __metadata("design:type", socket_io_1.Server)
@@ -72,6 +94,7 @@ exports.ChatGateway = ChatGateway = __decorate([
     (0, websockets_1.WebSocketGateway)({ cors: true }),
     __param(1, (0, typeorm_2.InjectRepository)(conversations_entity_1.Conversation)),
     __metadata("design:paramtypes", [chat_service_1.ChatService,
-        typeorm_1.Repository])
+        typeorm_1.Repository,
+        chatgpt_service_1.ChatGptService])
 ], ChatGateway);
 //# sourceMappingURL=chat.gateway.js.map

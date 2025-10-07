@@ -36,12 +36,6 @@ let AuthController = class AuthController {
         const idToken = authHeader.replace('Bearer ', '');
         return await this.authService.firebaseLogin(idToken);
     }
-    async refreshToken(body) {
-        const result = await this.authService.refreshToken(body.refresh_token);
-        if (!result)
-            throw new common_1.UnauthorizedException('Invalid refresh token');
-        return result;
-    }
 };
 exports.AuthController = AuthController;
 __decorate([
@@ -59,13 +53,6 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "firebaseLogin", null);
-__decorate([
-    (0, common_1.Post)('refresh-token'),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], AuthController.prototype, "refreshToken", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)('auth'),
     __metadata("design:paramtypes", [auth_service_1.AuthService])

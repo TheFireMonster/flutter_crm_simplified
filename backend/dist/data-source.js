@@ -18,7 +18,7 @@ for (const key of requiredEnv) {
         throw new Error(`Missing required environment variable: ${key}`);
     }
 }
-exports.default = new typeorm_1.DataSource({
+const dataSource = new typeorm_1.DataSource({
     type: 'postgres',
     host: process.env.DB_HOST,
     port: Number(process.env.DB_PORT),
@@ -29,4 +29,12 @@ exports.default = new typeorm_1.DataSource({
     migrations: [__dirname + '/migrations/*{.ts,.js}'],
     synchronize: false,
 });
+dataSource.initialize()
+    .then(() => {
+    console.log('✅ Database connected');
+})
+    .catch((err) => {
+    console.error('❌ Database connection error:', err);
+});
+exports.default = dataSource;
 //# sourceMappingURL=data-source.js.map

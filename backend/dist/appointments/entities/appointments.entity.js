@@ -16,6 +16,8 @@ let Appointment = class Appointment {
     title;
     description;
     appointmentDate;
+    startTime;
+    endTime;
     location;
     updatedAt;
 };
@@ -33,9 +35,17 @@ __decorate([
     __metadata("design:type", String)
 ], Appointment.prototype, "description", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' }),
+    (0, typeorm_1.Column)({ type: 'date' }),
     __metadata("design:type", Date)
 ], Appointment.prototype, "appointmentDate", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'time' }),
+    __metadata("design:type", String)
+], Appointment.prototype, "startTime", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'time' }),
+    __metadata("design:type", String)
+], Appointment.prototype, "endTime", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 100, nullable: true }),
     __metadata("design:type", String)

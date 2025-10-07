@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
-// Permissions imports removed for simple Firebase login
+
 
 @Entity('users')
 export class User {
@@ -33,5 +33,5 @@ export class User {
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
     updatedAt: Date;
 
-    // Permissions removed for simple Firebase login
+
 }

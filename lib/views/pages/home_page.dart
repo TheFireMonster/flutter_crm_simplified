@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-//import 'package:flutter_crm/views/pages/chat_page.dart';
+
 import 'package:flutter_crm/views/pages/login_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_crm/widgets/menu/side_menu.dart';
+import 'package:go_router/go_router.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -27,11 +29,10 @@ class _HomePageState extends State<HomePage> {
         centerTitle: true,
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => LoginPage()),
-              );
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              if (!mounted) return;
+              context.go('/login');
             },
             child: Text('Logout', style: TextStyle(color: Colors.white)),
           ),

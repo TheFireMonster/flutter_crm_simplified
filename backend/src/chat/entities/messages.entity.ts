@@ -7,7 +7,7 @@ export class Message {
   id: string;
 
   @Column()
-  sender: string; // 'customer' ou 'employee'
+  sender: string; // 'customer', 'employee', 'client', 'staff', 'chatgpt'
 
   @Column('text')
   content: string;

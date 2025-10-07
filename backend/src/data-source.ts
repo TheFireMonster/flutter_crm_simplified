@@ -19,7 +19,8 @@ for (const key of requiredEnv) {
   }
 }
 
-export default new DataSource({
+
+const dataSource = new DataSource({
   type: 'postgres',
   host: process.env.DB_HOST,
   port: Number(process.env.DB_PORT),
@@ -30,3 +31,13 @@ export default new DataSource({
   migrations: [__dirname + '/migrations/*{.ts,.js}'],
   synchronize: false,
 });
+
+dataSource.initialize()
+  .then(() => {
+    console.log('✅ Database connected');
+  })
+  .catch((err) => {
+    console.error('❌ Database connection error:', err);
+  });
+
+export default dataSource;

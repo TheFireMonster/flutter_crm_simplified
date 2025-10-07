@@ -14,6 +14,7 @@ const chat_service_1 = require("./chat.service");
 const chat_controller_1 = require("./chat.controller");
 const conversations_entity_1 = require("./entities/conversations.entity");
 const messages_entity_1 = require("./entities/messages.entity");
+const chatgpt_module_1 = require("../ai-agents/chatgpt.module");
 let ChatModule = class ChatModule {
 };
 exports.ChatModule = ChatModule;
@@ -22,6 +23,7 @@ exports.ChatModule = ChatModule = __decorate([
         imports: [
             typeorm_1.TypeOrmModule.forFeature([conversations_entity_1.Conversation]),
             typeorm_1.TypeOrmModule.forFeature([messages_entity_1.Message]),
+            chatgpt_module_1.ChatGptModule,
         ],
         providers: [chat_gateway_1.ChatGateway, chat_service_1.ChatService],
         controllers: [chat_controller_1.ChatController],

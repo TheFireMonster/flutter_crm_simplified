@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_crm/widgets/menu/side_menu.dart';
 import 'package:go_router/go_router.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class AppointmentsPage extends StatefulWidget {
   const AppointmentsPage({super.key});
@@ -21,12 +23,47 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
   
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-  List<String> _appointments = [];
-  final List<String> _timeSlots = [
-    '00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00',
-    '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00',
-    '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00' 
-  ];
+  List<Map<String, dynamic>> _appointments = [];
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _durationController = TextEditingController();
+
+  Future<void> fetchAppointments() async {
+    if (_selectedDay == null) return;
+    final dateStr = _selectedDay!.toIso8601String();
+    final resp = await Uri.parse('http://localhost:3000/appointments');
+    final response = await http.get(resp);
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      setState(() {
+        _appointments = data
+          .where((a) => a['appointmentDate'].toString().startsWith(dateStr.substring(0, 10)))
+          .map<Map<String, dynamic>>((a) => Map<String, dynamic>.from(a)).toList();
+      });
+    }
+  }
+
+  Future<void> createAppointment() async {
+    if (_selectedDay == null) return;
+    final name = _nameController.text.trim();
+    final duration = _durationController.text.trim();
+    if (name.isEmpty || duration.isEmpty) return;
+    final dateStr = _selectedDay!.toIso8601String();
+    final resp = await Uri.parse('http://localhost:3000/appointments');
+    final response = await http.post(
+      resp,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'title': name,
+        'description': 'Duration: $duration',
+        'appointmentDate': dateStr,
+      }),
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      _nameController.clear();
+      _durationController.clear();
+      fetchAppointments();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,8 +89,8 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                     setState(() {
                       _selectedDay = selectedDay;
                       _focusedDay = focusedDay;
-                      _appointments = []; // Clear previous appointments
                     });
+                    fetchAppointments();
                   },
                   calendarStyle: CalendarStyle(
                     todayDecoration: BoxDecoration(
@@ -74,26 +111,45 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _nameController,
+                            decoration: InputDecoration(labelText: 'Appointment Name'),
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: _durationController,
+                            decoration: InputDecoration(labelText: 'Duration (min)'),
+                            keyboardType: TextInputType.number,
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: createAppointment,
+                          child: Text('Add'),
+                        ),
+                      ],
+                    ),
+                  ),
                   Expanded(
                     child: ListView.builder(
-                      itemCount: _timeSlots.length,
+                      itemCount: _appointments.length,
                       itemBuilder: (context, index) {
-                        final time = _timeSlots[index];
-                        final appointmentExists = _appointments.contains(time);
+                        final appointment = _appointments[index];
                         return ListTile(
-                          title: Text(time),
-                          trailing: appointmentExists
-                              ? Icon(Icons.check, color: Colors.green)
-                              : null,
-                          onTap: () {
-                            setState(() {
-                              if (appointmentExists) {
-                                _appointments.remove(time);
-                              } else {
-                                _appointments.add(time);
-                              }
-                            });
-                          },
+                          title: Text(appointment['title'] ?? ''),
+                          subtitle: Text(appointment['description'] ?? ''),
+                          trailing: Text(
+                            appointment['appointmentDate'] != null
+                              ? appointment['appointmentDate'].toString().substring(11, 16)
+                              : '',
+                          ),
                         );
                       },
                     ),

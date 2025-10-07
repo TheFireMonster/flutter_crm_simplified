@@ -1,9 +1,6 @@
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
-// TokenManager import removed for pure Firebase login
 
-final authService = AuthService(); // No TokenManager
+final authService = AuthService();
 
 class AuthService {
   final firebaseAuth = FirebaseAuth.instance;
@@ -19,12 +16,9 @@ class AuthService {
     );
     if (cred.user != null) {
       await cred.user!.updateDisplayName(name);
-      // No backend token registration, only Firebase
     }
     return cred.user;
   }
-
-  // _registerBackend removed for pure Firebase login
 
   Future<User?> signIn({
     required String email,
@@ -33,10 +27,25 @@ class AuthService {
     final cred = await firebaseAuth.signInWithEmailAndPassword(
       email: email,
       password: password,
+      
     );
-    // Only Firebase login, no backend token
     return cred.user;
   }
 
-  // _loginBackend removed for pure Firebase login
+  String getFirebaseAuthErrorMessage(String code) {
+    switch (code) {
+      case 'invalid-email':
+        return 'O e-mail informado é inválido.';
+      case 'user-not-found':
+        return 'Usuário não encontrado.';
+      case 'wrong-password':
+        return 'Senha incorreta.';
+      case 'email-already-in-use':
+        return 'Este e-mail já está em uso.';
+      case 'weak-password':
+        return 'A senha é muito fraca.';
+      default:
+        return 'Ocorreu um erro. Tente novamente.';
+    }
+  }
 }

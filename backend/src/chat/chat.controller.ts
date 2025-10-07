@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
@@ -14,6 +14,25 @@ export class ChatController {
     @InjectRepository(Message)
     private messageRepo: Repository<Message>,
   ) {}
+
+  @Patch('conversations/:linkId')
+  async updateConversation(
+    @Param('linkId') linkId: string,
+    @Body() body: { customerName?: string; chatGptActive?: boolean }
+  ) {
+    const conv = await this.conversationRepo.findOne({ where: { linkId } });
+    if (!conv) {
+      return { error: 'Conversation not found' };
+    }
+    if (body.customerName !== undefined) {
+      conv.customerName = body.customerName;
+    }
+    if (body.chatGptActive !== undefined) {
+      conv.chatGptActive = body.chatGptActive;
+    }
+    await this.conversationRepo.save(conv);
+    return { success: true, customerName: conv.customerName, chatGptActive: conv.chatGptActive };
+  }
   
   @Post('conversations')
   async createConversation(@Body('customerName') customerName?: string) {
@@ -28,7 +47,7 @@ export class ChatController {
 
     return {
       linkId: saved.linkId,
-      url: `https://localhost:3000/chat/${saved.linkId}`,
+      url: `http://localhost:3000/chat/${saved.linkId}`,
     };
   }
 

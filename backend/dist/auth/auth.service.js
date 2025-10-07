@@ -47,7 +47,6 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
-const jwt_1 = require("@nestjs/jwt");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const users_entity_1 = require("../users/entities/users.entity");
@@ -55,10 +54,8 @@ const crypto = __importStar(require("crypto"));
 const admin = __importStar(require("firebase-admin"));
 let AuthService = class AuthService {
     userRepo;
-    jwtService;
-    constructor(userRepo, jwtService) {
+    constructor(userRepo) {
         this.userRepo = userRepo;
-        this.jwtService = jwtService;
     }
     async firebaseRegister(idToken, name) {
         let decoded;
@@ -79,7 +76,7 @@ let AuthService = class AuthService {
             });
             await this.userRepo.save(user);
         }
-        return this.createToken(user);
+        return user;
     }
     async firebaseLogin(idToken) {
         let decoded;
@@ -100,37 +97,13 @@ let AuthService = class AuthService {
             });
             await this.userRepo.save(user);
         }
-        return this.createToken(user);
-    }
-    async refreshToken(refreshToken) {
-        const user = await this.userRepo.findOne({
-            where: { refreshToken },
-        });
-        if (!user) {
-            throw new common_1.UnauthorizedException('Invalid refresh token');
-        }
-        const newRefreshToken = crypto.randomBytes(32).toString('hex');
-        user.refreshToken = newRefreshToken;
-        await this.userRepo.save(user);
-        return this.createToken(user);
-    }
-    createToken(user) {
-        const payload = {
-            sub: user.id,
-            email: user.email,
-        };
-        return {
-            token: this.jwtService.sign(payload),
-            expiry: Date.now() + 3600 * 1000,
-            refresh_token: user.refreshToken,
-        };
+        return user;
     }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(users_entity_1.User)),
-    __metadata("design:paramtypes", [typeorm_2.Repository,
-        jwt_1.JwtService])
+    __metadata("design:paramtypes", [typeorm_2.Repository])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

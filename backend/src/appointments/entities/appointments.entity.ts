@@ -11,8 +11,15 @@ export class Appointment {
     @Column({ type: 'text' })
     description: string;
 
-    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+
+    @Column({ type: 'date' })
     appointmentDate: Date;
+
+    @Column({ type: 'time' })
+    startTime: string;
+
+    @Column({ type: 'time' })
+    endTime: string;
 
     @Column({ type: 'varchar', length: 100, nullable: true })
     location?: string;
