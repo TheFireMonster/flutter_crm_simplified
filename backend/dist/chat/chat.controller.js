@@ -34,11 +34,11 @@ let ChatController = class ChatController {
         if (body.customerName !== undefined) {
             conv.customerName = body.customerName;
         }
-        if (body.chatGptActive !== undefined) {
-            conv.chatGptActive = body.chatGptActive;
+        if (body.AIChatActive !== undefined) {
+            conv.AIChatActive = body.AIChatActive;
         }
         await this.conversationRepo.save(conv);
-        return { success: true, customerName: conv.customerName, chatGptActive: conv.chatGptActive };
+        return { success: true, customerName: conv.customerName, AIChatActive: conv.AIChatActive };
     }
     async createConversation(customerName) {
         const linkId = (0, uuid_1.v4)();

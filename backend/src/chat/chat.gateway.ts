@@ -5,7 +5,7 @@ import { ChatService } from './chat.service';
 import { Conversation } from './entities/conversations.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ChatGptService } from '../ai-agents/chatgpt.service';
+import { AIChatService } from '../openai/aichat/aichat.service';
 
 @WebSocketGateway({ cors: true })
 export class ChatGateway {
@@ -25,7 +25,7 @@ export class ChatGateway {
     private readonly chatService: ChatService,
     @InjectRepository(Conversation)
     private readonly conversationRepo: Repository<Conversation>,
-    private readonly chatGptService: ChatGptService,
+    private readonly aiChatService: AIChatService,
   ) {}
 
   handleConnection(client: Socket) {
@@ -65,13 +65,12 @@ export class ChatGateway {
     this.server.to(data.conversationId).emit('receive_message', savedMessage);
     client.emit('receive_message', savedMessage);
 
-    // If ChatGPT is active, route message to ChatGPT and emit bot response
-    if (conversation.chatGptActive) {
-      const gptReply = await this.chatGptService.ask(data.text);
+    if (conversation.AIChatActive) {
+      const AIChatReply = await this.aiChatService.ask(data.text);
       const botMessage = await this.chatService.saveMessage(
         conversation.id,
-        'chatgpt',
-        gptReply,
+        'AIChat',
+        AIChatReply,
       );
       this.server.to(data.conversationId).emit('receive_message', botMessage);
     }

@@ -6,14 +6,14 @@ import { ChatService } from './chat.service';
 import { ChatController } from './chat.controller';
 import { Conversation } from './entities/conversations.entity';
 import { Message } from './entities/messages.entity';
-import { ChatGptModule } from '../ai-agents/chatgpt.module';
-import { ChatGptService } from '../ai-agents/chatgpt.service';
+import { AIChatModule } from '../openai/aichat/aichat.module';
+import { AIChatService } from '../openai/aichat/aichat.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Conversation]),
     TypeOrmModule.forFeature([Message]),
-    ChatGptModule,
+    AIChatModule,
   ],
   providers: [ChatGateway, ChatService],
   controllers: [ChatController],

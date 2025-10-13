@@ -4,6 +4,6 @@ export declare class Conversation {
     linkId: string;
     customerName: string;
     createdAt: Date;
-    chatGptActive: boolean;
+    AIChatActive: boolean;
     messages: Message[];
 }

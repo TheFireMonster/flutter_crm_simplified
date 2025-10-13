@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_crm/widgets/menu/side_menu.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class ReportsPage extends StatefulWidget {
   const ReportsPage({super.key});
@@ -9,38 +10,38 @@ class ReportsPage extends StatefulWidget {
 }
 
 class _ReportsPageState extends State<ReportsPage> {
+  final TextEditingController _controller = TextEditingController();
+  String get chartPrompt => _controller.text;
   bool isDrawerOpen = false;
 
-  void toggleDrawer() {
+ void toggleDrawer() {
     setState(() {
       isDrawerOpen = !isDrawerOpen;
     });
   }
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Reports Page')),
       body: Row(
         children: [
           SideMenu(isDrawerOpen: isDrawerOpen, toggleDrawer: toggleDrawer),
-          Expanded(
-            child: ListView.builder(
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return Card(
-                  margin: const EdgeInsets.all(8),
-                  child: ListTile(
-                    title: Text("Report ${index + 1}"),
-                    subtitle: Text("Details of report ${index + 1}"),
-                    trailing: Icon(Icons.arrow_forward),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+           Container(
+            color: Colors.grey[200],
+            child: TextField(
+              controller: _controller,
+              decoration: InputDecoration(
+                labelText: 'Type your message here',
+                labelStyle: TextStyle(color: Colors.black54),
+                floatingLabelStyle: TextStyle(color: Colors.black54),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey),
+                ),
+                filled: true,
+                fillColor: Colors.white,
+              ),
+              onChanged: (text) {
+        

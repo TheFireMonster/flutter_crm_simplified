@@ -12,10 +12,11 @@ import { TicketsModule } from './tickets/tickets.module';
 import { SalesModule } from './sales/sales.module';
 import { ConfigModule } from '@nestjs/config';
 import dataSource from './data-source';
-import { AiAgentsModule } from './ai-agents/ai-agents.module';
+
 import { AuditModule } from './audit/audit.module';
 import { ChatModule } from './chat/chat.module';
 import { ProductsServicesModule } from './products_services/products_services.module';
+import { AIChatModule } from './openai/aichat/aichat.module';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { ProductsServicesModule } from './products_services/products_services.mo
     CustomerReportsModule,
     TicketsModule,
     SalesModule,
-    AiAgentsModule,
+    AIChatModule,
     AuditModule,
     ChatModule,
     ProductsServicesModule,

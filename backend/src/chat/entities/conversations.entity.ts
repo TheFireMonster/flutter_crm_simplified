@@ -16,7 +16,7 @@ export class Conversation {
   createdAt: Date;
 
   @Column({ type: 'boolean', default: false })
-  chatGptActive: boolean;
+  AIChatActive: boolean;
 
   @OneToMany(() => Message, (message) => message.conversation)
   messages: Message[];

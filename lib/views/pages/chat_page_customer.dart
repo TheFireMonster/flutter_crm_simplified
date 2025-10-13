@@ -35,13 +35,10 @@ class _ChatPageCustomerState extends State<ChatPageCustomer> {
     });
 
     socket.onConnect((_) {
-      print('✅ Connected to chat server');
       socket.emit('join_conversation', widget.conversationId);
     });
 
-    socket.onDisconnect((_) {
-      print('❌ Disconnected from chat server');
-    });
+    socket.onDisconnect((_) {});
 
     socket.on('receive_message', (data) {
       final message = Message(
@@ -53,15 +50,17 @@ class _ChatPageCustomerState extends State<ChatPageCustomer> {
     });
 
     socket.on('typing', (data) {
-      setState(() {
-        isSomeoneTyping = true;
-        typingUser = data['sender'] ?? '';
-      });
-      Future.delayed(Duration(seconds: 2), () {
+      if (data['sender'] != 'client') {
         setState(() {
-          isSomeoneTyping = false;
+          isSomeoneTyping = true;
+          typingUser = data['sender'] ?? '';
         });
-      });
+        Future.delayed(Duration(seconds: 2), () {
+          setState(() {
+            isSomeoneTyping = false;
+          });
+        });
+      }
     });
   }
 
@@ -82,19 +81,12 @@ class _ChatPageCustomerState extends State<ChatPageCustomer> {
 
   void sendMessage(String text) {
     if (text.trim().isEmpty) return;
-    final message = Message(
-      text: text,
-      date: DateTime.now(),
-      isSentByMe: true,
-    );
-    setState(() => messages.add(message));
     _controller.clear();
     socket.emit('send_message', {
       'conversationId': widget.conversationId,
       'sender': 'client',
       'text': text,
     });
-    print('Message sent: $message');
   }
 
   @override
@@ -195,14 +187,7 @@ class _ChatPageCustomerState extends State<ChatPageCustomer> {
                 }
               },
               onSubmitted: (text) {
-                if (text.trim().isEmpty) return;
-                _controller.clear();
-                socket.emit('send_message', {
-                  'conversationId': widget.conversationId,
-                  'sender': 'client',
-                  'text': text,
-                });
-                print('Message sent: $text');
+                sendMessage(text);
               },
             ),
           ),

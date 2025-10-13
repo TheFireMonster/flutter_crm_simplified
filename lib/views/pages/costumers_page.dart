@@ -28,6 +28,9 @@ class _CostumersPageState extends State<CostumersPage> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _sourceController = TextEditingController();
+  final TextEditingController _dateOfBirthController = TextEditingController();
+  final TextEditingController _stateController = TextEditingController();
+  final TextEditingController _cepController = TextEditingController();
   List<Map<String, dynamic>> _customers = [];
 
   Future<void> fetchCustomers() async {
@@ -54,15 +57,21 @@ class _CostumersPageState extends State<CostumersPage> {
         'phone': _phoneController.text.trim(),
         'address': _addressController.text.trim(),
         'source': _sourceController.text.trim(),
+        'dateOfBirth': _dateOfBirthController.text.trim(),
+        'state': _stateController.text.trim(),
+        'cep': _cepController.text.trim(),
       }),
     );
     if (response.statusCode == 200 || response.statusCode == 201) {
-      _nameController.clear();
-      _emailController.clear();
-      _cpfController.clear();
-      _phoneController.clear();
-      _addressController.clear();
-      _sourceController.clear();
+  _nameController.clear();
+  _emailController.clear();
+  _cpfController.clear();
+  _phoneController.clear();
+  _addressController.clear();
+  _sourceController.clear();
+  _dateOfBirthController.clear();
+  _stateController.clear();
+  _cepController.clear();
       fetchCustomers();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Customer registered!')));
     } else {
@@ -118,6 +127,21 @@ class _CostumersPageState extends State<CostumersPage> {
                               validator: (v) => v == null || v.isEmpty ? 'Required' : null,
                             ),
                             TextFormField(
+                              controller: _dateOfBirthController,
+                              decoration: InputDecoration(labelText: 'Date of Birth (YYYY-MM-DD)'),
+                              validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                            ),
+                            TextFormField(
+                              controller: _stateController,
+                              decoration: InputDecoration(labelText: 'State (e.g. SC)'),
+                              validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                            ),
+                            TextFormField(
+                              controller: _cepController,
+                              decoration: InputDecoration(labelText: 'CEP'),
+                              validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                            ),
+                            TextFormField(
                               controller: _phoneController,
                               decoration: InputDecoration(labelText: 'Phone'),
                             ),
@@ -149,7 +173,9 @@ class _CostumersPageState extends State<CostumersPage> {
                           return Card(
                             child: ListTile(
                               title: Text(c['name'] ?? ''),
-                              subtitle: Text('Email: ${c['email'] ?? ''}\nCPF: ${c['cpf'] ?? ''}'),
+                              subtitle: Text(
+                                'Email: ${c['email'] ?? ''}\nCPF: ${c['cpf'] ?? ''}\nDate of Birth: ${c['dateOfBirth'] ?? ''}\nState: ${c['state'] ?? ''}\nCEP: ${c['cep'] ?? ''}'
+                              ),
                               trailing: Text(c['phone'] ?? ''),
                             ),
                           );

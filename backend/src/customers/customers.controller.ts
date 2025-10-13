@@ -12,7 +12,6 @@ export class CustomersController {
         return 'This action returns all customers';
     }
     
-    // ✅ Put specific routes FIRST, before parameterized routes
     @Get('search')
     search() {
         return 'This action searches for customers';
@@ -23,7 +22,6 @@ export class CustomersController {
         return 'This action exports customers data';
     }
     
-    // ✅ Put parameterized routes LAST
     @Get(':id')
     findOne(@Param('id') id: string) {
         return `This action returns customer ${id}`;

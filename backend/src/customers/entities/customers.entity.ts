@@ -20,6 +20,16 @@ export class Customer {
     @Column({ type: 'text', nullable: true })
     address?: string;
 
+
+    @Column({ type: 'date', nullable: true })
+    dateOfBirth?: Date;
+
+    @Column({ type: 'varchar', length: 2, nullable: true })
+    state?: string;
+
+    @Column({ type: 'varchar', length: 9, nullable: true })
+    cep?: string;
+
     @Column({ type: 'varchar', nullable: true, length: 50 })
     source?: string;
 

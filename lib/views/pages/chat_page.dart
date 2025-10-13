@@ -146,15 +146,17 @@ class _ChatPageState extends State<ChatPage> {
     });
 
     socket.on('typing', (data) {
-      setState(() {
-        isSomeoneTyping = true;
-        typingUser = data['sender'] ?? '';
-      });
-      Future.delayed(Duration(seconds: 2), () {
+      if (data['sender'] != 'staff') {
         setState(() {
-          isSomeoneTyping = false;
+          isSomeoneTyping = true;
+          typingUser = data['sender'] ?? '';
         });
-      });
+        Future.delayed(Duration(seconds: 2), () {
+          setState(() {
+            isSomeoneTyping = false;
+          });
+        });
+      }
     });
   }
 

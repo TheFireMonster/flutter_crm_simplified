@@ -7,16 +7,16 @@ export declare class ChatController {
     constructor(conversationRepo: Repository<Conversation>, messageRepo: Repository<Message>);
     updateConversation(linkId: string, body: {
         customerName?: string;
-        chatGptActive?: boolean;
+        AIChatActive?: boolean;
     }): Promise<{
         error: string;
         success?: undefined;
         customerName?: undefined;
-        chatGptActive?: undefined;
+        AIChatActive?: undefined;
     } | {
         success: boolean;
         customerName: string;
-        chatGptActive: boolean;
+        AIChatActive: boolean;
         error?: undefined;
     }>;
     createConversation(customerName?: string): Promise<{

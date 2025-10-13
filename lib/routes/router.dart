@@ -8,21 +8,20 @@ import 'package:flutter_crm/views/pages/settings_page.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_crm/views/pages/costumers_page.dart';
+import 'package:flutter_crm/views/pages/services_page.dart';
+import 'package:flutter_crm/views/pages/reports_page.dart';
 
 final GoRouter router = GoRouter(
   redirect: (context, state) {
     final user = FirebaseAuth.instance.currentUser;
     final path = state.fullPath ?? '';
 
-    // Paths that don't require authentication
     final publicPaths = ['/login', '/register'];
 
-    // Not logged in -> redirect to login unless already on public paths
     if (user == null && !publicPaths.contains(path)) {
       return '/login';
     }
 
-    // Logged in -> redirect away from login/register
     if (user != null && publicPaths.contains(path)) {
       return '/home';
     }
@@ -38,6 +37,8 @@ final GoRouter router = GoRouter(
     GoRoute(path: '/sales', builder: (context, state) => SalesPage()),
     GoRoute(path: '/chat', builder: (context, state) => ChatPage()),
     GoRoute(path: '/costumers', builder: (context, state) => CostumersPage()),
+    GoRoute(path: '/services', builder: (context, state) => ServicePage()),
+    GoRoute(path: '/reports', builder: (context, state) => ReportsPage()),
     GoRoute(
       path: '/chat/:id',
       builder: (context, state) {

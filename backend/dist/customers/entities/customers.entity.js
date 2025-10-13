@@ -18,6 +18,9 @@ let Customer = class Customer {
     cpf;
     phone;
     address;
+    dateOfBirth;
+    state;
+    cep;
     source;
     createdAt;
     updatedAt;
@@ -47,6 +50,18 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'text', nullable: true }),
     __metadata("design:type", String)
 ], Customer.prototype, "address", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'date', nullable: true }),
+    __metadata("design:type", Date)
+], Customer.prototype, "dateOfBirth", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 2, nullable: true }),
+    __metadata("design:type", String)
+], Customer.prototype, "state", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 9, nullable: true }),
+    __metadata("design:type", String)
+], Customer.prototype, "cep", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'varchar', nullable: true, length: 50 }),
     __metadata("design:type", String)

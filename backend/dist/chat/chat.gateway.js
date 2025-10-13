@@ -19,21 +19,21 @@ const chat_service_1 = require("./chat.service");
 const conversations_entity_1 = require("./entities/conversations.entity");
 const typeorm_1 = require("typeorm");
 const typeorm_2 = require("@nestjs/typeorm");
-const chatgpt_service_1 = require("../ai-agents/chatgpt.service");
+const aichat_service_1 = require("../openai/aichat/aichat.service");
 let ChatGateway = class ChatGateway {
     chatService;
     conversationRepo;
-    chatGptService;
+    aiChatService;
     handleTyping(data, client) {
         this.server.to(data.conversationId).emit('typing', {
             sender: data.sender,
         });
     }
     server;
-    constructor(chatService, conversationRepo, chatGptService) {
+    constructor(chatService, conversationRepo, aiChatService) {
         this.chatService = chatService;
         this.conversationRepo = conversationRepo;
-        this.chatGptService = chatGptService;
+        this.aiChatService = aiChatService;
     }
     handleConnection(client) {
         console.log('🔗 Socket.IO client connected:', client.id, 'from', client.handshake.address);
@@ -54,9 +54,9 @@ let ChatGateway = class ChatGateway {
         const savedMessage = await this.chatService.saveMessage(conversation.id, data.sender, data.text);
         this.server.to(data.conversationId).emit('receive_message', savedMessage);
         client.emit('receive_message', savedMessage);
-        if (conversation.chatGptActive) {
-            const gptReply = await this.chatGptService.ask(data.text);
-            const botMessage = await this.chatService.saveMessage(conversation.id, 'chatgpt', gptReply);
+        if (conversation.AIChatActive) {
+            const AIChatReply = await this.aiChatService.ask(data.text);
+            const botMessage = await this.chatService.saveMessage(conversation.id, 'AIChat', AIChatReply);
             this.server.to(data.conversationId).emit('receive_message', botMessage);
         }
     }
@@ -95,6 +95,6 @@ exports.ChatGateway = ChatGateway = __decorate([
     __param(1, (0, typeorm_2.InjectRepository)(conversations_entity_1.Conversation)),
     __metadata("design:paramtypes", [chat_service_1.ChatService,
         typeorm_1.Repository,
-        chatgpt_service_1.ChatGptService])
+        aichat_service_1.AIChatService])
 ], ChatGateway);
 //# sourceMappingURL=chat.gateway.js.map

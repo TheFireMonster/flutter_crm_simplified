@@ -18,7 +18,7 @@ export class ChatController {
   @Patch('conversations/:linkId')
   async updateConversation(
     @Param('linkId') linkId: string,
-    @Body() body: { customerName?: string; chatGptActive?: boolean }
+    @Body() body: { customerName?: string; AIChatActive?: boolean }
   ) {
     const conv = await this.conversationRepo.findOne({ where: { linkId } });
     if (!conv) {
@@ -27,11 +27,11 @@ export class ChatController {
     if (body.customerName !== undefined) {
       conv.customerName = body.customerName;
     }
-    if (body.chatGptActive !== undefined) {
-      conv.chatGptActive = body.chatGptActive;
+    if (body.AIChatActive !== undefined) {
+      conv.AIChatActive = body.AIChatActive;
     }
     await this.conversationRepo.save(conv);
-    return { success: true, customerName: conv.customerName, chatGptActive: conv.chatGptActive };
+    return { success: true, customerName: conv.customerName, AIChatActive: conv.AIChatActive };
   }
   
   @Post('conversations')

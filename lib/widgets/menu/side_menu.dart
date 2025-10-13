@@ -67,6 +67,22 @@ class _SideMenuState extends State<SideMenu> {
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
+                  SizedBox(height: 10),
+                  GestureDetector(
+                    onTap: () => context.go('/services'),
+                    child: Text(
+                      "Services",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  GestureDetector(
+                    onTap: () => context.go('/reports'),
+                    child: Text(
+                      "Reports",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
                 ],
               )
               : Column(
