@@ -12,10 +12,13 @@ export class Conversation {
   @Column({ nullable: true })
   customerName: string;
 
+  @Column({ type: 'int', nullable: true })
+  customerId?: number;
+
   @CreateDateColumn()
   createdAt: Date;
 
-  @Column({ type: 'boolean', default: false })
+  @Column({ name: 'chatGptActive', type: 'boolean', default: false })
   AIChatActive: boolean;
 
   @OneToMany(() => Message, (message) => message.conversation)

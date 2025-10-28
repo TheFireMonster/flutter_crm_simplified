@@ -15,11 +15,14 @@ export class SalesService {
 
 	async create(createSaleDto: CreateSaleDto): Promise<Sale> {
 		const sale = this.saleRepository.create(createSaleDto);
-		return this.saleRepository.save(sale);
+		const saved = await this.saleRepository.save(sale);
+		// return with customer relation loaded so clients receive nested customer
+		const found = await this.saleRepository.findOne({ where: { id: saved.id }, relations: ['customer'] });
+		return found as Sale;
 	}
 
 	async findAll(): Promise<Sale[]> {
-		return this.saleRepository.find();
+		return this.saleRepository.find({ relations: ['customer'] });
 	}
 }
 

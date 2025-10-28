@@ -14,34 +14,41 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CustomersController = void 0;
 const common_1 = require("@nestjs/common");
+const customers_service_1 = require("./customers.service");
+const create_customer_dto_1 = require("./dto/create-customer.dto");
 let CustomersController = class CustomersController {
-    create() {
-        return 'This action adds a new customer';
+    customersService;
+    constructor(customersService) {
+        this.customersService = customersService;
+    }
+    create(body) {
+        return this.customersService.create(body);
     }
     findAll() {
-        return 'This action returns all customers';
+        return this.customersService.findAll();
     }
     search() {
-        return 'This action searches for customers';
+        return this.customersService.findAll();
     }
     export() {
-        return 'This action exports customers data';
+        return this.customersService.findAll();
     }
     findOne(id) {
-        return `This action returns customer ${id}`;
+        return this.customersService.findOne(Number(id));
     }
-    update(id) {
-        return `This action updates customer ${id}`;
+    update(id, body) {
+        return this.customersService.update(Number(id), body);
     }
     remove(id) {
-        return `This action removes customer ${id}`;
+        return this.customersService.remove(Number(id));
     }
 };
 exports.CustomersController = CustomersController;
 __decorate([
     (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [create_customer_dto_1.CreateCustomerDto]),
     __metadata("design:returntype", void 0)
 ], CustomersController.prototype, "create", null);
 __decorate([
@@ -72,8 +79,9 @@ __decorate([
 __decorate([
     (0, common_1.Put)(':id'),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, create_customer_dto_1.CreateCustomerDto]),
     __metadata("design:returntype", void 0)
 ], CustomersController.prototype, "update", null);
 __decorate([
@@ -84,6 +92,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], CustomersController.prototype, "remove", null);
 exports.CustomersController = CustomersController = __decorate([
-    (0, common_1.Controller)('customers')
+    (0, common_1.Controller)('customers'),
+    __metadata("design:paramtypes", [customers_service_1.CustomersService])
 ], CustomersController);
 //# sourceMappingURL=customers.controller.js.map

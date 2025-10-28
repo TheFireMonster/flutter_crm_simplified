@@ -62,16 +62,38 @@ export class ChatGateway {
       data.text,
     );
 
-    this.server.to(data.conversationId).emit('receive_message', savedMessage);
-    client.emit('receive_message', savedMessage);
+  // Emit the saved message to the conversation room. This will deliver to
+  // all joined clients (including the sender), so emitting directly to the
+  // client as well caused duplicates.
+  this.server.to(data.conversationId).emit('receive_message', savedMessage);
 
+    console.error(`onMessage: conversation ${conversation.linkId} AIChatActive=${conversation.AIChatActive}`);
     if (conversation.AIChatActive) {
-      const AIChatReply = await this.aiChatService.ask(data.text);
+      console.error('onMessage: AI is active, calling ask (non-streaming)...');
+      // Notify clients the AI is 'typing' (simple indicator).
+      try {
+        this.server.to(data.conversationId).emit('typing', { sender: 'staff' });
+      } catch (_) {}
+
+      // Call the simpler synchronous completion method. It will include
+      // recent history and customerName when available (handled inside service).
+      const AIChatReply = await this.aiChatService.ask(
+        data.text,
+        conversation.id,
+        conversation.customerName || undefined,
+      );
+
+      try {
+        this.server.to(data.conversationId).emit('typing', { sender: 'staff', done: true });
+      } catch (_) {}
+
+      console.error('onMessage: ask returned, saving bot message');
       const botMessage = await this.chatService.saveMessage(
         conversation.id,
         'AIChat',
         AIChatReply,
       );
+      console.error('onMessage: saved botMessage, emitting to room');
       this.server.to(data.conversationId).emit('receive_message', botMessage);
     }
   }

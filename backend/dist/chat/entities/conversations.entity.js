@@ -16,6 +16,7 @@ let Conversation = class Conversation {
     id;
     linkId;
     customerName;
+    customerId;
     createdAt;
     AIChatActive;
     messages;
@@ -34,11 +35,15 @@ __decorate([
     __metadata("design:type", String)
 ], Conversation.prototype, "customerName", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'int', nullable: true }),
+    __metadata("design:type", Number)
+], Conversation.prototype, "customerId", void 0);
+__decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
 ], Conversation.prototype, "createdAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'boolean', default: false }),
+    (0, typeorm_1.Column)({ name: 'chatGptActive', type: 'boolean', default: false }),
     __metadata("design:type", Boolean)
 ], Conversation.prototype, "AIChatActive", void 0);
 __decorate([

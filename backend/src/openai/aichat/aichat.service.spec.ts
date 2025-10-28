@@ -2,55 +2,43 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AIChatService } from './aichat.service';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
-import { ProductsServicesService } from '../../products_services/products_services.service';
+import { ServiceService } from '../../services/service.service';
 import { AppointmentsService } from '../../appointments/appointments.service';
+import { CustomersAiService } from '../../customers/customers.ai.service';
+import { AppointmentsAiService } from '../../appointments/appointments.ai.service';
 import { of } from 'rxjs';
 
-describe('ChatGptService', () => {
+describe('AIChatService', () => {
   let service: AIChatService;
-  let httpService: HttpService;
-  let configService: ConfigService;
-  let productsServicesService: ProductsServicesService;
-  let appointmentsService: AppointmentsService;
+  const httpMock = { post: jest.fn() } as any;
+  const configMock = { get: jest.fn().mockImplementation((k) => (k === 'MOCK_AI' ? 'true' : 'test-api-key')) } as any;
+  const serviceServiceMock = { findAll: jest.fn().mockResolvedValue([{ serviceName: 'Consulta' }]) } as any;
+  const appointmentsServiceMock = { getAll: jest.fn().mockResolvedValue([{ title: 'Consulta', appointmentDate: '2025-10-10' }]) } as any;
+  const customersAiMock = { createDraftFromAi: jest.fn() } as any;
+  const appointmentsAiMock = { createDraftFromAi: jest.fn() } as any;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AIChatService,
-        {
-          provide: HttpService,
-          useValue: {
-            post: jest.fn().mockReturnValue(of({ data: { choices: [{ message: { content: 'mocked response' } }] } }))
-          }
-        },
-        {
-          provide: ConfigService,
-          useValue: { get: jest.fn().mockReturnValue('test-api-key') }
-        },
-        {
-          provide: ProductsServicesService,
-          useValue: { findAll: jest.fn().mockResolvedValue([{ name: 'Produto1' }, { name: 'Produto2' }]) }
-        },
-        {
-          provide: AppointmentsService,
-          useValue: { getAll: jest.fn().mockResolvedValue([{ title: 'Consulta', appointmentDate: '2025-10-10' }]) }
-        }
+        { provide: HttpService, useValue: httpMock },
+        { provide: ConfigService, useValue: configMock },
+        { provide: ServiceService, useValue: serviceServiceMock },
+        { provide: AppointmentsService, useValue: appointmentsServiceMock },
+        { provide: CustomersAiService, useValue: customersAiMock },
+        { provide: AppointmentsAiService, useValue: appointmentsAiMock },
       ],
     }).compile();
 
     service = module.get<AIChatService>(AIChatService);
-    httpService = module.get<HttpService>(HttpService);
-    configService = module.get<ConfigService>(ConfigService);
-    productsServicesService = module.get<ProductsServicesService>(ProductsServicesService);
-    appointmentsService = module.get<AppointmentsService>(AppointmentsService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
+  afterEach(() => jest.clearAllMocks());
 
-  it('should call OpenAI API and return a response', async () => {
+  it('should call OpenAI API and return a response for ask()', async () => {
+    (httpMock.post as jest.Mock).mockReturnValueOnce(of({ data: { choices: [{ message: { content: 'mocked response' } }] } }));
     const result = await service.ask('Olá, assistente!');
     expect(result).toBe('mocked response');
+    expect(httpMock.post).toHaveBeenCalled();
   });
 });

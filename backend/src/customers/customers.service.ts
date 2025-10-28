@@ -40,4 +40,23 @@ export class CustomersService {
         }
         return this.customersRepository.delete(id);
     }
+
+        async findByName(name: string) {
+            return this.customersRepository.findOne({ where: { name } });
+        }
+
+        // Find existing customer by id or name, otherwise create a lead (source='chat-lead')
+        async findOrCreateLead(payload: { id?: number; name?: string }) {
+            if (payload?.id) {
+                try {
+                    return await this.findOne(payload.id);
+                } catch (_) {}
+            }
+            if (payload?.name) {
+                const existing = await this.findByName(payload.name);
+                if (existing) return existing;
+            }
+            const created = await this.create({ name: payload.name || 'Cliente', source: 'chat-lead' });
+            return created;
+        }
 }

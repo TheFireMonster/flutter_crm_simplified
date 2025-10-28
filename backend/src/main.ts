@@ -1,11 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { ValidationPipe } from '@nestjs/common';
 import { join } from 'path';
 import { existsSync } from 'fs';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   
   const flutterBuildPath = join(__dirname, '..', '..', 'build', 'web');
@@ -49,7 +51,8 @@ async function bootstrap() {
     next();
   });
 
-  await app.listen(3000);
-    console.log('Server running on http://localhost:3000');
+  const port = process.env.PORT ? Number(process.env.PORT) : 3000;
+  await app.listen(port);
+  console.log(`Server running on http://0.0.0.0:${port}`);
 }
 bootstrap();

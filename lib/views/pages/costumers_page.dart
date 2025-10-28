@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_crm/widgets/menu/side_menu.dart';
-import 'package:go_router/go_router.dart';
+// go_router unused here
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class CostumersPage extends StatefulWidget {
@@ -34,21 +34,78 @@ class _CostumersPageState extends State<CostumersPage> {
   List<Map<String, dynamic>> _customers = [];
 
   Future<void> fetchCustomers() async {
-  final resp = await Uri.parse('http://localhost:3000/customers');
-    final response = await http.get(resp);
+    final uri = Uri.parse('http://localhost:3000/customers');
+    final response = await http.get(uri);
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
+      if (!mounted) return;
       setState(() {
         _customers = data.map<Map<String, dynamic>>((c) => Map<String, dynamic>.from(c)).toList();
       });
+      // merge in any chat-created customers that are stored locally
+      await _mergeChatCustomersIfAny();
     }
+  }
+
+  Future<void> _loadChatCustomers() async {
+    final prefs = await SharedPreferences.getInstance();
+    final idsJson = prefs.getString('customerIds');
+    final namesJson = prefs.getString('customerNames');
+    if (idsJson == null || namesJson == null) return;
+    try {
+      final Map<String, dynamic> ids = jsonDecode(idsJson);
+      final Map<String, dynamic> names = jsonDecode(namesJson);
+      final chatCustomers = <Map<String, dynamic>>[];
+      ids.forEach((linkId, custId) {
+        final name = names[linkId]?.toString() ?? '';
+        if (custId != null && custId.toString().isNotEmpty) {
+          chatCustomers.add({'id': custId, 'name': name});
+        }
+      });
+      if (!mounted) return;
+      setState(() {
+        final existingIds = _customers.map((c) => c['id']?.toString()).toSet();
+        for (final c in chatCustomers) {
+          final cid = c['id']?.toString();
+          if (cid == null) continue;
+          if (!existingIds.contains(cid)) {
+            _customers.add(c);
+            existingIds.add(cid);
+          }
+        }
+      });
+    } catch (_) {}
+  }
+
+  Future<void> _mergeChatCustomersIfAny() async {
+    final prefs = await SharedPreferences.getInstance();
+    final idsJson = prefs.getString('customerIds');
+    final namesJson = prefs.getString('customerNames');
+    if (idsJson == null || namesJson == null) return;
+    try {
+      final Map<String, dynamic> ids = jsonDecode(idsJson);
+      final Map<String, dynamic> names = jsonDecode(namesJson);
+      final existingIds = _customers.map((c) => c['id']?.toString()).toSet();
+      for (final entry in ids.entries) {
+        final linkId = entry.key;
+        final custId = entry.value;
+        final name = names[linkId]?.toString() ?? '';
+        final custIdStr = custId?.toString();
+        if (custIdStr == null || custIdStr.isEmpty) continue;
+        if (!existingIds.contains(custIdStr)) {
+          _customers.add({'id': custId, 'name': name});
+          existingIds.add(custIdStr);
+        }
+      }
+      if (mounted) setState(() {});
+    } catch (_) {}
   }
 
   Future<void> registerCustomer() async {
     if (!_formKey.currentState!.validate()) return;
-  final resp = await Uri.parse('http://localhost:3000/customers');
+    final uri = Uri.parse('http://localhost:3000/customers');
     final response = await http.post(
-      resp,
+      uri,
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'name': _nameController.text.trim(),
@@ -72,9 +129,11 @@ class _CostumersPageState extends State<CostumersPage> {
   _dateOfBirthController.clear();
   _stateController.clear();
   _cepController.clear();
-      fetchCustomers();
+      await fetchCustomers();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Customer registered!')));
     } else {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error registering customer')));
     }
   }
@@ -83,6 +142,7 @@ class _CostumersPageState extends State<CostumersPage> {
   void initState() {
     super.initState();
     fetchCustomers();
+    _loadChatCustomers();
   }
 
   @override
@@ -128,7 +188,7 @@ class _CostumersPageState extends State<CostumersPage> {
                             ),
                             TextFormField(
                               controller: _dateOfBirthController,
-                              decoration: InputDecoration(labelText: 'Date of Birth (YYYY-MM-DD)'),
+                              decoration: InputDecoration(labelText: 'Date of Birth (DD/MM/AAAA)'),
                               validator: (v) => v == null || v.isEmpty ? 'Required' : null,
                             ),
                             TextFormField(

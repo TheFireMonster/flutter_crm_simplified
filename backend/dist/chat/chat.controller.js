@@ -18,13 +18,18 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const uuid_1 = require("uuid");
 const conversations_entity_1 = require("../chat/entities/conversations.entity");
+const customers_service_1 = require("../customers/customers.service");
+const create_conversation_dto_1 = require("./dto/create-conversation.dto");
+const update_conversation_dto_1 = require("./dto/update-conversation.dto");
 const messages_entity_1 = require("../chat/entities/messages.entity");
 let ChatController = class ChatController {
     conversationRepo;
     messageRepo;
-    constructor(conversationRepo, messageRepo) {
+    customersService;
+    constructor(conversationRepo, messageRepo, customersService) {
         this.conversationRepo = conversationRepo;
         this.messageRepo = messageRepo;
+        this.customersService = customersService;
     }
     async updateConversation(linkId, body) {
         const conv = await this.conversationRepo.findOne({ where: { linkId } });
@@ -37,20 +42,41 @@ let ChatController = class ChatController {
         if (body.AIChatActive !== undefined) {
             conv.AIChatActive = body.AIChatActive;
         }
+        else if (body.chatGptActive !== undefined) {
+            conv.AIChatActive = body.chatGptActive;
+        }
         await this.conversationRepo.save(conv);
         return { success: true, customerName: conv.customerName, AIChatActive: conv.AIChatActive };
     }
-    async createConversation(customerName) {
-        const linkId = (0, uuid_1.v4)();
-        const conv = this.conversationRepo.create({
-            linkId,
-            customerName: customerName || 'Cliente',
-        });
-        const saved = await this.conversationRepo.save(conv);
-        return {
-            linkId: saved.linkId,
-            url: `http://localhost:3000/chat/${saved.linkId}`,
-        };
+    async getConversation(linkId) {
+        const conv = await this.conversationRepo.findOne({ where: { linkId } });
+        if (!conv)
+            return { error: 'Conversation not found' };
+        return { linkId: conv.linkId, customerName: conv.customerName, chatGptActive: conv.AIChatActive };
+    }
+    async createConversation(dto) {
+        try {
+            const linkId = (0, uuid_1.v4)();
+            const lead = await (this.customersService ? this.customersService.findOrCreateLead({ id: dto?.customerId, name: dto?.customerName }) : null);
+            const conv = this.conversationRepo.create({
+                linkId,
+                customerName: dto?.customerName || (lead ? lead.name : 'Cliente'),
+            });
+            const saved = await this.conversationRepo.save(conv);
+            if (lead && lead.id) {
+                saved.customerId = lead.id;
+                await this.conversationRepo.save(saved);
+            }
+            return {
+                linkId: saved.linkId,
+                url: `http://localhost:3000/chat/${saved.linkId}`,
+                customerId: lead ? lead.id : undefined,
+            };
+        }
+        catch (err) {
+            console.error('createConversation error:', err && err.stack ? err.stack : err);
+            return { error: 'Failed to create conversation', details: err?.message || String(err) };
+        }
     }
     async getHistory(linkId) {
         return this.messageRepo.find({
@@ -66,14 +92,21 @@ __decorate([
     __param(0, (0, common_1.Param)('linkId')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String, update_conversation_dto_1.UpdateConversationDto]),
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "updateConversation", null);
 __decorate([
-    (0, common_1.Post)('conversations'),
-    __param(0, (0, common_1.Body)('customerName')),
+    (0, common_1.Get)('conversations/:linkId'),
+    __param(0, (0, common_1.Param)('linkId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ChatController.prototype, "getConversation", null);
+__decorate([
+    (0, common_1.Post)('conversations'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [create_conversation_dto_1.CreateConversationDto]),
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "createConversation", null);
 __decorate([
@@ -88,6 +121,7 @@ exports.ChatController = ChatController = __decorate([
     __param(0, (0, typeorm_1.InjectRepository)(conversations_entity_1.Conversation)),
     __param(1, (0, typeorm_1.InjectRepository)(messages_entity_1.Message)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
-        typeorm_2.Repository])
+        typeorm_2.Repository,
+        customers_service_1.CustomersService])
 ], ChatController);
 //# sourceMappingURL=chat.controller.js.map

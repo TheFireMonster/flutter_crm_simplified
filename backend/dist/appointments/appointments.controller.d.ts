@@ -1,15 +1,13 @@
 import { Repository } from 'typeorm';
+import { AppointmentsService } from './appointments.service';
+import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { Appointment } from './entities/appointments.entity';
 export declare class AppointmentsController {
     private readonly appointmentRepo;
-    constructor(appointmentRepo: Repository<Appointment>);
+    private readonly appointmentsService;
+    constructor(appointmentRepo: Repository<Appointment>, appointmentsService: AppointmentsService);
     getAll(): Promise<Appointment[]>;
-    create(body: {
-        title: string;
-        description?: string;
-        appointmentDate: string;
-        startTime: string;
-        endTime: string;
-        location?: string;
-    }): Promise<Appointment>;
+    create(body: CreateAppointmentDto): Promise<Appointment | {
+        error: string;
+    }>;
 }

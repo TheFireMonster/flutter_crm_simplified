@@ -11,14 +11,16 @@ const common_1 = require("@nestjs/common");
 const axios_1 = require("@nestjs/axios");
 const aichat_service_1 = require("./aichat.service");
 const config_1 = require("@nestjs/config");
-const products_services_module_1 = require("../../products_services/products_services.module");
 const appointments_module_1 = require("../../appointments/appointments.module");
+const service_module_1 = require("../../services/service.module");
+const customers_module_1 = require("../../customers/customers.module");
+const chat_module_1 = require("../../chat/chat.module");
 let AIChatModule = class AIChatModule {
 };
 exports.AIChatModule = AIChatModule;
 exports.AIChatModule = AIChatModule = __decorate([
     (0, common_1.Module)({
-        imports: [axios_1.HttpModule, config_1.ConfigModule, products_services_module_1.ProductsServicesModule, appointments_module_1.AppointmentsModule],
+        imports: [axios_1.HttpModule, config_1.ConfigModule, appointments_module_1.AppointmentsModule, service_module_1.ServiceModule, customers_module_1.CustomersModule, (0, common_1.forwardRef)(() => chat_module_1.ChatModule)],
         providers: [aichat_service_1.AIChatService],
         exports: [aichat_service_1.AIChatService],
     })

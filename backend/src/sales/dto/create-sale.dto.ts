@@ -1,11 +1,12 @@
 import { IsString, IsNumber, IsOptional } from 'class-validator';
 
+// DTO keys must match the entity columns so TypeORM.create() maps fields correctly.
 export class CreateSaleDto {
   @IsString()
-  productName: string;
+  serviceName: string;
 
   @IsNumber()
-  amount: number;
+  price: number;
 
   @IsOptional()
   @IsString()
@@ -14,4 +15,8 @@ export class CreateSaleDto {
   @IsOptional()
   @IsString()
   customerEmail?: string;
+
+  @IsOptional()
+  @IsNumber()
+  customerId?: number;
 }

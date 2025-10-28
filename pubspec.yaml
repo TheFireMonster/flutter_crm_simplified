@@ -47,7 +47,9 @@ dependencies:
   go_router: ^16.2.1
   table_calendar: ^3.2.0
   socket_io_client: ^3.1.2
-  fl_chart: ^1.1.0
+  fl_chart: ^1.1.1
+
+# no dependency_overrides - use SDK pinned deps where possible
 
 dev_dependencies:
   flutter_test:
@@ -101,3 +103,4 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+

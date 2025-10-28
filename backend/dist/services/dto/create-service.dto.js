@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateServiceDto = void 0;
 class CreateServiceDto {
     serviceName;
-    amount;
+    price;
     customerName;
     customerEmail;
 }

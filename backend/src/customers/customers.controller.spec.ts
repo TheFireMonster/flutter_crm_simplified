@@ -29,8 +29,9 @@ describe('CustomersController', () => {
   });
 
     it('should create a customer', async () => {
-    const result = await controller.create();
-    expect(result).toBe('This action adds a new customer');
+    const body = { name: 'Ana' };
+    const result = await controller.create(body as any);
+    expect(result).toEqual({ id: 1, name: 'Ana' });
   });
 
   it('should find all customers', async () => {
@@ -44,8 +45,9 @@ describe('CustomersController', () => {
   });
 
   it('should update a customer', async () => {
-    const result = await controller.update('1');
-    expect(result).toBe('This action updates customer 1');
+    const body = { name: 'Ana Updated' };
+    const result = await controller.update('1', body as any);
+    expect(result).toEqual({ id: 1, name: 'Ana', email: 'ana@email.com' });
   });
 
   it('should remove a customer', async () => {

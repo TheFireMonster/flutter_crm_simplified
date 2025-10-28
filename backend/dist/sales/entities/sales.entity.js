@@ -11,13 +11,16 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Sale = void 0;
 const typeorm_1 = require("typeorm");
+const customers_entity_1 = require("../../customers/entities/customers.entity");
 let Sale = class Sale {
     id;
-    productName;
-    amount;
+    serviceName;
+    price;
     saleDate;
     customerName;
     customerEmail;
+    customerId;
+    customer;
     updatedAt;
 };
 exports.Sale = Sale;
@@ -28,11 +31,11 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 100 }),
     __metadata("design:type", String)
-], Sale.prototype, "productName", void 0);
+], Sale.prototype, "serviceName", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 2 }),
     __metadata("design:type", Number)
-], Sale.prototype, "amount", void 0);
+], Sale.prototype, "price", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' }),
     __metadata("design:type", Date)
@@ -45,6 +48,15 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 100, nullable: true }),
     __metadata("design:type", String)
 ], Sale.prototype, "customerEmail", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'integer', nullable: true }),
+    __metadata("design:type", Number)
+], Sale.prototype, "customerId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => customers_entity_1.Customer, { nullable: true }),
+    (0, typeorm_1.JoinColumn)({ name: 'customerId' }),
+    __metadata("design:type", customers_entity_1.Customer)
+], Sale.prototype, "customer", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' }),
     __metadata("design:type", Date)

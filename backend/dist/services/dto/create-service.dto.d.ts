@@ -1,6 +1,6 @@
 export declare class CreateServiceDto {
     serviceName: string;
-    amount: number;
+    price: number;
     customerName?: string;
     customerEmail?: string;
 }

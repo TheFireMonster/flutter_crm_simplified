@@ -11,16 +11,19 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const appointments_controller_1 = require("./appointments.controller");
 const appointments_service_1 = require("./appointments.service");
+const appointments_ai_service_1 = require("./appointments.ai.service");
 const appointments_entity_1 = require("./entities/appointments.entity");
+const ai_actions_module_1 = require("../ai-actions/ai-actions.module");
+const customers_module_1 = require("../customers/customers.module");
 let AppointmentsModule = class AppointmentsModule {
 };
 exports.AppointmentsModule = AppointmentsModule;
 exports.AppointmentsModule = AppointmentsModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([appointments_entity_1.Appointment])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([appointments_entity_1.Appointment]), ai_actions_module_1.AiActionsModule, customers_module_1.CustomersModule],
         controllers: [appointments_controller_1.AppointmentsController],
-        providers: [appointments_service_1.AppointmentsService],
-        exports: [appointments_service_1.AppointmentsService],
+        providers: [appointments_service_1.AppointmentsService, appointments_ai_service_1.AppointmentsAiService],
+        exports: [appointments_service_1.AppointmentsService, appointments_ai_service_1.AppointmentsAiService],
     })
 ], AppointmentsModule);
 //# sourceMappingURL=appointments.module.js.map

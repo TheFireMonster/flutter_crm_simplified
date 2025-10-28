@@ -1,3 +1,5 @@
+// removed dart:ffi import (not needed)
+
 import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:flutter_crm/widgets/chat/messages.dart';
@@ -6,7 +8,7 @@ import 'package:flutter_crm/widgets/menu/side_menu.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -59,14 +61,14 @@ class _ChatPageState extends State<ChatPage> {
           messages = data.map((msg) => Message(
             text: msg['content'],
             date: DateTime.parse(msg['createdAt']),
-            isSentByMe: msg['sender'] == 'staff',
+            isSentByMe: (msg['sender'] == 'staff'),
           )).toList();
         });
       } else {
-        print('Failed to load message history: ${response.statusCode}');
+  debugPrint('Failed to load message history: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error loading message history: $e');
+  debugPrint('Error loading message history: $e');
     }
   }
   final TextEditingController _controller = TextEditingController();
@@ -74,6 +76,8 @@ class _ChatPageState extends State<ChatPage> {
   String? generatedCustomerId;
   List<String> generatedChatLinks = [];
   Map<String, String> customerNames = {};
+  // keep dynamic to handle existing string ids and numeric ids during migration
+  Map<String, dynamic> customerIds = {};
   Future<void> loadChatLinks() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -83,6 +87,10 @@ class _ChatPageState extends State<ChatPage> {
       if (namesJson != null) {
         customerNames = Map<String, String>.from(jsonDecode(namesJson));
       }
+      final idsJson = prefs.getString('customerIds');
+      if (idsJson != null) {
+        customerIds = Map<String, int>.from(jsonDecode(idsJson));
+      }
     });
   }
 
@@ -90,11 +98,13 @@ class _ChatPageState extends State<ChatPage> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('chatLinks', generatedChatLinks);
     await prefs.setString('customerNames', jsonEncode(customerNames));
+    await prefs.setString('customerIds', jsonEncode(customerIds));
   }
   bool isGeneratingLink = false;
   final TextEditingController _customerNameController = TextEditingController();
-  late IO.Socket socket;
+  late io.Socket socket;
   List<Message> messages = [];
+  final Set<int> _receivedMessageIds = {};
   bool isSomeoneTyping = false;
   String typingUser = '';
   String? url;
@@ -114,48 +124,83 @@ class _ChatPageState extends State<ChatPage> {
   
   if (widget.conversationId != null && widget.conversationId!.isNotEmpty) {
     linkId = widget.conversationId;
-    loadMessageHistory(linkId!);
-    fetchChatGptStatus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _joinConversationIfNeeded();
+    });
   }
   }
 
+  void _joinConversationIfNeeded() {
+    if (linkId == null) return;
+    try {
+      try { socket.emit('join_conversation', linkId); } catch (_) {}
+    } catch (_) {}
+    loadMessageHistory(linkId!);
+    fetchChatGptStatus();
+  }
+
   void connectToServer() {
-    socket = IO.io('http://localhost:3000', <String, dynamic>{
+  socket = io.io('http://localhost:3000', <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': true,
     });
 
     socket.onConnect((_) {
-      print('✅ Connected to server');
+                            debugPrint('✅ Connected to server');
       if (linkId != null) {
         socket.emit('join_conversation', linkId);
       }
     });
 
     socket.onDisconnect((_) {
-      print('❌ Disconnected from server');
+                            debugPrint('❌ Disconnected from server');
     });
 
     socket.on('receive_message', (data) {
+      debugPrint('receive_message event: ${data}');
+      final incomingId = int.parse(data['id']?.toString() ?? '0');
+      if (_receivedMessageIds.contains(incomingId)) {
+        debugPrint('Duplicate message ignored id=$incomingId');
+        return;
+      }
       final message = Message(
         text: data['content'] ?? data['text'],
         date: DateTime.parse(data['createdAt'] ?? DateTime.now().toIso8601String()),
-        isSentByMe: data['sender'] == 'staff',
+        isSentByMe: (data['sender'] == 'staff'),
       );
-      setState(() => messages.add(message));
+  _receivedMessageIds.add(incomingId);
+      if ((data['sender'] ?? '') == 'staff') {
+        setState(() {
+          isSomeoneTyping = false;
+          typingUser = '';
+        });
+      }
+      setState(() {
+        messages.add(message);
+      });
+      debugPrint('Message added to messages list, count=${messages.length}');
     });
 
     socket.on('typing', (data) {
-      if (data['sender'] != 'staff') {
-        setState(() {
-          isSomeoneTyping = true;
-          typingUser = data['sender'] ?? '';
-        });
-        Future.delayed(Duration(seconds: 2), () {
+      final sender = data['sender'] ?? '';
+      final done = data['done'] == true;
+      if (sender != 'staff') {
+        if (done) {
           setState(() {
             isSomeoneTyping = false;
+            typingUser = '';
           });
-        });
+        } else {
+          setState(() {
+            isSomeoneTyping = true;
+            typingUser = sender;
+          });
+          Future.delayed(Duration(seconds: 2), () {
+            setState(() {
+              isSomeoneTyping = false;
+            });
+          });
+        }
       }
     });
   }
@@ -165,11 +210,12 @@ class _ChatPageState extends State<ChatPage> {
         return '${name}_$timestamp';
       }
 
-      Future<Map<String, dynamic>> fetchConversationInfo(String customerId, String customerName) async {
+      Future<Map<String, dynamic>> fetchConversationInfo(String? customerId, String customerName) async {
+        final body = customerId != null ? {'customerId': customerId, 'customerName': customerName} : {'customerName': customerName};
         final response = await http.post(
           Uri.parse('http://localhost:3000/chat/conversations'),
           headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({'customerId': customerId, 'customerName': customerName}),
+          body: jsonEncode(body),
         );
         if (response.statusCode == 200 || response.statusCode == 201) {
           final contentType = response.headers['content-type'] ?? '';
@@ -210,7 +256,7 @@ class _ChatPageState extends State<ChatPage> {
                 Container(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    'Chat Messages',
+                    'Mensagens',
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -231,26 +277,35 @@ class _ChatPageState extends State<ChatPage> {
                         icon: Icon(Icons.link, color: Colors.green[800]),
                         label: Text(isGeneratingLink ? 'Gerando...' : 'Gerar link de chat'),
                         onPressed: isGeneratingLink ? null : () async {
+                          final messenger = ScaffoldMessenger.of(context);
+                          final navigator = Navigator.of(context);
+
                           final name = _customerNameController.text.trim();
                           if (name.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            messenger.showSnackBar(
                               SnackBar(content: Text('Digite o nome do cliente.')),
                             );
                             return;
                           }
+
                           setState(() { isGeneratingLink = true; });
-                          final customerId = DateTime.now().millisecondsSinceEpoch.toString();
                           try {
-                            final info = await fetchConversationInfo(customerId, name);
+                            final info = await fetchConversationInfo(null, name);
                             linkId = info['linkId'];
                             final newLink = info['url'];
                             setState(() {
                               generatedChatLinks.add(newLink);
                               customerNames[linkId!] = name;
+                              // preserve the original type returned by the server (number when possible)
+                              if (info.containsKey('customerId') && info['customerId'] != null) {
+                                customerIds[linkId!] = info['customerId'];
+                              }
                             });
+                              try { socket.emit('join_conversation', linkId); } catch (_) {}
                             saveChatLinks();
+                            if (!mounted) return;
                             showDialog(
-                              context: context,
+                              context: navigator.context,
                               builder: (BuildContext context) {
                                 return AlertDialog(
                                   title: Row(
@@ -278,7 +333,7 @@ class _ChatPageState extends State<ChatPage> {
                                   actions: [
                                     TextButton(
                                       child: Text('Fechar'),
-                                      onPressed: () => Navigator.of(context).pop(),
+                                      onPressed: () => navigator.pop(),
                                     ),
                                   ],
                                 );
@@ -289,8 +344,9 @@ class _ChatPageState extends State<ChatPage> {
                               generatedChatLinks.add('Erro ao gerar link.');
                             });
                             saveChatLinks();
+                            if (!mounted) return;
                             showDialog(
-                              context: context,
+                              context: navigator.context,
                               builder: (BuildContext context) {
                                 return AlertDialog(
                                   title: Text('Erro'),
@@ -298,7 +354,7 @@ class _ChatPageState extends State<ChatPage> {
                                   actions: [
                                     TextButton(
                                       child: Text('Fechar'),
-                                      onPressed: () => Navigator.of(context).pop(),
+                                      onPressed: () => navigator.pop(),
                                     ),
                                   ],
                                 );
@@ -322,8 +378,8 @@ class _ChatPageState extends State<ChatPage> {
                     itemCount: generatedChatLinks.length,
                     itemBuilder: (context, index) {
                       final link = generatedChatLinks[index];
-                      final linkId = link.split('/').last;
-                      final name = customerNames[linkId] ?? '';
+                      final localLinkId = link.split('/').last;
+                      final name = customerNames[localLinkId] ?? '';
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 8.0),
                         child: Card(
@@ -365,12 +421,12 @@ class _ChatPageState extends State<ChatPage> {
                                     );
                                     if (result != null && result.isNotEmpty) {
                                       setState(() {
-                                        customerNames[linkId] = result;
+                                        customerNames[localLinkId] = result;
                                       });
                                       saveChatLinks();
                                       
                                       await http.patch(
-                                        Uri.parse('http://localhost:3000/chat/conversations/$linkId'),
+                                        Uri.parse('http://localhost:3000/chat/conversations/$localLinkId'),
                                         headers: {'Content-Type': 'application/json'},
                                         body: jsonEncode({'customerName': result}),
                                       );
@@ -395,17 +451,30 @@ class _ChatPageState extends State<ChatPage> {
                                 IconButton(
                                   icon: Icon(Icons.delete, color: Colors.red[400]),
                                   onPressed: () async {
-                                    setState(() {
-                                      generatedChatLinks.removeAt(index);
-                                      customerNames.remove(linkId);
-                                    });
-                                    await saveChatLinks();
-                                  },
+                                      setState(() {
+                                        generatedChatLinks.removeAt(index);
+                                        customerNames.remove(localLinkId);
+                                        customerIds.remove(localLinkId);
+                                      });
+                                      await saveChatLinks();
+
+                                      // if the deleted conversation is currently open on the right,
+                                      // clear it and leave the conversation on the socket
+                                      try {
+                                        if (linkId == localLinkId) {
+                                          try { socket.emit('leave_conversation', localLinkId); } catch (_) {}
+                                          setState(() {
+                                            linkId = null;
+                                            messages.clear();
+                                          });
+                                        }
+                                      } catch (_) {}
+                                    },
                                 ),
                               ],
                             ),
                             onTap: () {
-                              String conversationId = linkId;
+                              String conversationId = localLinkId;
                               GoRouter.of(context).push('/chat/$conversationId');
                             },
                           ),
@@ -456,7 +525,8 @@ class _ChatPageState extends State<ChatPage> {
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(
-                                  DateFormat.yMMMd().format(message.date),
+                                  // show day-first date format (DD/MM/YYYY)
+                                  DateFormat('dd/MM/yyyy').format(message.date),
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: Colors.blue[800],
@@ -471,13 +541,19 @@ class _ChatPageState extends State<ChatPage> {
                               ? Alignment.centerRight
                               : Alignment.centerLeft,
                           child: Card(
+                            color: message.isSentByMe ? Colors.green[100] : Colors.grey[200],
                             elevation: 8,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(24),
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(12),
-                              child: Text(message.text),
+                              child: Text(
+                                message.text,
+                                style: TextStyle(
+                                  color: message.isSentByMe ? Colors.green[900] : Colors.black87,
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -511,7 +587,8 @@ class _ChatPageState extends State<ChatPage> {
                             Switch(
                               value: chatGptActive,
                               onChanged: (value) => toggleChatGpt(value),
-                              activeColor: Colors.green,
+                              activeThumbImage: null,
+                              activeThumbColor: Colors.green,
                             ),
                           ],
                         ),
@@ -523,8 +600,9 @@ class _ChatPageState extends State<ChatPage> {
                             Expanded(
                               child: TextField(
                                 controller: _controller,
+                                enabled: !chatGptActive,
                                 decoration: InputDecoration(
-                                  labelText: 'Type your message here',
+                                  labelText: chatGptActive ? 'AI mode ativo, digitação desabilitada' : 'Digite sua mensagem aqui',
                                   labelStyle: TextStyle(color: Colors.black54),
                                   floatingLabelStyle: TextStyle(color: Colors.black54),
                                   border: OutlineInputBorder(
@@ -536,7 +614,7 @@ class _ChatPageState extends State<ChatPage> {
                                   filled: true,
                                   fillColor: Colors.white,
                                 ),
-                                onChanged: (text) {
+                                onChanged: chatGptActive ? null : (text) {
                                   if (linkId != null && text.isNotEmpty) {
                                     socket.emit('typing', {
                                       'conversationId': linkId,
@@ -544,7 +622,7 @@ class _ChatPageState extends State<ChatPage> {
                                     });
                                   }
                                 },
-                                onSubmitted: (text) {
+                                onSubmitted: chatGptActive ? null : (text) {
                                   if (text.trim().isEmpty) return;
                                   _controller.clear();
                                   socket.emit('send_message', {
@@ -552,14 +630,14 @@ class _ChatPageState extends State<ChatPage> {
                                     'sender': 'staff',
                                     'text': text,
                                   });
-                                  print('Message sent: $text');
+                                  debugPrint('Message sent: $text');
                                 },
                               ),
                             ),
                             AnimatedSwitcher(duration: const Duration(seconds: 1),
                               child: IconButton(
                                 icon: Icon(Icons.send, color: Colors.green[800],size: 30),
-                                onPressed: () {
+                                onPressed: chatGptActive ? null : () {
                                   final text = _controller.text;
                                   if (text.trim().isEmpty) return;
                                   _controller.clear();
@@ -568,7 +646,7 @@ class _ChatPageState extends State<ChatPage> {
                                     'sender': 'staff',
                                     'text': text,
                                   });
-                                  print('Message sent: $text');
+                                  debugPrint('Message sent: $text');
                                 },
                               ),
                             ),

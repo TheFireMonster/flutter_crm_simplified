@@ -4,7 +4,6 @@ import 'package:flutter_crm/views/pages/login_page.dart';
 import 'package:flutter_crm/views/pages/register_page.dart';
 import 'package:flutter_crm/views/pages/appointments_page.dart';
 import 'package:flutter_crm/views/pages/sales_page.dart';
-import 'package:flutter_crm/views/pages/settings_page.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_crm/views/pages/costumers_page.dart';
@@ -38,7 +37,7 @@ final GoRouter router = GoRouter(
     GoRoute(path: '/chat', builder: (context, state) => ChatPage()),
     GoRoute(path: '/costumers', builder: (context, state) => CostumersPage()),
     GoRoute(path: '/services', builder: (context, state) => ServicePage()),
-    GoRoute(path: '/reports', builder: (context, state) => ReportsPage()),
+  GoRoute(path: '/reports', builder: (context, state) => ReportsPage()),
     GoRoute(
       path: '/chat/:id',
       builder: (context, state) {
@@ -46,6 +45,6 @@ final GoRouter router = GoRouter(
         return ChatPage(conversationId: conversationId);
       },
     ),
-    GoRoute(path: '/settings', builder: (context, state) => SettingsPage()),
+    // settings page removed
   ],
 );

@@ -28,7 +28,8 @@ describe('AIChatController', () => {
   });
 
   it('should return response from service', async () => {
-    const result = await controller.ask('Olá, assistente!');
+    const dto = { prompt: 'Olá, assistente!' } as any;
+    const result = await controller.ask(dto);
     expect(result).toEqual({ response: 'mocked response' });
   });
 });

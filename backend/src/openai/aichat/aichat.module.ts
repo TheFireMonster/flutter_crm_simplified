@@ -1,13 +1,14 @@
-
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { AIChatService } from './aichat.service';
 import { ConfigModule } from '@nestjs/config';
-import { ProductsServicesModule } from '../../products_services/products_services.module';
 import { AppointmentsModule } from '../../appointments/appointments.module';
+import { ServiceModule } from '../../services/service.module';
+import { CustomersModule } from '../../customers/customers.module';
+import { ChatModule } from '../../chat/chat.module';
 
 @Module({
-  imports: [HttpModule, ConfigModule, ProductsServicesModule, AppointmentsModule],
+  imports: [HttpModule, ConfigModule, AppointmentsModule, ServiceModule, CustomersModule, forwardRef(() => ChatModule)],
   providers: [AIChatService],
   exports: [AIChatService],
 })

@@ -48,6 +48,24 @@ let CustomersService = class CustomersService {
         }
         return this.customersRepository.delete(id);
     }
+    async findByName(name) {
+        return this.customersRepository.findOne({ where: { name } });
+    }
+    async findOrCreateLead(payload) {
+        if (payload?.id) {
+            try {
+                return await this.findOne(payload.id);
+            }
+            catch (_) { }
+        }
+        if (payload?.name) {
+            const existing = await this.findByName(payload.name);
+            if (existing)
+                return existing;
+        }
+        const created = await this.create({ name: payload.name || 'Cliente', source: 'chat-lead' });
+        return created;
+    }
 };
 exports.CustomersService = CustomersService;
 exports.CustomersService = CustomersService = __decorate([

@@ -10,6 +10,8 @@ exports.CustomersModule = void 0;
 const common_1 = require("@nestjs/common");
 const customers_controller_1 = require("./customers.controller");
 const customers_service_1 = require("./customers.service");
+const customers_ai_service_1 = require("./customers.ai.service");
+const ai_actions_module_1 = require("../ai-actions/ai-actions.module");
 const typeorm_1 = require("@nestjs/typeorm");
 const customers_entity_1 = require("./entities/customers.entity");
 let CustomersModule = class CustomersModule {
@@ -17,9 +19,10 @@ let CustomersModule = class CustomersModule {
 exports.CustomersModule = CustomersModule;
 exports.CustomersModule = CustomersModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([customers_entity_1.Customer])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([customers_entity_1.Customer]), ai_actions_module_1.AiActionsModule],
         controllers: [customers_controller_1.CustomersController],
-        providers: [customers_service_1.CustomersService]
+        providers: [customers_service_1.CustomersService, customers_ai_service_1.CustomersAiService],
+        exports: [customers_service_1.CustomersService, customers_ai_service_1.CustomersAiService]
     })
 ], CustomersModule);
 //# sourceMappingURL=customers.module.js.map

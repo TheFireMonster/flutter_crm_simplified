@@ -2,13 +2,12 @@ import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
 import { User } from './users/entities/users.entity';
 import { Customer } from './customers/entities/customers.entity';
-import { CustomerReport } from './customer-reports/entities/customer-reports.entity';
 import { Appointment } from './appointments/entities/appointments.entity';
 import { Sale } from './sales/entities/sales.entity';
-import { Setting } from './settings/entities/settings.entity';
-import { Ticket } from './tickets/entities/tickets.entity';
+import { Service } from './services/entities/service.entity';
 import { Message } from './chat/entities/messages.entity';
 import { Conversation } from './chat/entities/conversations.entity';
+import { AiAction } from './ai-actions/entities/ai-action.entity';
 
 config();
 
@@ -27,7 +26,7 @@ const dataSource = new DataSource({
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  entities: [User, Customer, Appointment, Sale, Setting, CustomerReport, Ticket, Message, Conversation],
+  entities: [User, Customer, Appointment, Sale, Message, Conversation, Service, AiAction],
   migrations: [__dirname + '/migrations/*{.ts,.js}'],
   synchronize: false,
 });

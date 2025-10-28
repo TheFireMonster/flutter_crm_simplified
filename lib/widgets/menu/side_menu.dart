@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_crm/views/pages/chat_page.dart';
-import 'package:flutter_crm/views/pages/sales_page.dart';
-import 'package:flutter_crm/views/pages/settings_page.dart';
 import 'package:go_router/go_router.dart';
 
 class SideMenu extends StatefulWidget {
@@ -34,14 +31,6 @@ class _SideMenuState extends State<SideMenu> {
                   GestureDetector(
                     onTap: () => context.go('/chat'),
                     child: Text("Chat", style: TextStyle(color: Colors.white)),
-                  ),
-                  SizedBox(height: 10),
-                  GestureDetector(
-                    onTap: () => context.go('/settings'),
-                    child: Text(
-                      "Settings",
-                      style: TextStyle(color: Colors.white),
-                    ),
                   ),
                   SizedBox(height: 10),
                   GestureDetector(
@@ -92,10 +81,7 @@ class _SideMenuState extends State<SideMenu> {
                     icon: Icon(Icons.chat, color: Colors.white, size: 30),
                     onPressed: () => context.go('/chat'),
                   ),
-                  IconButton(
-                    icon: Icon(Icons.settings, color: Colors.white, size: 30),
-                    onPressed: () => context.go('/settings'),
-                  ),
+                  SizedBox.shrink(),
                   IconButton(
                     icon: Icon(Icons.attach_money, color: Colors.white, size: 30),
                     onPressed: () => context.go('/sales'),
@@ -107,6 +93,14 @@ class _SideMenuState extends State<SideMenu> {
                     IconButton(
                       icon: Icon(Icons.people, color: Colors.white, size: 30),
                       onPressed: () => context.go('/costumers')
+                    ),
+                  IconButton(
+                    icon: Icon(Icons.build, color: Colors.white, size: 30),
+                    onPressed: () => context.go('/services'),
+                  ),  
+                    IconButton(
+                      icon: Icon(Icons.bar_chart, color: Colors.white, size: 30),
+                      onPressed: () => context.go('/reports')
                     ),
                 ],
               ),

@@ -14,20 +14,21 @@ const common_1 = require("@nestjs/common");
 const auth_module_1 = require("./auth/auth.module");
 const customers_module_1 = require("./customers/customers.module");
 const users_module_1 = require("./users/users.module");
-const settings_module_1 = require("./settings/settings.module");
 const appointments_module_1 = require("./appointments/appointments.module");
+const service_module_1 = require("./services/service.module");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const typeorm_1 = require("@nestjs/typeorm");
-const customer_reports_module_1 = require("./customer-reports/customer-reports.module");
-const tickets_module_1 = require("./tickets/tickets.module");
 const sales_module_1 = require("./sales/sales.module");
 const config_1 = require("@nestjs/config");
 const data_source_1 = __importDefault(require("./data-source"));
 const audit_module_1 = require("./audit/audit.module");
 const chat_module_1 = require("./chat/chat.module");
-const products_services_module_1 = require("./products_services/products_services.module");
 const aichat_module_1 = require("./openai/aichat/aichat.module");
+const ai_actions_module_1 = require("./ai-actions/ai-actions.module");
+const debug_module_1 = require("./debug/debug.module");
+const reports_module_1 = require("./reports/reports.module");
+const chartai_module_1 = require("./openai/chartai/chartai.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -38,16 +39,17 @@ exports.AppModule = AppModule = __decorate([
             auth_module_1.AuthModule,
             customers_module_1.CustomersModule,
             users_module_1.UsersModule,
-            settings_module_1.SettingsModule,
             appointments_module_1.AppointmentsModule,
+            service_module_1.ServiceModule,
             typeorm_1.TypeOrmModule.forRoot(data_source_1.default.options),
-            customer_reports_module_1.CustomerReportsModule,
-            tickets_module_1.TicketsModule,
             sales_module_1.SalesModule,
             aichat_module_1.AIChatModule,
+            ai_actions_module_1.AiActionsModule,
             audit_module_1.AuditModule,
+            debug_module_1.DebugModule,
             chat_module_1.ChatModule,
-            products_services_module_1.ProductsServicesModule,
+            reports_module_1.ReportsModule,
+            chartai_module_1.ChartAIModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

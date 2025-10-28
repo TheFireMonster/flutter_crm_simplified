@@ -1,6 +1,7 @@
 export declare class CreateSaleDto {
-    productName: string;
-    amount: number;
+    serviceName: string;
+    price: number;
     customerName?: string;
     customerEmail?: string;
+    customerId?: number;
 }

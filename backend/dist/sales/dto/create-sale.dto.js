@@ -12,20 +12,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateSaleDto = void 0;
 const class_validator_1 = require("class-validator");
 class CreateSaleDto {
-    productName;
-    amount;
+    serviceName;
+    price;
     customerName;
     customerEmail;
+    customerId;
 }
 exports.CreateSaleDto = CreateSaleDto;
 __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], CreateSaleDto.prototype, "productName", void 0);
+], CreateSaleDto.prototype, "serviceName", void 0);
 __decorate([
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
-], CreateSaleDto.prototype, "amount", void 0);
+], CreateSaleDto.prototype, "price", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
@@ -36,4 +37,9 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateSaleDto.prototype, "customerEmail", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], CreateSaleDto.prototype, "customerId", void 0);
 //# sourceMappingURL=create-sale.dto.js.map

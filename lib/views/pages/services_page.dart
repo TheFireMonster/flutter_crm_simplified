@@ -14,7 +14,7 @@ class _ServicePageState extends State<ServicePage> {
   bool isDrawerOpen = false;
   final _formKey = GlobalKey<FormState>();
   String serviceName = '';
-  String amount = '';
+  String price = '';
   String customerName = '';
   String customerEmail = '';
   bool isLoading = false;
@@ -43,7 +43,7 @@ class _ServicePageState extends State<ServicePage> {
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
         'serviceName': serviceName,
-        'amount': double.tryParse(amount) ?? 0,
+        'price': double.tryParse(price) ?? 0,
         'customerName': customerName.isNotEmpty ? customerName : null,
         'customerEmail': customerEmail.isNotEmpty ? customerEmail : null,
       }),
@@ -51,15 +51,17 @@ class _ServicePageState extends State<ServicePage> {
     setState(() { isLoading = false; });
     if (response.statusCode == 201 || response.statusCode == 200) {
       _formKey.currentState!.reset();
-      serviceName = '';
-      amount = '';
+  serviceName = '';
+  price = '';
       customerName = '';
       customerEmail = '';
       await fetchServices();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Service registered successfully!')),
       );
     } else {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to register service.')),
       );
@@ -108,9 +110,9 @@ class _ServicePageState extends State<ServicePage> {
                               validator: (val) => val == null || val.isEmpty ? 'Required' : null,
                             ),
                             TextFormField(
-                              decoration: InputDecoration(labelText: 'Amount'),
+                              decoration: InputDecoration(labelText: 'Price'),
                               keyboardType: TextInputType.number,
-                              onChanged: (val) => amount = val,
+                              onChanged: (val) => price = val,
                               validator: (val) => val == null || val.isEmpty ? 'Required' : null,
                             ),
                             TextFormField(
@@ -146,7 +148,7 @@ class _ServicePageState extends State<ServicePage> {
                                 return Card(
                                   child: ListTile(
                                     title: Text(s['serviceName'] ?? ''),
-                                    subtitle: Text('Amount: ${s['amount']}'),
+                                    subtitle: Text('Price: ${s['price']}'),
                                     trailing: Column(
                                       crossAxisAlignment: CrossAxisAlignment.end,
                                       children: [

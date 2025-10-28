@@ -2,10 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@nestjs/core");
 const app_module_1 = require("./app.module");
+const common_1 = require("@nestjs/common");
 const path_1 = require("path");
 const fs_1 = require("fs");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
+    app.useGlobalPipes(new common_1.ValidationPipe({ whitelist: true, transform: true }));
     const flutterBuildPath = (0, path_1.join)(__dirname, '..', '..', 'build', 'web');
     console.log('🔍 Flutter build path:', flutterBuildPath);
     console.log('📁 Path exists:', (0, fs_1.existsSync)(flutterBuildPath));
@@ -37,8 +39,9 @@ async function bootstrap() {
         }
         next();
     });
-    await app.listen(3000);
-    console.log('Server running on http://localhost:3000');
+    const port = process.env.PORT ? Number(process.env.PORT) : 3000;
+    await app.listen(port);
+    console.log(`Server running on http://0.0.0.0:${port}`);
 }
 bootstrap();
 //# sourceMappingURL=main.js.map

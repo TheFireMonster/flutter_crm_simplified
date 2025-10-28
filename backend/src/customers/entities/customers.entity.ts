@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from "typeorm";
+import { Sale } from '../../sales/entities/sales.entity';
 
 @Entity('customers')
 export class Customer {
@@ -8,10 +9,10 @@ export class Customer {
     @Column({ type: 'varchar', length: 100 })
     name: string;
 
-    @Column({ type: 'varchar', length: 100, unique: true })
+    @Column({ type: 'varchar', length: 100, unique: true, nullable: true })
     email: string;
 
-    @Column({ type: 'varchar', length: 11 })
+    @Column({ type: 'varchar', length: 11, unique: true, nullable: true })
     cpf: string;
 
     @Column({ type: 'varchar', length: 20, nullable: true })
@@ -19,7 +20,6 @@ export class Customer {
 
     @Column({ type: 'text', nullable: true })
     address?: string;
-
 
     @Column({ type: 'date', nullable: true })
     dateOfBirth?: Date;
@@ -46,4 +46,7 @@ export class Customer {
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
     updatedAt: Date;
+
+    @OneToMany(() => Sale, (s) => s.customer)
+    sales?: Sale[];
 }

@@ -30,6 +30,14 @@ let ChatService = class ChatService {
         });
         return this.messageRepo.save(msg);
     }
+    async getRecentMessages(conversationId, limit = 20) {
+        return this.messageRepo.createQueryBuilder('m')
+            .leftJoinAndSelect('m.conversation', 'c')
+            .where('c.id = :id', { id: conversationId })
+            .orderBy('m.createdAt', 'ASC')
+            .take(limit)
+            .getMany();
+    }
 };
 exports.ChatService = ChatService;
 exports.ChatService = ChatService = __decorate([

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -16,9 +17,9 @@ class SocketService {
           .build(),
     );
 
-    socket.onConnect((_) => print('Conectado!'));
+      socket.onConnect((_) => debugPrint('Conectado!'));
     socket.on('receive_message', (data) {
-      print('Nova mensagem: $data');
+        debugPrint('Nova mensagem: $data');
     });
   }
 

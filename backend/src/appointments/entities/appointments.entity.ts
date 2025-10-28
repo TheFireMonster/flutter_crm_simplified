@@ -21,8 +21,18 @@ export class Appointment {
     @Column({ type: 'time' })
     endTime: string;
 
+    @Column({ type: 'int', nullable: true })
+    duration?: number;
+
+
     @Column({ type: 'varchar', length: 100, nullable: true })
     location?: string;
+
+    @Column({ type: 'int', nullable: true })
+    customerId?: number;
+
+    @Column({ type: 'varchar', length: 100, nullable: true })
+    customerName?: string;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
     updatedAt: Date;

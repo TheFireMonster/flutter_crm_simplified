@@ -5,6 +5,9 @@ export declare class Appointment {
     appointmentDate: Date;
     startTime: string;
     endTime: string;
+    duration?: number;
     location?: string;
+    customerId?: number;
+    customerName?: string;
     updatedAt: Date;
 }

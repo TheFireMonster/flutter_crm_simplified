@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from "typeorm";
+import { Customer } from '../../customers/entities/customers.entity';
 
 @Entity('sales')
 export class Sale {
@@ -6,10 +7,10 @@ export class Sale {
     id: number;
 
     @Column({ type: 'varchar', length: 100 })
-    productName: string;
+    serviceName: string;
 
     @Column({ type: 'decimal', precision: 10, scale: 2 })
-    amount: number;
+    price: number;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     saleDate: Date;
@@ -19,6 +20,13 @@ export class Sale {
 
     @Column({ type: 'varchar', length: 100, nullable: true })
     customerEmail?: string;
+
+    @Column({ type: 'integer', nullable: true })
+    customerId?: number;
+
+    @ManyToOne(() => Customer, { nullable: true })
+    @JoinColumn({ name: 'customerId' })
+    customer?: Customer;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
     updatedAt: Date;

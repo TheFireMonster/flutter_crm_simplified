@@ -1,5 +1,5 @@
 import { Repository } from 'typeorm';
-import { Service } from './service.entity';
+import { Service } from './entities/service.entity';
 import { CreateServiceDto } from './dto/create-service.dto';
 export declare class ServiceService {
     private readonly serviceRepository;

@@ -1,0 +1,29 @@
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
+import { Repository } from 'typeorm';
+import { Appointment } from '../../appointments/entities/appointments.entity';
+import { Customer } from '../../customers/entities/customers.entity';
+import { Service } from '../../services/entities/service.entity';
+export declare class ChartAIService {
+    private readonly httpService;
+    private readonly configService;
+    private readonly appointmentRepo;
+    private readonly customerRepo;
+    private readonly serviceRepo;
+    constructor(httpService: HttpService, configService: ConfigService, appointmentRepo: Repository<Appointment>, customerRepo: Repository<Customer>, serviceRepo: Repository<Service>);
+    generateChart(prompt: string): Promise<{
+        error: string;
+        chartType?: undefined;
+        chartData?: undefined;
+        meta?: undefined;
+    } | {
+        chartType: any;
+        chartData: Customer[] | Appointment[] | Service[];
+        meta: {
+            table: "customers" | "appointments" | "services";
+            selectedFields: any;
+            count: number;
+        };
+        error?: undefined;
+    }>;
+}

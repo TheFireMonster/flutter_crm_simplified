@@ -24,10 +24,12 @@ let SalesService = class SalesService {
     }
     async create(createSaleDto) {
         const sale = this.saleRepository.create(createSaleDto);
-        return this.saleRepository.save(sale);
+        const saved = await this.saleRepository.save(sale);
+        const found = await this.saleRepository.findOne({ where: { id: saved.id }, relations: ['customer'] });
+        return found;
     }
     async findAll() {
-        return this.saleRepository.find();
+        return this.saleRepository.find({ relations: ['customer'] });
     }
 };
 exports.SalesService = SalesService;

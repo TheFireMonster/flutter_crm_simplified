@@ -15,22 +15,23 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AIChatController = void 0;
 const common_1 = require("@nestjs/common");
 const aichat_service_1 = require("./aichat.service");
+const prompt_dto_1 = require("../dto/prompt.dto");
 let AIChatController = class AIChatController {
     chatGptService;
     constructor(chatGptService) {
         this.chatGptService = chatGptService;
     }
-    async ask(prompt) {
-        const response = await this.chatGptService.ask(prompt);
+    async ask(body) {
+        const response = await this.chatGptService.ask(body.prompt);
         return { response };
     }
 };
 exports.AIChatController = AIChatController;
 __decorate([
     (0, common_1.Post)('ask'),
-    __param(0, (0, common_1.Body)('prompt')),
+    __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [prompt_dto_1.PromptDto]),
     __metadata("design:returntype", Promise)
 ], AIChatController.prototype, "ask", null);
 exports.AIChatController = AIChatController = __decorate([

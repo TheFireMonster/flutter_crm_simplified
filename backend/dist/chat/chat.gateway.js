@@ -53,10 +53,21 @@ let ChatGateway = class ChatGateway {
         }
         const savedMessage = await this.chatService.saveMessage(conversation.id, data.sender, data.text);
         this.server.to(data.conversationId).emit('receive_message', savedMessage);
-        client.emit('receive_message', savedMessage);
+        console.error(`onMessage: conversation ${conversation.linkId} AIChatActive=${conversation.AIChatActive}`);
         if (conversation.AIChatActive) {
-            const AIChatReply = await this.aiChatService.ask(data.text);
+            console.error('onMessage: AI is active, calling ask (non-streaming)...');
+            try {
+                this.server.to(data.conversationId).emit('typing', { sender: 'staff' });
+            }
+            catch (_) { }
+            const AIChatReply = await this.aiChatService.ask(data.text, conversation.id, conversation.customerName || undefined);
+            try {
+                this.server.to(data.conversationId).emit('typing', { sender: 'staff', done: true });
+            }
+            catch (_) { }
+            console.error('onMessage: ask returned, saving bot message');
             const botMessage = await this.chatService.saveMessage(conversation.id, 'AIChat', AIChatReply);
+            console.error('onMessage: saved botMessage, emitting to room');
             this.server.to(data.conversationId).emit('receive_message', botMessage);
         }
     }

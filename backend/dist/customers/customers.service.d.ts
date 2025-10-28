@@ -8,4 +8,9 @@ export declare class CustomersService {
     findOne(id: number): Promise<Customer>;
     update(id: number, updateData: Partial<Customer>): Promise<Customer>;
     remove(id: number): Promise<import("typeorm").DeleteResult>;
+    findByName(name: string): Promise<Customer | null>;
+    findOrCreateLead(payload: {
+        id?: number;
+        name?: string;
+    }): Promise<Customer>;
 }

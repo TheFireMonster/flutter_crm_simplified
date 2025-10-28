@@ -25,12 +25,24 @@ let AppointmentsService = class AppointmentsService {
     async getAll() {
         return this.appointmentRepo.find();
     }
+    async hasOverlap(date, startTime, endTime) {
+        const qb = this.appointmentRepo.createQueryBuilder('a')
+            .where('a.appointmentDate = :date', { date })
+            .andWhere('NOT (a.endTime <= :start OR a.startTime >= :end)', { start: startTime, end: endTime });
+        const found = await qb.getOne();
+        return !!found;
+    }
     async create(data) {
         const appointment = this.appointmentRepo.create({
             title: data.title,
             description: data.description ?? '',
             appointmentDate: new Date(data.appointmentDate),
+            startTime: data.startTime ?? null,
+            endTime: data.endTime ?? null,
+            duration: data.duration ?? null,
             location: data.location,
+            customerId: data.customerId ?? null,
+            customerName: data.customerName ?? null,
         });
         return this.appointmentRepo.save(appointment);
     }
