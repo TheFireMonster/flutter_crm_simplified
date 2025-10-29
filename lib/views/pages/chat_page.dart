@@ -101,6 +101,7 @@ class _ChatPageState extends State<ChatPage> {
   bool isGeneratingLink = false;
   final TextEditingController _customerNameController = TextEditingController();
   late io.Socket socket;
+  bool isSocketConnected = false;
   List<Message> messages = [];
   final Set<int> _receivedMessageIds = {};
   bool isSomeoneTyping = false;
@@ -128,6 +129,17 @@ class _ChatPageState extends State<ChatPage> {
   }
   }
 
+  @override
+  void dispose() {
+    try {
+      socket.disconnect();
+      socket.dispose();
+    } catch (_) {}
+    _controller.dispose();
+    _customerNameController.dispose();
+    super.dispose();
+  }
+
   void _joinConversationIfNeeded() {
     if (linkId == null) return;
     try {
@@ -149,6 +161,7 @@ class _ChatPageState extends State<ChatPage> {
 
     socket.onConnect((_){
       if (kDebugMode) print('Socket connected to $serverUrl');
+      if (mounted) setState(() => isSocketConnected = true);
       if (linkId != null) {
         try { socket.emit('join_conversation', linkId); } catch (_) {}
       }
@@ -156,14 +169,17 @@ class _ChatPageState extends State<ChatPage> {
 
     socket.onConnectError((err){
       if (kDebugMode) print('Socket connect error: $err');
+      if (mounted) setState(() => isSocketConnected = false);
     });
 
     socket.onError((err){
       if (kDebugMode) print('Socket error: $err');
+      if (mounted) setState(() => isSocketConnected = false);
     });
 
     socket.onDisconnect((_){
       if (kDebugMode) print('Socket disconnected');
+      if (mounted) setState(() => isSocketConnected = false);
     });
 
     socket.on('receive_message', (data) {
@@ -500,13 +516,36 @@ class _ChatPageState extends State<ChatPage> {
                   padding: const EdgeInsets.all(8.0),
                   color: Colors.green[800],
                   width: double.infinity,
-                  child: Text(
-                    'Chat',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Chat',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            width: 10,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              color: isSocketConnected ? Colors.greenAccent : Colors.redAccent,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            isSocketConnected ? 'Conectado' : 'Desconectado',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          SizedBox(width: 8),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
                 Expanded(
