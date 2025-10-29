@@ -74,15 +74,6 @@ class LoginDesktop extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 16),
-                  Text(
-                    "Your email: $email",
-                    style: TextStyle(
-                      fontFamily: 'Roboto',
-                      fontWeight: FontWeight.w400,
-                      fontSize: 16,
-                      color: Colors.blueGrey[700],
-                    ),
-                  ),
                   SizedBox(
                     width: 400,
                     height: 48,
