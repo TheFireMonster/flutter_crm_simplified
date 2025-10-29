@@ -3,6 +3,7 @@ import 'package:grouped_list/grouped_list.dart';
 import 'package:flutter_crm/widgets/chat/messages.dart';
 import 'package:intl/intl.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -30,22 +31,26 @@ class _ChatPageCustomerState extends State<ChatPageCustomer> {
   }
 
   void connectToServer() {
-  socket = io.io('/', <String, dynamic>{
+    final origin = Uri.base.origin;
+    final serverUrl = (origin.isNotEmpty && origin.startsWith('http')) ? origin : 'http://localhost:3000';
+
+    socket = io.io(serverUrl, <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': true,
     });
 
-    socket.onConnect((_) {
+    socket.onConnect((_){
+      if (kDebugMode) print('Socket connected to $serverUrl');
       socket.emit('join_conversation', widget.conversationId);
     });
 
-    socket.onDisconnect((_) {});
+    socket.onConnectError((err){ if (kDebugMode) print('Socket connect error: $err'); });
+    socket.onError((err){ if (kDebugMode) print('Socket error: $err'); });
+    socket.onDisconnect((_){ if (kDebugMode) print('Socket disconnected'); });
 
     socket.on('receive_message', (data) {
-      debugPrint('customer receive_message event: $data');
       final incomingId = data['id']?.toString();
       if (incomingId != null && _receivedMessageIds.contains(incomingId)) {
-        debugPrint('Duplicate message ignored id=$incomingId');
         return;
       }
       final message = Message(
@@ -63,7 +68,6 @@ class _ChatPageCustomerState extends State<ChatPageCustomer> {
       setState(() {
         messages.add(message);
       });
-      debugPrint('Customer message list count=${messages.length}');
     });
 
     socket.on('typing', (data) {
@@ -245,7 +249,6 @@ class _ChatPageCustomerState extends State<ChatPageCustomer> {
                         'sender': 'client',
                         'text': text,
                       });
-                      debugPrint('Customer message sent: $text');
                     },
                   ),
                 ),

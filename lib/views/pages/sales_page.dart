@@ -65,7 +65,6 @@ class _SalesPageState extends State<SalesPage> {
         if (mounted) setState(() {});
       }
     } catch (e) {
-      debugPrint('Failed to load services: $e');
       if (mounted) setState(() { errorMessage = 'Failed to load services: $e'; });
     }
   }
@@ -86,7 +85,6 @@ class _SalesPageState extends State<SalesPage> {
         _chatCustomerIds = idmap.map((k, v) => MapEntry(k, v.toString()));
       }
     } catch (e) {
-      debugPrint('Failed loading chat customers: $e');
       if (mounted) setState(() { errorMessage = 'Failed loading chat customers: $e'; });
     }
   }
@@ -116,7 +114,6 @@ class _SalesPageState extends State<SalesPage> {
         });
       }
     } catch (e) {
-      debugPrint('Failed to load sales: $e');
       if (mounted) setState(() { errorMessage = 'Failed to load sales: $e'; });
     } finally {
       if (mounted) setState(() {
@@ -336,7 +333,7 @@ class _SalesPageState extends State<SalesPage> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Sale created')));
       } else {
-        debugPrint('Create sale failed ${resp.statusCode} ${resp.body}');
+        
         // try to surface server-side message
         String userMsg = 'Failed to create sale';
         try {
@@ -354,7 +351,6 @@ class _SalesPageState extends State<SalesPage> {
         if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(userMsg)));
       }
     } catch (e) {
-      debugPrint('Create sale error: $e');
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error creating sale')));
     } finally {
       if (mounted) setState(() => loading = false);

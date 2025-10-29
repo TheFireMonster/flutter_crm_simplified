@@ -18,22 +18,18 @@ class _LoginPageState extends State<LoginPage> {
   String _error = '';
 
   Future<void> _login() async {
-  debugPrint('Login button pressed');
     setState(() {
       _loading = true;
       _error = '';
     });
 
     try {
-  debugPrint('Calling authService.signIn with email: $_email');
       final user = await authService.signIn(
         email: _email,
         password: _password,
       );
-  debugPrint('authService.signIn returned: $user');
 
       if (user == null) {
-  debugPrint('No user found, showing error');
         setState(() {
           _error = 'Usuário não encontrado.';
           _loading = false;
@@ -42,13 +38,10 @@ class _LoginPageState extends State<LoginPage> {
       }
 
       if (!mounted) {
-  debugPrint('Widget not mounted, aborting navigation');
         return;
       }
-  debugPrint('Navigating to /home');
       context.go('/home');
     } catch (e) {
-  debugPrint('Error during login: $e');
       if (e is FirebaseAuthException) {
         setState(() {
           _error = authService.getFirebaseAuthErrorMessage(e.code);
@@ -62,7 +55,6 @@ class _LoginPageState extends State<LoginPage> {
       setState(() {
         _loading = false;
       });
-  debugPrint('Login flow finished');
     }
   }
 

@@ -44,8 +44,7 @@ class _ReportsPageState extends State<ReportsPage> {
         return;
       }
 
-      final data = jsonDecode(response.body);
-      debugPrint('ChartAI response: $data');
+  final data = jsonDecode(response.body);
 
       // If ChartAI already returned labels/datasets, use directly
       if (data is Map && data.containsKey('labels') && data.containsKey('datasets')) {
@@ -119,8 +118,7 @@ class _ReportsPageState extends State<ReportsPage> {
         'datasets': datasets,
         'raw': data,
       };
-    } catch (e, st) {
-      debugPrint('Error generating chart: $e\n$st');
+    } catch (e) {
       _errorMessage = e.toString();
       _chartResult = null;
     } finally {

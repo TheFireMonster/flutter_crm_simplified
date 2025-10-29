@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -64,10 +65,8 @@ class _ChatPageState extends State<ChatPage> {
           )).toList();
         });
       } else {
-  debugPrint('Failed to load message history: ${response.statusCode}');
       }
     } catch (e) {
-  debugPrint('Error loading message history: $e');
     }
   }
   final TextEditingController _controller = TextEditingController();
@@ -139,27 +138,37 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void connectToServer() {
-  socket = io.io('/', <String, dynamic>{
+    // Determine server URL: prefer current origin (useful on web / deployed apps).
+  final origin = Uri.base.origin;
+  final serverUrl = (origin.isNotEmpty && origin.startsWith('http')) ? origin : 'http://localhost:3000';
+
+    socket = io.io(serverUrl, <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': true,
     });
 
-    socket.onConnect((_) {
-                            debugPrint('✅ Connected to server');
+    socket.onConnect((_){
+      if (kDebugMode) print('Socket connected to $serverUrl');
       if (linkId != null) {
-        socket.emit('join_conversation', linkId);
+        try { socket.emit('join_conversation', linkId); } catch (_) {}
       }
     });
 
-    socket.onDisconnect((_) {
-                            debugPrint('❌ Disconnected from server');
+    socket.onConnectError((err){
+      if (kDebugMode) print('Socket connect error: $err');
+    });
+
+    socket.onError((err){
+      if (kDebugMode) print('Socket error: $err');
+    });
+
+    socket.onDisconnect((_){
+      if (kDebugMode) print('Socket disconnected');
     });
 
     socket.on('receive_message', (data) {
-      debugPrint('receive_message event: $data');
       final incomingId = int.parse(data['id']?.toString() ?? '0');
       if (_receivedMessageIds.contains(incomingId)) {
-        debugPrint('Duplicate message ignored id=$incomingId');
         return;
       }
       final message = Message(
@@ -177,7 +186,6 @@ class _ChatPageState extends State<ChatPage> {
       setState(() {
         messages.add(message);
       });
-      debugPrint('Message added to messages list, count=${messages.length}');
     });
 
     socket.on('typing', (data) {
@@ -629,7 +637,6 @@ class _ChatPageState extends State<ChatPage> {
                                     'sender': 'staff',
                                     'text': text,
                                   });
-                                  debugPrint('Message sent: $text');
                                 },
                               ),
                             ),
@@ -645,7 +652,6 @@ class _ChatPageState extends State<ChatPage> {
                                     'sender': 'staff',
                                     'text': text,
                                   });
-                                  debugPrint('Message sent: $text');
                                 },
                               ),
                             ),
