@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { HttpModule } from '@nestjs/axios';
+import { HttpModule } from '@nestjs/axios'
 import { ChartAIService } from './chartai.service';
 import { ChartAIController } from './chartai.controller';
 import { ConfigModule } from '@nestjs/config';

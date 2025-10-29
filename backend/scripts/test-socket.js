@@ -71,7 +71,7 @@ async function run() {
   staff.on('typing', (d) => console.log('[staff] typing', d));
   customer.on('typing', (d) => console.log('[customer] typing', d));
 
-  // Wait a bit for connects
+
   await new Promise(r => setTimeout(r, 1000));
 
   console.log('customer sends message');
