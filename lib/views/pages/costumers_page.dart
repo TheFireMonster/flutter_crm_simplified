@@ -138,6 +138,125 @@ class _CostumersPageState extends State<CostumersPage> {
     }
   }
 
+  Future<void> updateCustomer(int id) async {
+    if (!_formKey.currentState!.validate()) return;
+    final uri = Uri.parse('/customers/$id');
+    final response = await http.put(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'name': _nameController.text.trim(),
+        'email': _emailController.text.trim(),
+        'cpf': _cpfController.text.trim(),
+        'phone': _phoneController.text.trim(),
+        'address': _addressController.text.trim(),
+        'source': _sourceController.text.trim(),
+        'dateOfBirth': _dateOfBirthController.text.trim(),
+        'state': _stateController.text.trim(),
+        'cep': _cepController.text.trim(),
+      }),
+    );
+    if (response.statusCode == 200) {
+      _clearFormFields();
+      await fetchCustomers();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Customer updated')));
+    } else {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error updating customer')));
+    }
+  }
+
+  void _openEditCustomer(Map<String, dynamic> customer) {
+    // populate controllers
+    _nameController.text = (customer['name'] ?? '').toString();
+    _emailController.text = (customer['email'] ?? '').toString();
+    _cpfController.text = (customer['cpf'] ?? '').toString();
+    _phoneController.text = (customer['phone'] ?? '').toString();
+    _addressController.text = (customer['address'] ?? '').toString();
+    _sourceController.text = (customer['source'] ?? '').toString();
+    _dateOfBirthController.text = (customer['dateOfBirth'] ?? '').toString();
+    _stateController.text = (customer['state'] ?? '').toString();
+    _cepController.text = (customer['cep'] ?? '').toString();
+
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Edit customer'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                TextFormField(controller: _nameController, decoration: InputDecoration(labelText: 'Name')),
+                TextFormField(controller: _emailController, decoration: InputDecoration(labelText: 'Email')),
+                TextFormField(controller: _cpfController, decoration: InputDecoration(labelText: 'CPF')),
+                TextFormField(controller: _dateOfBirthController, decoration: InputDecoration(labelText: 'Date of Birth')),
+                TextFormField(controller: _stateController, decoration: InputDecoration(labelText: 'State')),
+                TextFormField(controller: _cepController, decoration: InputDecoration(labelText: 'CEP')),
+                TextFormField(controller: _phoneController, decoration: InputDecoration(labelText: 'Phone')),
+                TextFormField(controller: _addressController, decoration: InputDecoration(labelText: 'Address')),
+                TextFormField(controller: _sourceController, decoration: InputDecoration(labelText: 'Source')),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () { _clearFormFields(); Navigator.of(context).pop(); }, child: Text('Cancel')),
+            ElevatedButton(onPressed: () async {
+              Navigator.of(context).pop();
+              final id = customer['id'];
+              if (id != null) await updateCustomer(int.tryParse(id.toString()) ?? id);
+            }, child: Text('Save')),
+          ],
+        );
+      }
+    );
+  }
+
+  void _confirmDeleteCustomer(Map<String, dynamic> customer) {
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Delete customer?'),
+          content: Text('Are you sure you want to delete "${customer['name'] ?? ''}"? This cannot be undone.'),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(context).pop(), child: Text('Cancel')),
+            ElevatedButton(onPressed: () async {
+              Navigator.of(context).pop();
+              final id = customer['id'];
+              if (id != null) await _deleteCustomer(int.tryParse(id.toString()) ?? id);
+            }, child: Text('Delete')),
+          ],
+        );
+      }
+    );
+  }
+
+  Future<void> _deleteCustomer(int id) async {
+    final uri = Uri.parse('/customers/$id');
+    final resp = await http.delete(uri);
+    if (resp.statusCode == 200 || resp.statusCode == 204) {
+      await fetchCustomers();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Customer deleted')));
+    } else {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error deleting customer')));
+    }
+  }
+
+  void _clearFormFields() {
+    _nameController.clear();
+    _emailController.clear();
+    _cpfController.clear();
+    _phoneController.clear();
+    _addressController.clear();
+    _sourceController.clear();
+    _dateOfBirthController.clear();
+    _stateController.clear();
+    _cepController.clear();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -236,7 +355,24 @@ class _CostumersPageState extends State<CostumersPage> {
                               subtitle: Text(
                                 'Email: ${c['email'] ?? ''}\nCPF: ${c['cpf'] ?? ''}\nDate of Birth: ${c['dateOfBirth'] ?? ''}\nState: ${c['state'] ?? ''}\nCEP: ${c['cep'] ?? ''}'
                               ),
-                              trailing: Text(c['phone'] ?? ''),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(c['phone'] ?? ''),
+                                  const SizedBox(width: 8),
+                                  IconButton(
+                                    icon: Icon(Icons.edit, size: 20),
+                                    tooltip: 'Edit',
+                                    onPressed: () => _openEditCustomer(c),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.delete, size: 20),
+                                    tooltip: 'Delete',
+                                    onPressed: () => _confirmDeleteCustomer(c),
+                                  ),
+                                ],
+                              ),
+                              onTap: () => _openEditCustomer(c),
                             ),
                           );
                         },

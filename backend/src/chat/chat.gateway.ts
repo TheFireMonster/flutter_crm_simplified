@@ -28,6 +28,21 @@ export class ChatGateway {
     private readonly aiChatService: AIChatService,
   ) {}
 
+  @SubscribeMessage('update_customer')
+  async handleUpdateCustomer(
+    @MessageBody() data: { conversationId: string; update: Record<string, any> },
+    @ConnectedSocket() client: Socket,
+  ) {
+    try {
+      // Optionally verify the client is in the conversation room or is authenticated.
+  const updated = await this.chatService.updateCustomerForConversation(data.conversationId, data.update, client.id);
+      // Notify the room that customer data changed
+      this.server.to(data.conversationId).emit('customer_updated', updated);
+    } catch (err) {
+      console.error('handleUpdateCustomer error', err);
+    }
+  }
+
   handleConnection(client: Socket) {
     console.log('🔗 Socket.IO client connected:', client.id, 'from', client.handshake.address);
   }
