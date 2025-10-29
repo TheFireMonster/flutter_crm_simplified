@@ -31,7 +31,7 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBBw6TrXiljptA4ZekEJuMfoWm2pv7ApC0',
+  apiKey: String.fromEnvironment('FIREBASE_API_KEY', defaultValue: 'AIzaSyBBw6TrXiljptA4ZekEJuMfoWm2pv7ApC0'),
     appId: '1:860258832462:web:df1fa45368079e48b3f31f',
     messagingSenderId: '860258832462',
     projectId: 'smart-crm-firebase',
@@ -41,7 +41,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBQZvXMEjDQ7B1UO4BKSsaNHPEKnImaNKw',
+  apiKey: String.fromEnvironment('FIREBASE_API_KEY_ANDROID', defaultValue: 'AIzaSyBQZvXMEjDQ7B1UO4BKSsaNHPEKnImaNKw'),
     appId: '1:860258832462:android:5f8467e657c2b0afb3f31f',
     messagingSenderId: '860258832462',
     projectId: 'smart-crm-firebase',
@@ -49,7 +49,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyD4WK84w_ldX8mrDkXrEfHy0l3EIJlSXmk',
+  apiKey: String.fromEnvironment('FIREBASE_API_KEY_IOS', defaultValue: 'AIzaSyD4WK84w_ldX8mrDkXrEfHy0l3EIJlSXmk'),
     appId: '1:860258832462:ios:f75a29f8f29f4d8db3f31f',
     messagingSenderId: '860258832462',
     projectId: 'smart-crm-firebase',
@@ -59,7 +59,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyD4WK84w_ldX8mrDkXrEfHy0l3EIJlSXmk',
+  apiKey: String.fromEnvironment('FIREBASE_API_KEY_IOS', defaultValue: 'AIzaSyD4WK84w_ldX8mrDkXrEfHy0l3EIJlSXmk'),
     appId: '1:860258832462:ios:f75a29f8f29f4d8db3f31f',
     messagingSenderId: '860258832462',
     projectId: 'smart-crm-firebase',
@@ -69,7 +69,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyBBw6TrXiljptA4ZekEJuMfoWm2pv7ApC0',
+  apiKey: String.fromEnvironment('FIREBASE_API_KEY', defaultValue: 'AIzaSyBBw6TrXiljptA4ZekEJuMfoWm2pv7ApC0'),
     appId: '1:860258832462:web:4ff29314ef62b544b3f31f',
     messagingSenderId: '860258832462',
     projectId: 'smart-crm-firebase',

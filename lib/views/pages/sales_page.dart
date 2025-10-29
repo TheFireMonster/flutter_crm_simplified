@@ -333,6 +333,7 @@ class _SalesPageState extends State<SalesPage> {
         _customerNameController.clear();
         _customerEmailController.clear();
         await fetchSales();
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Sale created')));
       } else {
         debugPrint('Create sale failed ${resp.statusCode} ${resp.body}');
@@ -350,11 +351,11 @@ class _SalesPageState extends State<SalesPage> {
             userMsg = parsed;
           }
         } catch (_) {}
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(userMsg)));
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(userMsg)));
       }
     } catch (e) {
       debugPrint('Create sale error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error creating sale')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error creating sale')));
     } finally {
       if (mounted) setState(() => loading = false);
     }

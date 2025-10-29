@@ -42,7 +42,7 @@ class _ChatPageCustomerState extends State<ChatPageCustomer> {
     socket.onDisconnect((_) {});
 
     socket.on('receive_message', (data) {
-      debugPrint('customer receive_message event: ${data}');
+      debugPrint('customer receive_message event: $data');
       final incomingId = data['id']?.toString();
       if (incomingId != null && _receivedMessageIds.contains(incomingId)) {
         debugPrint('Duplicate message ignored id=$incomingId');
