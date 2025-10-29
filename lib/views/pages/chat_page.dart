@@ -1,4 +1,3 @@
-// removed dart:ffi import (not needed)
 
 import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
@@ -27,7 +26,7 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> fetchChatGptStatus() async {
     if (linkId == null) return;
     final response = await http.get(
-      Uri.parse('http://localhost:3000/chat/conversations/$linkId'),
+      Uri.parse('/chat/conversations/$linkId'),
       headers: {'Content-Type': 'application/json'},
     );
     if (response.statusCode == 200) {
@@ -41,7 +40,7 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> toggleChatGpt(bool value) async {
     if (linkId == null) return;
     final response = await http.patch(
-      Uri.parse('http://localhost:3000/chat/conversations/$linkId'),
+      Uri.parse('/chat/conversations/$linkId'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'chatGptActive': value}),
     );
@@ -52,7 +51,7 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> loadMessageHistory(String conversationId) async {
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:3000/chat/history/$conversationId'),
+        Uri.parse('/chat/history/$conversationId'),
         headers: {'Content-Type': 'application/json'},
       );
       if (response.statusCode == 200) {
@@ -140,7 +139,7 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void connectToServer() {
-  socket = io.io('http://localhost:3000', <String, dynamic>{
+  socket = io.io('/', <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': true,
     });
@@ -157,7 +156,7 @@ class _ChatPageState extends State<ChatPage> {
     });
 
     socket.on('receive_message', (data) {
-      debugPrint('receive_message event: ${data}');
+      debugPrint('receive_message event: $data');
       final incomingId = int.parse(data['id']?.toString() ?? '0');
       if (_receivedMessageIds.contains(incomingId)) {
         debugPrint('Duplicate message ignored id=$incomingId');
@@ -213,7 +212,7 @@ class _ChatPageState extends State<ChatPage> {
       Future<Map<String, dynamic>> fetchConversationInfo(String? customerId, String customerName) async {
         final body = customerId != null ? {'customerId': customerId, 'customerName': customerName} : {'customerName': customerName};
         final response = await http.post(
-          Uri.parse('http://localhost:3000/chat/conversations'),
+          Uri.parse('/chat/conversations'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode(body),
         );
@@ -426,7 +425,7 @@ class _ChatPageState extends State<ChatPage> {
                                       saveChatLinks();
                                       
                                       await http.patch(
-                                        Uri.parse('http://localhost:3000/chat/conversations/$localLinkId'),
+                                        Uri.parse('/chat/conversations/$localLinkId'),
                                         headers: {'Content-Type': 'application/json'},
                                         body: jsonEncode({'customerName': result}),
                                       );

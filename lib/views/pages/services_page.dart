@@ -27,7 +27,7 @@ class _ServicePageState extends State<ServicePage> {
   }
 
   Future<void> fetchServices() async {
-    final response = await http.get(Uri.parse('http://localhost:3000/services'));
+    final response = await http.get(Uri.parse('/services'));
     if (response.statusCode == 200) {
       setState(() {
         services = List<Map<String, dynamic>>.from(json.decode(response.body));
@@ -39,7 +39,7 @@ class _ServicePageState extends State<ServicePage> {
     if (!_formKey.currentState!.validate()) return;
     setState(() { isLoading = true; });
     final response = await http.post(
-      Uri.parse('http://localhost:3000/services'),
+      Uri.parse('/services'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
         'serviceName': serviceName,

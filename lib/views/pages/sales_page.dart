@@ -44,7 +44,7 @@ class _SalesPageState extends State<SalesPage> {
 
   Future<void> _loadServices() async {
     try {
-      final uri = Uri.parse('http://localhost:3000/services');
+      final uri = Uri.parse('/services');
       final resp = await http.get(uri);
       if (resp.statusCode == 200) {
         final decoded = jsonDecode(resp.body);
@@ -96,7 +96,7 @@ class _SalesPageState extends State<SalesPage> {
       loading = true;
     });
     try {
-      final uri = Uri.parse('http://localhost:3000/sales');
+      final uri = Uri.parse('/sales');
       final resp = await http.get(uri);
       if (resp.statusCode == 200) {
         final decoded = jsonDecode(resp.body);
@@ -324,7 +324,7 @@ class _SalesPageState extends State<SalesPage> {
 
     try {
       setState(() => loading = true);
-      final uri = Uri.parse('http://localhost:3000/sales');
+      final uri = Uri.parse('/sales');
       final resp = await http.post(uri, body: jsonEncode(payload), headers: {'Content-Type': 'application/json'});
       if (resp.statusCode == 201 || resp.statusCode == 200) {
         // clear form and refresh

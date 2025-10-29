@@ -30,7 +30,7 @@ class _ChatPageCustomerState extends State<ChatPageCustomer> {
   }
 
   void connectToServer() {
-  socket = io.io('http://localhost:3000', <String, dynamic>{
+  socket = io.io('/', <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': true,
     });
@@ -91,7 +91,7 @@ class _ChatPageCustomerState extends State<ChatPageCustomer> {
   }
 
   Future<void> loadHistory() async {
-    final url = 'http://localhost:3000/chat/history/${widget.conversationId}';
+    final url = '/chat/history/${widget.conversationId}';
     final resp = await http.get(Uri.parse(url));
     if (resp.statusCode == 200) {
       final List<dynamic> data = jsonDecode(resp.body);

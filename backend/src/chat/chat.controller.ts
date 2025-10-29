@@ -57,6 +57,7 @@ export class ChatController {
   async createConversation(@Body() dto: CreateConversationDto) {
     try {
       const linkId = uuidv4();
+      const apiBase = process.env.API_BASE_URL || 'http://localhost:3000';
 
       // find or create a lead by customerId or name
       const lead = await (this.customersService ? this.customersService.findOrCreateLead({ id: dto?.customerId, name: dto?.customerName }) : null);
@@ -76,7 +77,7 @@ export class ChatController {
 
       return {
         linkId: saved.linkId,
-        url: `http://localhost:3000/chat/${saved.linkId}`,
+        url: `${apiBase}/chat/${saved.linkId}`,
         customerId: lead ? lead.id : undefined,
       };
     } catch (err) {

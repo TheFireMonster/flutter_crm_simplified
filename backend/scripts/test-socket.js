@@ -2,7 +2,7 @@ const io = require('socket.io-client');
 const fetch = require('node-fetch');
 
 const PORT = process.env.PORT || process.env.port || 3000;
-const BASE = `http://localhost:${PORT}`;
+const BASE = process.env.API_BASE_URL || `http://localhost:${PORT}`;
 
 async function createConversation() {
   const res = await fetch(`${BASE}/chat/conversations`, {

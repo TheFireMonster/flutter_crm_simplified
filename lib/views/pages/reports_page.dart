@@ -28,7 +28,7 @@ class _ReportsPageState extends State<ReportsPage> {
   String? _errorMessage;
 
   Future<void> generateChart(String prompt) async {
-    final uri = Uri.parse('http://localhost:3000/chartai/generate');
+    final uri = Uri.parse('/chartai/generate');
     _isLoading = true;
     _errorMessage = null;
     setState(() {});

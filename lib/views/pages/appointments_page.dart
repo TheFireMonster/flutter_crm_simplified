@@ -41,7 +41,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
   }
 
   Future<void> fetchCustomers() async {
-    final uri = Uri.parse('http://localhost:3000/customers');
+    final uri = Uri.parse('/customers');
     final response = await http.get(uri);
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
@@ -112,7 +112,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
   Future<void> fetchAppointments() async {
     if (_selectedDay == null) return;
     final dateStr = _selectedDay!.toIso8601String();
-    final uri = Uri.parse('http://localhost:3000/appointments');
+    final uri = Uri.parse('/appointments');
     final response = await http.get(uri);
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
@@ -122,14 +122,13 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
       if (!mounted) return;
       setState(() {
         _appointments = todays;
-        _selectedSlot = null; // reset slot selection when appointments refresh
+        _selectedSlot = null;
         _computeOccupiedSlots();
       });
     }
   }
 
   void _computeOccupiedSlots() {
-    // slots: from 08:00 to 18:00 every 30 minutes -> indices 0..19
     final status = <int, String>{};
     for (int i = 0; i < 20; i++) {
       status[i] = 'free';
@@ -243,7 +242,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
   // combine selected day with selected slot (30-minute increments)
     final slotMinutes = 8 * 60 + _selectedSlot! * 30;
     final apptDate = DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day, slotMinutes ~/ 60, slotMinutes % 60);
-    final uri = Uri.parse('http://localhost:3000/appointments');
+    final uri = Uri.parse('/appointments');
     final response = await http.post(
       uri,
       headers: {'Content-Type': 'application/json'},

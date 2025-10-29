@@ -34,7 +34,7 @@ class _CostumersPageState extends State<CostumersPage> {
   List<Map<String, dynamic>> _customers = [];
 
   Future<void> fetchCustomers() async {
-    final uri = Uri.parse('http://localhost:3000/customers');
+    final uri = Uri.parse('/customers');
     final response = await http.get(uri);
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
@@ -103,7 +103,7 @@ class _CostumersPageState extends State<CostumersPage> {
 
   Future<void> registerCustomer() async {
     if (!_formKey.currentState!.validate()) return;
-    final uri = Uri.parse('http://localhost:3000/customers');
+    final uri = Uri.parse('/customers');
     final response = await http.post(
       uri,
       headers: {'Content-Type': 'application/json'},

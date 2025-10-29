@@ -56,7 +56,7 @@ describe('ChatController', () => {
     conversationRepo.create.mockReturnValue(conv);
     conversationRepo.save.mockResolvedValue(conv);
     const result = await controller.createConversation({ customerName: 'Cliente' });
-    expect(result).toEqual({ linkId: 'uuid', url: 'http://localhost:3000/chat/uuid' });
+    expect(result).toEqual({ linkId: 'uuid', url: '/chat/uuid' });
     expect(conversationRepo.create).toHaveBeenCalledWith({ linkId: expect.any(String), customerName: 'Cliente' });
     expect(conversationRepo.save).toHaveBeenCalled();
   });
