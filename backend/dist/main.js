@@ -41,7 +41,7 @@ async function bootstrap() {
     });
     const port = process.env.PORT ? Number(process.env.PORT) : 3000;
     await app.listen(port);
-    console.log(`Server running on http://0.0.0.0:${port}`);
+    console.log(`Server running on ${process.env.API_BASE_URL || `http://localhost:${port}`}`);
 }
 bootstrap();
 //# sourceMappingURL=main.js.map

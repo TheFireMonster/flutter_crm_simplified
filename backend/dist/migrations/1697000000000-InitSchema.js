@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.InitSchema1756007106747 = void 0;
-class InitSchema1756007106747 {
-    name = 'InitSchema1756007106747';
+exports.InitSchema1697000000000 = void 0;
+class InitSchema1697000000000 {
+    name = 'InitSchema1697000000000';
     async up(queryRunner) {
         await queryRunner.query(`CREATE TABLE "permissions" ("id" SERIAL NOT NULL, "name" character varying(100) NOT NULL, "description" character varying(255) NOT NULL, "isActive" boolean NOT NULL DEFAULT false, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "UQ_94b0c1df9c647ac7f26e989318a" UNIQUE ("description"), CONSTRAINT "PK_920331560282b8bd21bb02290df" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "users" ("id" SERIAL NOT NULL, "name" character varying(100) NOT NULL, "email" character varying(100) NOT NULL, "password" character varying(255), "phone" character varying(20), "isAdmin" boolean NOT NULL DEFAULT false, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "UQ_97672ac88f789774dd47f7c8be3" UNIQUE ("email"), CONSTRAINT "PK_a3ffb1c0c8416b9fc6f907b7433" PRIMARY KEY ("id"))`);
@@ -34,5 +34,5 @@ class InitSchema1756007106747 {
         await queryRunner.query(`DROP TABLE "permissions"`);
     }
 }
-exports.InitSchema1756007106747 = InitSchema1756007106747;
-//# sourceMappingURL=1756007106747-InitSchema.js.map
+exports.InitSchema1697000000000 = InitSchema1697000000000;
+//# sourceMappingURL=1697000000000-InitSchema.js.map

@@ -19,14 +19,13 @@ for (const key of requiredEnv) {
 }
 const dataSource = new typeorm_1.DataSource({
     type: 'postgres',
-    host: process.env.DB_HOST,
-    port: Number(process.env.DB_PORT),
-    username: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
+    url: process.env.DATABASE_URL,
     entities: [users_entity_1.User, customers_entity_1.Customer, appointments_entity_1.Appointment, sales_entity_1.Sale, messages_entity_1.Message, conversations_entity_1.Conversation, service_entity_1.Service, ai_action_entity_1.AiAction],
     migrations: [__dirname + '/migrations/*{.ts,.js}'],
     synchronize: false,
+    ssl: {
+        rejectUnauthorized: false,
+    },
 });
 dataSource.initialize()
     .then(() => {

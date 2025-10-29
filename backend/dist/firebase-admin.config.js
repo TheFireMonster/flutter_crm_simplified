@@ -34,9 +34,26 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const admin = __importStar(require("firebase-admin"));
+const saJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON || process.env.FIREBASE_ADMIN_JSON;
 if (!admin.apps.length) {
-    admin.initializeApp({
-        credential: admin.credential.applicationDefault(),
-    });
+    if (saJson) {
+        try {
+            const parsed = JSON.parse(saJson);
+            admin.initializeApp({
+                credential: admin.credential.cert(parsed),
+            });
+        }
+        catch (err) {
+            console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT_JSON:', err);
+            admin.initializeApp({
+                credential: admin.credential.applicationDefault(),
+            });
+        }
+    }
+    else {
+        admin.initializeApp({
+            credential: admin.credential.applicationDefault(),
+        });
+    }
 }
 //# sourceMappingURL=firebase-admin.config.js.map

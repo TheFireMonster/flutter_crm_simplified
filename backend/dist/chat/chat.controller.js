@@ -57,6 +57,7 @@ let ChatController = class ChatController {
     async createConversation(dto) {
         try {
             const linkId = (0, uuid_1.v4)();
+            const apiBase = process.env.API_BASE_URL || 'http://localhost:3000';
             const lead = await (this.customersService ? this.customersService.findOrCreateLead({ id: dto?.customerId, name: dto?.customerName }) : null);
             const conv = this.conversationRepo.create({
                 linkId,
@@ -69,7 +70,7 @@ let ChatController = class ChatController {
             }
             return {
                 linkId: saved.linkId,
-                url: `http://localhost:3000/chat/${saved.linkId}`,
+                url: `${apiBase}/chat/${saved.linkId}`,
                 customerId: lead ? lead.id : undefined,
             };
         }
