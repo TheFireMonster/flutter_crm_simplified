@@ -13,10 +13,11 @@ import { CustomerAudit } from 'src/customers/entities/customer-audit.entity';
   imports: [
     TypeOrmModule.forFeature([Conversation]),
     TypeOrmModule.forFeature([Message]),
+    TypeOrmModule.forFeature([CustomerAudit]),
     forwardRef(() => AIChatModule),
     CustomersModule,
   ],
-  providers: [ChatGateway, ChatService, CustomerAudit],
+  providers: [ChatGateway, ChatService],
   controllers: [ChatController],
   exports: [ChatService],
 })
