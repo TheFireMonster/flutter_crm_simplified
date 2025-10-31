@@ -1,4 +1,3 @@
-
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChatGateway } from './chat.gateway';
@@ -8,7 +7,7 @@ import { Conversation } from './entities/conversations.entity';
 import { Message } from './entities/messages.entity';
 import { AIChatModule } from '../openai/aichat/aichat.module';
 import { CustomersModule } from '../customers/customers.module';
-import { AIChatService } from '../openai/aichat/aichat.service';
+import { CustomerAudit } from 'src/customers/entities/customer-audit.entity';
 
 @Module({
   imports: [
@@ -17,7 +16,7 @@ import { AIChatService } from '../openai/aichat/aichat.service';
     forwardRef(() => AIChatModule),
     CustomersModule,
   ],
-  providers: [ChatGateway, ChatService],
+  providers: [ChatGateway, ChatService, CustomerAudit],
   controllers: [ChatController],
   exports: [ChatService],
 })
