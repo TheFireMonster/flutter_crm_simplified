@@ -4,13 +4,15 @@ import { Repository } from 'typeorm';
 import { Appointment } from '../../appointments/entities/appointments.entity';
 import { Customer } from '../../customers/entities/customers.entity';
 import { Service } from '../../services/entities/service.entity';
+import { Sale } from '../../sales/entities/sales.entity';
 export declare class ChartAIService {
     private readonly httpService;
     private readonly configService;
     private readonly appointmentRepo;
     private readonly customerRepo;
+    private readonly saleRepo;
     private readonly serviceRepo;
-    constructor(httpService: HttpService, configService: ConfigService, appointmentRepo: Repository<Appointment>, customerRepo: Repository<Customer>, serviceRepo: Repository<Service>);
+    constructor(httpService: HttpService, configService: ConfigService, appointmentRepo: Repository<Appointment>, customerRepo: Repository<Customer>, saleRepo: Repository<Sale>, serviceRepo: Repository<Service>);
     generateChart(prompt: string): Promise<{
         error: string;
         chartType?: undefined;
@@ -18,9 +20,9 @@ export declare class ChartAIService {
         meta?: undefined;
     } | {
         chartType: any;
-        chartData: Customer[] | Appointment[] | Service[];
+        chartData: Sale[] | Customer[] | Appointment[] | Service[];
         meta: {
-            table: "customers" | "appointments" | "services";
+            table: "sales" | "customers" | "appointments" | "services";
             selectedFields: any;
             count: number;
         };

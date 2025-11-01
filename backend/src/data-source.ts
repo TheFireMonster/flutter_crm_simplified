@@ -8,6 +8,7 @@ import { Service } from './services/entities/service.entity';
 import { Message } from './chat/entities/messages.entity';
 import { Conversation } from './chat/entities/conversations.entity';
 import { AiAction } from './ai-actions/entities/ai-action.entity';
+import { CustomerAudit } from './customers/entities/customer-audit.entity';
 
 config();
 
@@ -27,7 +28,7 @@ const dataSource = new DataSource({
   //password: process.env.DB_PASSWORD,
   //database: process.env.DB_NAME,
   url: process.env.DB_URL,
-  entities: [User, Customer, Appointment, Sale, Message, Conversation, Service, AiAction],
+  entities: [User, Customer, Appointment, Sale, Message, Conversation, Service, AiAction, CustomerAudit],
   migrations: [__dirname + '/migrations/*{.ts,.js}'],
   synchronize: false,
   ssl: {

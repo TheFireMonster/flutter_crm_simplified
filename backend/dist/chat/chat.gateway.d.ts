@@ -13,6 +13,10 @@ export declare class ChatGateway {
     }, client: Socket): void;
     server: Server;
     constructor(chatService: ChatService, conversationRepo: Repository<Conversation>, aiChatService: AIChatService);
+    handleUpdateCustomer(data: {
+        conversationId: string;
+        update: Record<string, any>;
+    }, client: Socket): Promise<void>;
     handleConnection(client: Socket): void;
     handleDisconnect(client: Socket): void;
     handleJoin(conversationId: string, client: Socket): void;

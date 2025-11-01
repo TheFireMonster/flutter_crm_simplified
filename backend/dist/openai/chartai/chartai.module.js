@@ -16,12 +16,13 @@ const typeorm_1 = require("@nestjs/typeorm");
 const appointments_entity_1 = require("../../appointments/entities/appointments.entity");
 const customers_entity_1 = require("../../customers/entities/customers.entity");
 const service_entity_1 = require("../../services/entities/service.entity");
+const sales_entity_1 = require("../../sales/entities/sales.entity");
 let ChartAIModule = class ChartAIModule {
 };
 exports.ChartAIModule = ChartAIModule;
 exports.ChartAIModule = ChartAIModule = __decorate([
     (0, common_1.Module)({
-        imports: [axios_1.HttpModule, config_1.ConfigModule, typeorm_1.TypeOrmModule.forFeature([appointments_entity_1.Appointment, customers_entity_1.Customer, service_entity_1.Service])],
+        imports: [axios_1.HttpModule, config_1.ConfigModule, typeorm_1.TypeOrmModule.forFeature([appointments_entity_1.Appointment, customers_entity_1.Customer, service_entity_1.Service, sales_entity_1.Sale])],
         providers: [chartai_service_1.ChartAIService],
         controllers: [chartai_controller_1.ChartAIController],
         exports: [chartai_service_1.ChartAIService],

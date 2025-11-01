@@ -35,6 +35,15 @@ let ChatGateway = class ChatGateway {
         this.conversationRepo = conversationRepo;
         this.aiChatService = aiChatService;
     }
+    async handleUpdateCustomer(data, client) {
+        try {
+            const updated = await this.chatService.updateCustomerForConversation(data.conversationId, data.update, client.id);
+            this.server.to(data.conversationId).emit('customer_updated', updated);
+        }
+        catch (err) {
+            console.error('handleUpdateCustomer error', err);
+        }
+    }
     handleConnection(client) {
         console.log('🔗 Socket.IO client connected:', client.id, 'from', client.handshake.address);
     }
@@ -85,6 +94,14 @@ __decorate([
     (0, websockets_1.WebSocketServer)(),
     __metadata("design:type", socket_io_1.Server)
 ], ChatGateway.prototype, "server", void 0);
+__decorate([
+    (0, websockets_1.SubscribeMessage)('update_customer'),
+    __param(0, (0, websockets_1.MessageBody)()),
+    __param(1, (0, websockets_1.ConnectedSocket)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, socket_io_1.Socket]),
+    __metadata("design:returntype", Promise)
+], ChatGateway.prototype, "handleUpdateCustomer", null);
 __decorate([
     (0, websockets_1.SubscribeMessage)('join_conversation'),
     __param(0, (0, websockets_1.MessageBody)()),

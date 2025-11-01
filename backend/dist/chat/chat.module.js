@@ -16,6 +16,7 @@ const conversations_entity_1 = require("./entities/conversations.entity");
 const messages_entity_1 = require("./entities/messages.entity");
 const aichat_module_1 = require("../openai/aichat/aichat.module");
 const customers_module_1 = require("../customers/customers.module");
+const customer_audit_entity_1 = require("../customers/entities/customer-audit.entity");
 let ChatModule = class ChatModule {
 };
 exports.ChatModule = ChatModule;
@@ -24,6 +25,7 @@ exports.ChatModule = ChatModule = __decorate([
         imports: [
             typeorm_1.TypeOrmModule.forFeature([conversations_entity_1.Conversation]),
             typeorm_1.TypeOrmModule.forFeature([messages_entity_1.Message]),
+            typeorm_1.TypeOrmModule.forFeature([customer_audit_entity_1.CustomerAudit]),
             (0, common_1.forwardRef)(() => aichat_module_1.AIChatModule),
             customers_module_1.CustomersModule,
         ],
