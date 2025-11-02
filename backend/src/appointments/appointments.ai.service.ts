@@ -74,15 +74,7 @@ export class AppointmentsAiService {
       await this.aiActionsService.finalize(requestId, 'appointments', createdId);
     }
 
-    // If this appointment was created for a chat lead, mark that customer as a converted customer
-    try {
-      if (dto.customerId) {
-        await this.customersService.update(dto.customerId, { source: 'chat-customer' } as any);
-      }
-    } catch (e) {
-      // Best-effort: don't fail the flow if marking fails
-      console.error('Failed to mark customer as chat-customer', e);
-    }
+    // No special 'lead' lifecycle — do not touch customer.source here.
 
     return createdEntity || created;
   }

@@ -314,7 +314,7 @@ class _SalesPageState extends State<SalesPage> {
       'price': price,
       if (customerName.isNotEmpty) 'customerName': customerName,
       if (customerEmail.isNotEmpty) 'customerEmail': customerEmail,
-      // include backend customerId when available for chat-created leads (server may ignore unknown fields)
+  // include backend customerId when available for chat-created customers (server may ignore unknown fields)
       if (_selectedChatCustomerLinkId != null && _chatCustomerIds.containsKey(_selectedChatCustomerLinkId))
         'customerId': int.tryParse(_chatCustomerIds[_selectedChatCustomerLinkId] ?? ''),
     };

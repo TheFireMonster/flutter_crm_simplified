@@ -29,6 +29,7 @@ describe('AppointmentsAiService', () => {
     expect(created).toBeDefined();
     expect((created as any).id).toBe(456);
     expect(aiActionsMock.finalize).toHaveBeenCalledWith('r2', 'appointments', 456);
-    expect(customersServiceMock.update).toHaveBeenCalledWith(1, { source: 'chat-customer' });
+    // We do not modify customer.source as there is no separate 'lead' concept
+    expect(customersServiceMock.update).not.toHaveBeenCalled();
   });
 });

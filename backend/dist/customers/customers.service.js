@@ -51,7 +51,7 @@ let CustomersService = class CustomersService {
     async findByName(name) {
         return this.customersRepository.findOne({ where: { name } });
     }
-    async findOrCreateLead(payload) {
+    async findOrCreateCustomer(payload) {
         if (payload?.id) {
             try {
                 return await this.findOne(payload.id);
@@ -63,7 +63,8 @@ let CustomersService = class CustomersService {
             if (existing)
                 return existing;
         }
-        const created = await this.create({ name: payload.name || 'Cliente', source: 'chat-lead' });
+        // Do not use special 'chat-lead' source — everything is a customer
+        const created = await this.create({ name: payload.name || 'Cliente' });
         return created;
     }
 };

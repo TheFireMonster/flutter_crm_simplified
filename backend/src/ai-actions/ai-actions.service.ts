@@ -11,13 +11,13 @@ export class AiActionsService {
   ) {}
 
   async reserve(requestId: string, actionType: string, payload: any) {
-    // Try to insert a new ai_action. If requestId already exists, return the existing row.
+    // Tenta inserir uma nova ai_action. Se requestId já existir, retorna a linha existente.
     try {
       const entity = this.aiActionsRepo.create({ requestId, actionType, payload });
       const saved = await this.aiActionsRepo.save(entity);
       return { inserted: true, record: saved };
     } catch (err) {
-      // Assuming unique constraint on requestId -> find existing
+      // Assumindo que a restrição única é sobre requestId -> encontrar existente
       const existing = await this.aiActionsRepo.findOne({ where: { requestId } });
       return { inserted: false, record: existing };
     }

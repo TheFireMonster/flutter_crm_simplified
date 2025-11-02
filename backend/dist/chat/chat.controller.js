@@ -58,20 +58,20 @@ let ChatController = class ChatController {
         try {
             const linkId = (0, uuid_1.v4)();
             const apiBase = process.env.API_BASE_URL || 'http://localhost:3000';
-            const lead = await (this.customersService ? this.customersService.findOrCreateLead({ id: dto?.customerId, name: dto?.customerName }) : null);
+            const customer = await (this.customersService ? this.customersService.findOrCreateCustomer({ id: dto?.customerId, name: dto?.customerName }) : null);
             const conv = this.conversationRepo.create({
                 linkId,
-                customerName: dto?.customerName || (lead ? lead.name : 'Cliente'),
+                customerName: dto?.customerName || (customer ? customer.name : 'Cliente'),
             });
             const saved = await this.conversationRepo.save(conv);
-            if (lead && lead.id) {
-                saved.customerId = lead.id;
+            if (customer && customer.id) {
+                saved.customerId = customer.id;
                 await this.conversationRepo.save(saved);
             }
             return {
                 linkId: saved.linkId,
                 url: `${apiBase}/chat/${saved.linkId}`,
-                customerId: lead ? lead.id : undefined,
+                customerId: customer ? customer.id : undefined,
             };
         }
         catch (err) {

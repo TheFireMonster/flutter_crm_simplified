@@ -70,14 +70,7 @@ let AppointmentsAiService = class AppointmentsAiService {
         if (createdId) {
             await this.aiActionsService.finalize(requestId, 'appointments', createdId);
         }
-        try {
-            if (dto.customerId) {
-                await this.customersService.update(dto.customerId, { source: 'chat-customer' });
-            }
-        }
-        catch (e) {
-            console.error('Failed to mark customer as chat-customer', e);
-        }
+        // No special 'lead' lifecycle — do not touch customer.source here.
         return createdEntity || created;
     }
 };

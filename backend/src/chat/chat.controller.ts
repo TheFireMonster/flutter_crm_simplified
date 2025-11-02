@@ -16,8 +16,8 @@ export class ChatController {
 
     @InjectRepository(Message)
     private messageRepo: Repository<Message>,
-    
-    // Inject CustomersService to link conversations to leads
+
+    // Injetar CustomersService para vincular conversas a clientes (não usamos mais 'leads')
     private readonly customersService?: CustomersService,
   ) {}
 
@@ -59,26 +59,26 @@ export class ChatController {
       const linkId = uuidv4();
       const apiBase = process.env.API_BASE_URL || 'http://localhost:3000';
 
-      // find or create a lead by customerId or name
-      const lead = await (this.customersService ? this.customersService.findOrCreateLead({ id: dto?.customerId, name: dto?.customerName }) : null);
+  // find or create a customer by customerId or name
+  const customer = await (this.customersService ? this.customersService.findOrCreateCustomer({ id: dto?.customerId, name: dto?.customerName }) : null);
 
       const conv = this.conversationRepo.create({
         linkId,
-        customerName: dto?.customerName || (lead ? lead.name : 'Cliente'),
+        customerName: dto?.customerName || (customer ? customer.name : 'Cliente'),
       });
 
       const saved = await this.conversationRepo.save(conv);
 
       // Persist the linked customerId into the conversation row for future lookups
-      if (lead && lead.id) {
-        saved.customerId = lead.id;
+      if (customer && customer.id) {
+        saved.customerId = customer.id;
         await this.conversationRepo.save(saved);
       }
 
       return {
         linkId: saved.linkId,
         url: `${apiBase}/chat/${saved.linkId}`,
-        customerId: lead ? lead.id : undefined,
+        customerId: customer ? customer.id : undefined,
       };
     } catch (err) {
       // Log full error server-side to help debugging and return a helpful message

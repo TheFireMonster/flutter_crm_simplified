@@ -42,7 +42,7 @@ export class ChatService {
 
   // Update or create a customer related to a conversation (by linkId).
   // If the conversation already has a customerId, update that customer.
-  // Otherwise create a new customer with source='chat-lead' and link it to the conversation.
+  // Otherwise create a new customer and link it to the conversation. We no longer treat 'leads' specially.
   async updateCustomerForConversation(conversationLinkId: string, updateData: Partial<any>, changedBy?: string) {
     const conv = await this.conversationRepo.findOne({ where: { linkId: conversationLinkId } });
     if (!conv) throw new NotFoundException('Conversation not found');
@@ -75,8 +75,8 @@ export class ChatService {
       return updated;
     }
 
-    // create a new customer (mark source as chat-lead)
-    const created = await this.customersService.create({ ...updateData, source: 'chat-lead' });
+  // create a new customer (no 'lead' source)
+  const created = await this.customersService.create({ ...updateData });
     // link conversation to new customer
     conv.customerId = (created as any).id;
     await this.conversationRepo.save(conv);
