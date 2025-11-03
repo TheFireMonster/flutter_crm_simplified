@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
-import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -161,27 +160,15 @@ class _ChatPageState extends State<ChatPage> {
     });
 
     socket.onConnect((_){
-      if (kDebugMode) print('Socket connected to $serverUrl');
       if (mounted) setState(() => isSocketConnected = true);
       if (linkId != null) {
         try { socket.emit('join_conversation', linkId); } catch (_) {}
       }
     });
 
-    socket.onConnectError((err){
-      if (kDebugMode) print('Socket connect error: $err');
-      if (mounted) setState(() => isSocketConnected = false);
-    });
-
-    socket.onError((err){
-      if (kDebugMode) print('Socket error: $err');
-      if (mounted) setState(() => isSocketConnected = false);
-    });
-
-    socket.onDisconnect((_){
-      if (kDebugMode) print('Socket disconnected');
-      if (mounted) setState(() => isSocketConnected = false);
-    });
+    socket.onConnectError((err){ if (mounted) setState(() => isSocketConnected = false); });
+    socket.onError((err){ if (mounted) setState(() => isSocketConnected = false); });
+    socket.onDisconnect((_){ if (mounted) setState(() => isSocketConnected = false); });
 
     socket.on('receive_message', (data) {
       final incomingId = data['id']?.toString() ?? '';

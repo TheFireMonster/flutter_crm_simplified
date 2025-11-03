@@ -17,7 +17,9 @@ export class ChatGateway {
     // Log for troubleshooting in production (Render) so we can confirm the event
     // reaches the server and which socket connection sent it.
     try {
-      console.log(`typing event from client ${client.id} for conversation ${data.conversationId} sender=${data.sender}`);
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`typing event from client ${client.id} for conversation ${data.conversationId} sender=${data.sender}`);
+      }
     } catch (_) {}
 
     this.server.to(data.conversationId).emit('typing', {
@@ -42,7 +44,6 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
   ) {
     try {
-      // Optionally verify the client is in the conversation room or is authenticated.
   const updated = await this.chatService.updateCustomerForConversation(data.conversationId, data.update, client.id);
       // Notify the room that customer data changed
       this.server.to(data.conversationId).emit('customer_updated', updated);
@@ -54,14 +55,20 @@ export class ChatGateway {
   handleConnection(client: Socket) {
     // Log handshake details to help diagnose production issues (origins, auth)
     try {
-      console.log('🔗 Socket.IO client connected:', client.id, 'from', client.handshake.address, 'headers=', JSON.stringify(client.handshake.headers || {}));
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('🔗 Socket.IO client connected:', client.id, 'from', client.handshake.address);
+      }
     } catch (_) {
-      console.log('🔗 Socket.IO client connected:', client.id);
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('🔗 Socket.IO client connected:', client.id);
+      }
     }
   }
 
   handleDisconnect(client: Socket) {
-    console.log('❌ Socket.IO client disconnected:', client.id, 'from', client.handshake.address);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('❌ Socket.IO client disconnected:', client.id, 'from', client.handshake.address);
+    }
   }
 
   @SubscribeMessage('join_conversation')
@@ -70,7 +77,9 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
   ) {
     client.join(conversationId);
-    console.log(`Client ${client.id} joined conversation ${conversationId}`);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`Client ${client.id} joined conversation ${conversationId}`);
+    }
   }
 
   @SubscribeMessage('send_message')
@@ -80,7 +89,9 @@ export class ChatGateway {
   ) {
     const conversation = await this.conversationRepo.findOne({ where: { linkId: data.conversationId } });
     if (!conversation) {
-      console.log('Conversation not found:', data.conversationId);
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('Conversation not found:', data.conversationId);
+      }
       return;
     }
 

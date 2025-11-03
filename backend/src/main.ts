@@ -13,9 +13,11 @@ async function bootstrap() {
   const flutterBuildPath = join(__dirname, '..', '..', 'build', 'web');
 
   
-  console.log('🔍 Flutter build path:', flutterBuildPath);
-  console.log('📁 Path exists:', existsSync(flutterBuildPath));
-  console.log('📄 Index.html exists:', existsSync(join(flutterBuildPath, 'index.html')));
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('🔍 Flutter build path:', flutterBuildPath);
+    console.log('📁 Path exists:', existsSync(flutterBuildPath));
+    console.log('📄 Index.html exists:', existsSync(join(flutterBuildPath, 'index.html')));
+  }
 
   app.useStaticAssets(flutterBuildPath, {
     index: false,
@@ -24,14 +26,18 @@ async function bootstrap() {
   app.use((req, res, next) => {
     if (req.path.startsWith('/chat/') && req.path.endsWith('.js')) {
       const assetPath = req.path.replace('/chat/', '/');
-      console.log('Rewriting asset request:', req.path, '->', assetPath);
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('Rewriting asset request:', req.path, '->', assetPath);
+      }
       return res.sendFile(join(flutterBuildPath, assetPath));
     }
     next();
   });
 
   app.use((req, res, next) => {
-    console.log('Request path:', req.path);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Request path:', req.path);
+    }
     next();
   });
 
@@ -53,6 +59,8 @@ async function bootstrap() {
 
   const port = process.env.PORT ? Number(process.env.PORT) : 3000;
   await app.listen(port);
-  console.log(`Server running on ${process.env.API_BASE_URL || `http://localhost:${port}`}`);
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`Server running on ${process.env.API_BASE_URL || `http://localhost:${port}`}`);
+  }
 }
 bootstrap();

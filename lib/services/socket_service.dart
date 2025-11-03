@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -11,7 +11,6 @@ class SocketService {
   Future<void> connect() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      if (kDebugMode) print('SocketService.connect aborted: no authenticated user');
       return;
     }
 
@@ -30,13 +29,12 @@ class SocketService {
 
     void attemptConnect(int idx) {
       if (idx >= candidates.length) {
-        if (kDebugMode) print('SocketService.connect: all connection attempts failed');
         return;
       }
 
       final url = candidates[idx];
       if (url.isEmpty || url == 'null' || !(url.startsWith('http') || url.startsWith('ws'))) {
-        if (kDebugMode) print('SocketService.connect skipping invalid url: $url');
+        // skip invalid url
         attemptConnect(idx + 1);
         return;
       }
@@ -55,12 +53,9 @@ class SocketService {
         },
       );
 
-      s.onConnect((_) {
-        if (kDebugMode) print('Socket connected to $url');
-      });
+      s.onConnect((_) {});
 
       s.onConnectError((err) async {
-        if (kDebugMode) print('Socket connect error to $url: $err');
         try {
           s.disconnect();
           s.dispose();
@@ -68,14 +63,8 @@ class SocketService {
         // try next candidate
         attemptConnect(idx + 1);
       });
-
-      s.onError((err) {
-        if (kDebugMode) print('Socket error on $url: $err');
-      });
-
-      s.onDisconnect((_) {
-        if (kDebugMode) print('Socket disconnected from $url');
-      });
+      s.onError((err) {});
+      s.onDisconnect((_) {});
 
       // start connection
       s.connect();
@@ -87,8 +76,6 @@ class SocketService {
   void sendMessage(String text) {
     if (socket?.connected == true) {
       socket!.emit('send_message', {'text': text});
-    } else {
-      if (kDebugMode) print('sendMessage failed: socket not connected');
     }
   }
 

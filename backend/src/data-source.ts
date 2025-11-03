@@ -38,7 +38,9 @@ const dataSource = new DataSource({
 
 dataSource.initialize()
   .then(() => {
-    console.log('✅ Database connected');
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('✅ Database connected');
+    }
   })
   .catch((err) => {
     console.error('❌ Database connection error:', err);

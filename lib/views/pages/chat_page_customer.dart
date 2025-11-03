@@ -3,7 +3,6 @@ import 'package:grouped_list/grouped_list.dart';
 import 'package:flutter_crm/widgets/chat/messages.dart';
 import 'package:intl/intl.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
-import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -50,15 +49,10 @@ class _ChatPageCustomerState extends State<ChatPageCustomer> {
       'autoConnect': true,
     });
 
-    socket.onConnect((_){
-      if (kDebugMode) print('Socket connected to $serverUrl');
-      if (mounted) setState(() => isSocketConnected = true);
-      socket.emit('join_conversation', widget.conversationId);
-    });
-
-    socket.onConnectError((err){ if (kDebugMode) print('Socket connect error: $err'); if (mounted) setState(() => isSocketConnected = false); });
-    socket.onError((err){ if (kDebugMode) print('Socket error: $err'); if (mounted) setState(() => isSocketConnected = false); });
-    socket.onDisconnect((_){ if (kDebugMode) print('Socket disconnected'); if (mounted) setState(() => isSocketConnected = false); });
+    socket.onConnect((_){ if (mounted) setState(() => isSocketConnected = true); socket.emit('join_conversation', widget.conversationId); });
+    socket.onConnectError((err){ if (mounted) setState(() => isSocketConnected = false); });
+    socket.onError((err){ if (mounted) setState(() => isSocketConnected = false); });
+    socket.onDisconnect((_){ if (mounted) setState(() => isSocketConnected = false); });
 
     socket.on('receive_message', (data) {
       final incomingId = data['id']?.toString();
