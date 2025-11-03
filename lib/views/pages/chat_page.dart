@@ -87,7 +87,7 @@ class _ChatPageState extends State<ChatPage> {
       }
       final idsJson = prefs.getString('customerIds');
       if (idsJson != null) {
-        customerIds = Map<String, int>.from(jsonDecode(idsJson));
+        customerIds = Map<String, dynamic>.from(jsonDecode(idsJson));
       }
     });
   }
@@ -103,7 +103,8 @@ class _ChatPageState extends State<ChatPage> {
   late io.Socket socket;
   bool isSocketConnected = false;
   List<Message> messages = [];
-  final Set<int> _receivedMessageIds = {};
+  // message IDs can be numeric or UUID strings depending on backend; store as strings for dedupe
+  final Set<String> _receivedMessageIds = {};
   bool isSomeoneTyping = false;
   String typingUser = '';
   String? url;
@@ -183,8 +184,8 @@ class _ChatPageState extends State<ChatPage> {
     });
 
     socket.on('receive_message', (data) {
-      final incomingId = int.parse(data['id']?.toString() ?? '0');
-      if (_receivedMessageIds.contains(incomingId)) {
+      final incomingId = data['id']?.toString() ?? '';
+      if (incomingId.isNotEmpty && _receivedMessageIds.contains(incomingId)) {
         return;
       }
       final message = Message(
@@ -192,7 +193,7 @@ class _ChatPageState extends State<ChatPage> {
         date: DateTime.parse(data['createdAt'] ?? DateTime.now().toIso8601String()),
         isSentByMe: (data['sender'] == 'staff'),
       );
-  _receivedMessageIds.add(incomingId);
+  if (incomingId.isNotEmpty) _receivedMessageIds.add(incomingId);
       if ((data['sender'] ?? '') == 'staff') {
         setState(() {
           isSomeoneTyping = false;
@@ -228,13 +229,22 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
+  int? _toNullableInt(dynamic v) {
+    if (v == null) return null;
+    if (v is int) return v;
+    final s = v.toString();
+    return int.tryParse(s);
+  }
+
         String generateCustomerId(String name) {
         final timestamp = DateTime.now().millisecondsSinceEpoch;
         return '${name}_$timestamp';
       }
 
       Future<Map<String, dynamic>> fetchConversationInfo(String? customerId, String customerName) async {
-        final body = customerId != null ? {'customerId': customerId, 'customerName': customerName} : {'customerName': customerName};
+    // Only include customerId in the request if it can be parsed as a numeric id.
+    final parsed = _toNullableInt(customerId);
+    final body = (parsed != null) ? {'customerId': parsed, 'customerName': customerName} : {'customerName': customerName};
         final response = await http.post(
           Uri.parse('/chat/conversations'),
           headers: {'Content-Type': 'application/json'},

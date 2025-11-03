@@ -309,15 +309,24 @@ class _SalesPageState extends State<SalesPage> {
       return;
     }
 
-    final payload = {
+    int? _toNullableInt(dynamic v) {
+      if (v == null) return null;
+      if (v is int) return v;
+      final s = v.toString();
+      return int.tryParse(s);
+    }
+
+    final Map<String, dynamic> payload = {
       'serviceName': service,
       'price': price,
-      if (customerName.isNotEmpty) 'customerName': customerName,
-      if (customerEmail.isNotEmpty) 'customerEmail': customerEmail,
-  // include backend customerId when available for chat-created customers (server may ignore unknown fields)
-      if (_selectedChatCustomerLinkId != null && _chatCustomerIds.containsKey(_selectedChatCustomerLinkId))
-        'customerId': int.tryParse(_chatCustomerIds[_selectedChatCustomerLinkId] ?? ''),
     };
+    if (customerName.isNotEmpty) payload['customerName'] = customerName;
+    if (customerEmail.isNotEmpty) payload['customerEmail'] = customerEmail;
+    if (_selectedChatCustomerLinkId != null && _chatCustomerIds.containsKey(_selectedChatCustomerLinkId)) {
+      final v = _chatCustomerIds[_selectedChatCustomerLinkId];
+      final parsed = _toNullableInt(v);
+  if (parsed != null) payload['customerId'] = parsed;
+    }
 
     try {
       setState(() => loading = true);

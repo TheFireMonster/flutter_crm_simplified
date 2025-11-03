@@ -138,9 +138,9 @@ class _CostumersPageState extends State<CostumersPage> {
     }
   }
 
-  Future<void> updateCustomer(int id) async {
+  Future<void> updateCustomer(dynamic id) async {
     if (!_formKey.currentState!.validate()) return;
-    final uri = Uri.parse('/customers/$id');
+    final uri = Uri.parse('/customers/${id.toString()}');
     final response = await http.put(
       uri,
       headers: {'Content-Type': 'application/json'},
@@ -204,7 +204,7 @@ class _CostumersPageState extends State<CostumersPage> {
             ElevatedButton(onPressed: () async {
               Navigator.of(context).pop();
               final id = customer['id'];
-              if (id != null) await updateCustomer(int.tryParse(id.toString()) ?? id);
+              if (id != null) await updateCustomer(id);
             }, child: Text('Save')),
           ],
         );
@@ -224,7 +224,7 @@ class _CostumersPageState extends State<CostumersPage> {
             ElevatedButton(onPressed: () async {
               Navigator.of(context).pop();
               final id = customer['id'];
-              if (id != null) await _deleteCustomer(int.tryParse(id.toString()) ?? id);
+              if (id != null) await _deleteCustomer(id);
             }, child: Text('Delete')),
           ],
         );
@@ -232,8 +232,8 @@ class _CostumersPageState extends State<CostumersPage> {
     );
   }
 
-  Future<void> _deleteCustomer(int id) async {
-    final uri = Uri.parse('/customers/$id');
+  Future<void> _deleteCustomer(dynamic id) async {
+    final uri = Uri.parse('/customers/${id.toString()}');
     final resp = await http.delete(uri);
     if (resp.statusCode == 200 || resp.statusCode == 204) {
       await fetchCustomers();
