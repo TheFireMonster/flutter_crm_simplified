@@ -14,8 +14,16 @@ export class ChatGateway {
     @MessageBody() data: { conversationId: string; sender: string },
     @ConnectedSocket() client: Socket,
   ) {
+    // Log for troubleshooting in production (Render) so we can confirm the event
+    // reaches the server and which socket connection sent it.
+    try {
+      console.log(`typing event from client ${client.id} for conversation ${data.conversationId} sender=${data.sender}`);
+    } catch (_) {}
+
     this.server.to(data.conversationId).emit('typing', {
       sender: data.sender,
+      conversationId: data.conversationId,
+      ts: Date.now(),
     });
   }
   @WebSocketServer()
@@ -44,7 +52,12 @@ export class ChatGateway {
   }
 
   handleConnection(client: Socket) {
-    console.log('🔗 Socket.IO client connected:', client.id, 'from', client.handshake.address);
+    // Log handshake details to help diagnose production issues (origins, auth)
+    try {
+      console.log('🔗 Socket.IO client connected:', client.id, 'from', client.handshake.address, 'headers=', JSON.stringify(client.handshake.headers || {}));
+    } catch (_) {
+      console.log('🔗 Socket.IO client connected:', client.id);
+    }
   }
 
   handleDisconnect(client: Socket) {

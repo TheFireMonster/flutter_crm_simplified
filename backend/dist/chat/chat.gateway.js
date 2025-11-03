@@ -28,6 +28,15 @@ let ChatGateway = class ChatGateway {
         this.server.to(data.conversationId).emit('typing', {
             sender: data.sender,
         });
+        try {
+            console.log(`typing event from client ${client.id} for conversation ${data.conversationId} sender=${data.sender}`);
+        }
+        catch (_) { }
+        this.server.to(data.conversationId).emit('typing', {
+            sender: data.sender,
+            conversationId: data.conversationId,
+            ts: Date.now(),
+        });
     }
     server;
     constructor(chatService, conversationRepo, aiChatService) {
@@ -46,6 +55,12 @@ let ChatGateway = class ChatGateway {
     }
     handleConnection(client) {
         console.log('🔗 Socket.IO client connected:', client.id, 'from', client.handshake.address);
+        try {
+            console.log('🔗 Socket.IO client connected:', client.id, 'from', client.handshake.address, 'headers=', JSON.stringify(client.handshake.headers || {}));
+        }
+        catch (_) {
+            console.log('🔗 Socket.IO client connected:', client.id);
+        }
     }
     handleDisconnect(client) {
         console.log('❌ Socket.IO client disconnected:', client.id, 'from', client.handshake.address);
