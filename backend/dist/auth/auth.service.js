@@ -50,12 +50,15 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const users_entity_1 = require("../users/entities/users.entity");
+const registration_service_1 = require("../registration/registration.service");
 const crypto = __importStar(require("crypto"));
 const admin = __importStar(require("firebase-admin"));
 let AuthService = class AuthService {
     userRepo;
-    constructor(userRepo) {
+    registrationService;
+    constructor(userRepo, registrationService) {
         this.userRepo = userRepo;
+        this.registrationService = registrationService;
     }
     async firebaseRegister(idToken, name) {
         let decoded;
@@ -99,11 +102,20 @@ let AuthService = class AuthService {
         }
         return user;
     }
+    async validateRegistrationCode(code) {
+        const registrationCode = await this.registrationService.validateRegistrationCode(code);
+        return {
+            valid: true,
+            message: 'Código válido. Você pode se registrar.',
+            expiresAt: registrationCode.expiresAt
+        };
+    }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(users_entity_1.User)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        registration_service_1.RegistrationService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

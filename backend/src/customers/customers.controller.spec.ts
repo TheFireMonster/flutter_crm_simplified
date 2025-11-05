@@ -24,33 +24,33 @@ describe('CustomersController', () => {
     service = module.get<CustomersService>(CustomersService);
   });
 
-  it('should be defined', () => {
+  it('deve estar definido', () => {
     expect(controller).toBeDefined();
   });
 
-    it('should create a customer', async () => {
+  it('deve criar um cliente', async () => {
     const body = { name: 'Ana' };
     const result = await controller.create(body as any);
     expect(result).toEqual({ id: 1, name: 'Ana' });
   });
 
-  it('should find all customers', async () => {
+  it('deve encontrar todos os clientes', async () => {
     const result = await controller.findAll();
     expect(result).toEqual([{ id: 1 }, { id: 2 }]);
   });
 
-  it('should find one customer', async () => {
+  it('deve encontrar um cliente', async () => {
     const result = await controller.findOne('1');
     expect(result).toEqual({ id: 1, name: 'Ana' });
   });
 
-  it('should update a customer', async () => {
+  it('deve atualizar um cliente', async () => {
     const body = { name: 'Ana Updated' };
     const result = await controller.update('1', body as any);
     expect(result).toEqual({ id: 1, name: 'Ana', email: 'ana@email.com' });
   });
 
-  it('should remove a customer', async () => {
+  it('deve remover um cliente', async () => {
     const result = await controller.remove('1');
     expect(result).toEqual({ affected: 1 });
   });

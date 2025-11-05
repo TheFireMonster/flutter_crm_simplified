@@ -12,7 +12,7 @@ describe('ReportsController', () => {
     controller = module.get<ReportsController>(ReportsController);
   });
 
-  it('should be defined', () => {
+  it('deve estar definido', () => {
     expect(controller).toBeDefined();
   });
 });

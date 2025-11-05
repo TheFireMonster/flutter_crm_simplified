@@ -72,8 +72,7 @@ let ChatService = class ChatService {
             }
             return updated;
         }
-    // create a new customer (no special 'lead' source)
-    const created = await this.customersService.create({ ...updateData });
+        const created = await this.customersService.create({ ...updateData });
         conv.customerId = created.id;
         await this.conversationRepo.save(conv);
         await this.auditRepo.save({

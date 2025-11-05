@@ -16,8 +16,6 @@ export class ChatController {
 
     @InjectRepository(Message)
     private messageRepo: Repository<Message>,
-
-    // Injetar CustomersService para vincular conversas a clientes (não usamos mais 'leads')
     private readonly customersService?: CustomersService,
   ) {}
 
@@ -33,9 +31,6 @@ export class ChatController {
     if (body.customerName !== undefined) {
       conv.customerName = body.customerName;
     }
-    // Accept either the server-side property name (AIChatActive) or the
-    // frontend-friendly name (chatGptActive). This prevents mismatches when
-    // the client sends { chatGptActive: true }.
     if (body.AIChatActive !== undefined) {
       conv.AIChatActive = body.AIChatActive;
     } else if (body.chatGptActive !== undefined) {
@@ -49,7 +44,6 @@ export class ChatController {
   async getConversation(@Param('linkId') linkId: string) {
     const conv = await this.conversationRepo.findOne({ where: { linkId } });
     if (!conv) return { error: 'Conversation not found' };
-    // Return the property name the frontend expects: chatGptActive
     return { linkId: conv.linkId, customerName: conv.customerName, chatGptActive: conv.AIChatActive };
   }
   
@@ -59,7 +53,6 @@ export class ChatController {
       const linkId = uuidv4();
       const apiBase = process.env.API_BASE_URL || 'http://localhost:3000';
 
-  // find or create a customer by customerId or name
   const customer = await (this.customersService ? this.customersService.findOrCreateCustomer({ id: dto?.customerId, name: dto?.customerName }) : null);
 
       const conv = this.conversationRepo.create({
@@ -69,7 +62,6 @@ export class ChatController {
 
       const saved = await this.conversationRepo.save(conv);
 
-      // Persist the linked customerId into the conversation row for future lookups
       if (customer && customer.id) {
         saved.customerId = customer.id;
         await this.conversationRepo.save(saved);
@@ -81,7 +73,6 @@ export class ChatController {
         customerId: customer ? customer.id : undefined,
       };
     } catch (err) {
-      // Log full error server-side to help debugging and return a helpful message
       console.error('createConversation error:', err && err.stack ? err.stack : err);
       return { error: 'Failed to create conversation', details: err?.message || String(err) };
     }

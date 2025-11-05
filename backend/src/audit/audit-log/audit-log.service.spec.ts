@@ -12,7 +12,7 @@ describe('AuditLogService', () => {
     service = module.get<AuditLogService>(AuditLogService);
   });
 
-  it('should be defined', () => {
+  it('deve estar definido', () => {
     expect(service).toBeDefined();
   });
 });

@@ -1,4 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 final authService = AuthService();
 
@@ -9,14 +11,35 @@ class AuthService {
     required String name,
     required String email,
     required String password,
+    String? registrationCode,
   }) async {
     final cred = await firebaseAuth.createUserWithEmailAndPassword(
       email: email,
       password: password,
     );
+    
     if (cred.user != null) {
       await cred.user!.updateDisplayName(name);
+      
+      // Se há código de registro, enviar para o backend
+      if (registrationCode != null) {
+        final idToken = await cred.user!.getIdToken();
+        final response = await http.post(
+          Uri.parse('/auth/firebase-register'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'idToken': idToken,
+            'name': name,
+            'registrationCode': registrationCode,
+          }),
+        );
+        
+        if (response.statusCode != 200) {
+          throw Exception('Erro ao validar código de registro');
+        }
+      }
     }
+    
     return cred.user;
   }
 

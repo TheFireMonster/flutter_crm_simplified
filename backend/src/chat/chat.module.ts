@@ -7,7 +7,7 @@ import { Conversation } from './entities/conversations.entity';
 import { Message } from './entities/messages.entity';
 import { AIChatModule } from '../openai/aichat/aichat.module';
 import { CustomersModule } from '../customers/customers.module';
-import { CustomerAudit } from 'src/customers/entities/customer-audit.entity';
+import { CustomerAudit } from '../customers/entities/customer-audit.entity';
 
 @Module({
   imports: [

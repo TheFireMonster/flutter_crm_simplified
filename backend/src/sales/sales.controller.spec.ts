@@ -14,7 +14,7 @@ describe('SalesController', () => {
     controller = module.get<SalesController>(SalesController);
   });
 
-  it('should be defined', () => {
+  it('deve estar definido', () => {
     expect(controller).toBeDefined();
   });
 });

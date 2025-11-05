@@ -23,11 +23,11 @@ describe('AIChatController', () => {
     service = module.get<AIChatService>(AIChatService);
   });
 
-  it('should be defined', () => {
+  it('deve estar definido', () => {
     expect(controller).toBeDefined();
   });
 
-  it('should return response from service', async () => {
+  it('deve retornar resposta do serviço', async () => {
     const dto = { prompt: 'Olá, assistente!' } as any;
     const result = await controller.ask(dto);
     expect(result).toEqual({ response: 'mocked response' });

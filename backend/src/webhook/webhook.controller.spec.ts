@@ -12,7 +12,7 @@ describe('WebhookController', () => {
     controller = module.get<WebhookController>(WebhookController);
   });
 
-  it('should be defined', () => {
+  it('deve estar definido', () => {
     expect(controller).toBeDefined();
   });
 });

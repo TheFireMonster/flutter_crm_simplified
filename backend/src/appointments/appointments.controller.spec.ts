@@ -19,7 +19,7 @@ describe('AppointmentsController', () => {
     controller = module.get<AppointmentsController>(AppointmentsController);
   });
 
-  it('should be defined', () => {
+  it('deve estar definido', () => {
     expect(controller).toBeDefined();
   });
 });

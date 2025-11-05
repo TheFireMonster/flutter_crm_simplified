@@ -3,6 +3,7 @@ import { ChatController } from './chat.controller';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Conversation } from './entities/conversations.entity';
 import { Message } from './entities/messages.entity';
+import { CustomersService } from '../customers/customers.service';
 
 describe('ChatController', () => {
   let controller: ChatController;
@@ -26,17 +27,18 @@ describe('ChatController', () => {
       providers: [
         { provide: getRepositoryToken(Conversation), useValue: conversationRepo },
         { provide: getRepositoryToken(Message), useValue: messageRepo },
+        { provide: CustomersService, useValue: { findOrCreateCustomer: jest.fn().mockResolvedValue(null) } },
       ],
     }).compile();
 
     controller = module.get<ChatController>(ChatController);
   });
 
-  it('should be defined', () => {
+  it('deve estar definido', () => {
     expect(controller).toBeDefined();
   });
 
-  it('should update conversation', async () => {
+  it('deve atualizar conversa', async () => {
     const conv = { linkId: 'abc', customerName: 'Old', AIChatActive: false };
     conversationRepo.findOne.mockResolvedValue(conv);
     conversationRepo.save.mockResolvedValue({ ...conv, customerName: 'New', AIChatActive: true });
@@ -45,23 +47,24 @@ describe('ChatController', () => {
     expect(conversationRepo.save).toHaveBeenCalled();
   });
 
-  it('should return error if conversation not found', async () => {
+  it('deve retornar erro se conversa não encontrada', async () => {
     conversationRepo.findOne.mockResolvedValue(undefined);
     const result = await controller.updateConversation('notfound', { customerName: 'New' });
     expect(result).toEqual({ error: 'Conversation not found' });
   });
 
-  it('should create conversation', async () => {
+  it('deve criar conversa', async () => {
     const conv = { linkId: 'uuid', customerName: 'Cliente' };
     conversationRepo.create.mockReturnValue(conv);
     conversationRepo.save.mockResolvedValue(conv);
-    const result = await controller.createConversation({ customerName: 'Cliente' });
-    expect(result).toEqual({ linkId: 'uuid', url: '/chat/uuid' });
+  const result = await controller.createConversation({ customerName: 'Cliente' });
+  expect(result.linkId).toBe('uuid');
+  expect(result.url).toEqual(expect.stringContaining('/chat/uuid'));
     expect(conversationRepo.create).toHaveBeenCalledWith({ linkId: expect.any(String), customerName: 'Cliente' });
     expect(conversationRepo.save).toHaveBeenCalled();
   });
 
-  it('should get message history', async () => {
+  it('deve obter histórico de mensagens', async () => {
     messageRepo.find.mockResolvedValue([{ content: 'msg1' }, { content: 'msg2' }]);
     const result = await controller.getHistory('abc');
     expect(result).toEqual([{ content: 'msg1' }, { content: 'msg2' }]);

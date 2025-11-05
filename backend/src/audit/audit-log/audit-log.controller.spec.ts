@@ -12,7 +12,7 @@ describe('AuditLogController', () => {
     controller = module.get<AuditLogController>(AuditLogController);
   });
 
-  it('should be defined', () => {
+  it('deve estar definido', () => {
     expect(controller).toBeDefined();
   });
 });

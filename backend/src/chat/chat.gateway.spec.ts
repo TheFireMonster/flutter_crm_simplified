@@ -9,7 +9,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 describe('ChatGateway', () => {
   let gateway: ChatGateway;
   const chatServiceMock = { saveMessage: jest.fn() };
-  const aiChatMock = { askStream: jest.fn() };
+  const aiChatMock = { askStream: jest.fn(), ask: jest.fn() };
   const repoMock = { findOne: jest.fn() };
 
   beforeEach(async () => {
@@ -23,23 +23,24 @@ describe('ChatGateway', () => {
     }).compile();
 
     gateway = module.get<ChatGateway>(ChatGateway);
-    // mock server
     gateway.server = { to: jest.fn().mockReturnThis(), emit: jest.fn() } as any;
   });
 
   afterEach(() => jest.clearAllMocks());
 
-  it('should emit typing events on handleTyping', () => {
+  it('deve emitir eventos de digitação em handleTyping', () => {
     const client: any = { id: 'c1' };
     const data = { conversationId: 'link1', sender: 'client' };
     gateway.handleTyping(data, client);
     expect((gateway.server.to as jest.Mock).mock.calls.length).toBeGreaterThan(0);
   });
 
-  it('should save and emit messages and call AI when active', async () => {
+  it('deve salvar e emitir mensagens e chamar IA quando ativo', async () => {
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     repoMock.findOne.mockResolvedValue({ id: 'conv1', linkId: 'link1', AIChatActive: true });
     chatServiceMock.saveMessage.mockResolvedValue({ id: 'm1', content: 'hi' });
-    aiChatMock.askStream.mockResolvedValue('AI reply');
+  aiChatMock.askStream.mockResolvedValue('AI reply');
+  aiChatMock.ask.mockResolvedValue('AI reply');
     chatServiceMock.saveMessage.mockResolvedValueOnce({ id: 'm1', content: 'hi' }).mockResolvedValueOnce({ id: 'm2', content: 'AI reply' });
 
     const client: any = { id: 'c1', handshake: { address: 'addr' } };
@@ -47,8 +48,10 @@ describe('ChatGateway', () => {
 
     expect(repoMock.findOne).toHaveBeenCalled();
     expect(chatServiceMock.saveMessage).toHaveBeenCalled();
-    expect(aiChatMock.askStream).toHaveBeenCalledWith('link1', 'hello', gateway.server);
-    // ensure AI message emitted
+  expect(aiChatMock.ask).toHaveBeenCalledWith('hello', 'conv1', undefined);
     expect((gateway.server.emit as jest.Mock).mock.calls.length).toBeGreaterThan(0);
+    expect(errorSpy).toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('onMessage: conversation link1'));
+    errorSpy.mockRestore();
   });
 });

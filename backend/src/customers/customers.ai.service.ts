@@ -15,14 +15,12 @@ export class CustomersAiService {
     const { inserted, record } = await this.aiActionsService.reserve(requestId, 'create_customer', dto);
 
     if (!inserted) {
-      // already reserved/processed
       if (record?.resultTable === 'customers' && record?.resultId) {
         return this.customersService.findOne(record.resultId);
       }
       return record;
     }
 
-    // Proceed to create the customer (this creates immediately; consider making 'draft')
     const created = await this.customersService.create({
       name: dto.name,
       email: dto.email,

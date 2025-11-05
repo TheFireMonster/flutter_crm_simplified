@@ -11,6 +11,7 @@ const messages_entity_1 = require("./chat/entities/messages.entity");
 const conversations_entity_1 = require("./chat/entities/conversations.entity");
 const ai_action_entity_1 = require("./ai-actions/entities/ai-action.entity");
 const customer_audit_entity_1 = require("./customers/entities/customer-audit.entity");
+const registration_code_entity_1 = require("./registration/entities/registration-code.entity");
 (0, dotenv_1.config)();
 const requiredEnv = ['DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_NAME'];
 for (const key of requiredEnv) {
@@ -21,7 +22,7 @@ for (const key of requiredEnv) {
 const dataSource = new typeorm_1.DataSource({
     type: 'postgres',
     url: process.env.DB_URL,
-    entities: [users_entity_1.User, customers_entity_1.Customer, appointments_entity_1.Appointment, sales_entity_1.Sale, messages_entity_1.Message, conversations_entity_1.Conversation, service_entity_1.Service, ai_action_entity_1.AiAction, customer_audit_entity_1.CustomerAudit],
+    entities: [users_entity_1.User, customers_entity_1.Customer, appointments_entity_1.Appointment, sales_entity_1.Sale, messages_entity_1.Message, conversations_entity_1.Conversation, service_entity_1.Service, ai_action_entity_1.AiAction, customer_audit_entity_1.CustomerAudit, registration_code_entity_1.RegistrationCode],
     migrations: [__dirname + '/migrations/*{.ts,.js}'],
     synchronize: false,
     ssl: {
@@ -30,7 +31,9 @@ const dataSource = new typeorm_1.DataSource({
 });
 dataSource.initialize()
     .then(() => {
-    console.log('✅ Database connected');
+    if (process.env.NODE_ENV !== 'production') {
+        console.log('✅ Database connected');
+    }
 })
     .catch((err) => {
     console.error('❌ Database connection error:', err);

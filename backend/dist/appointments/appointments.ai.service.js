@@ -70,7 +70,6 @@ let AppointmentsAiService = class AppointmentsAiService {
         if (createdId) {
             await this.aiActionsService.finalize(requestId, 'appointments', createdId);
         }
-        // No special 'lead' lifecycle — do not touch customer.source here.
         return createdEntity || created;
     }
 };

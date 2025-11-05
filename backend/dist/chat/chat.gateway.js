@@ -27,13 +27,6 @@ let ChatGateway = class ChatGateway {
     handleTyping(data, client) {
         this.server.to(data.conversationId).emit('typing', {
             sender: data.sender,
-        });
-        try {
-            console.log(`typing event from client ${client.id} for conversation ${data.conversationId} sender=${data.sender}`);
-        }
-        catch (_) { }
-        this.server.to(data.conversationId).emit('typing', {
-            sender: data.sender,
             conversationId: data.conversationId,
             ts: Date.now(),
         });
@@ -54,25 +47,15 @@ let ChatGateway = class ChatGateway {
         }
     }
     handleConnection(client) {
-        console.log('🔗 Socket.IO client connected:', client.id, 'from', client.handshake.address);
-        try {
-            console.log('🔗 Socket.IO client connected:', client.id, 'from', client.handshake.address, 'headers=', JSON.stringify(client.handshake.headers || {}));
-        }
-        catch (_) {
-            console.log('🔗 Socket.IO client connected:', client.id);
-        }
     }
     handleDisconnect(client) {
-        console.log('❌ Socket.IO client disconnected:', client.id, 'from', client.handshake.address);
     }
     handleJoin(conversationId, client) {
         client.join(conversationId);
-        console.log(`Client ${client.id} joined conversation ${conversationId}`);
     }
     async onMessage(data, client) {
         const conversation = await this.conversationRepo.findOne({ where: { linkId: data.conversationId } });
         if (!conversation) {
-            console.log('Conversation not found:', data.conversationId);
             return;
         }
         const savedMessage = await this.chatService.saveMessage(conversation.id, data.sender, data.text);

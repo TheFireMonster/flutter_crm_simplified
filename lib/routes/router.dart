@@ -16,12 +16,13 @@ final GoRouter router = GoRouter(
     final path = state.fullPath ?? '';
 
     final publicPaths = ['/login', '/register'];
+    final isRegisterPath = path.startsWith('/register');
 
-    if (user == null && !publicPaths.contains(path)) {
+    if (user == null && !publicPaths.contains(path) && !isRegisterPath) {
       return '/login';
     }
 
-    if (user != null && publicPaths.contains(path)) {
+    if (user != null && (publicPaths.contains(path) || isRegisterPath)) {
       return '/home';
     }
 
@@ -31,13 +32,12 @@ final GoRouter router = GoRouter(
     GoRoute(path: '/', redirect: (context, state) => '/login'),
     GoRoute(path: '/home', builder: (context, state) => HomePage()),
     GoRoute(path: '/login', builder: (context, state) => LoginPage()),
-    GoRoute(path: '/register', builder: (context, state) => RegisterPage()),
     GoRoute(path: '/appointments', builder: (context, state) => AppointmentsPage()),
     GoRoute(path: '/sales', builder: (context, state) => SalesPage()),
     GoRoute(path: '/chat', builder: (context, state) => ChatPage()),
     GoRoute(path: '/costumers', builder: (context, state) => CostumersPage()),
     GoRoute(path: '/services', builder: (context, state) => ServicePage()),
-  GoRoute(path: '/reports', builder: (context, state) => ReportsPage()),
+    GoRoute(path: '/reports', builder: (context, state) => ReportsPage()),
     GoRoute(
       path: '/chat/:id',
       builder: (context, state) {
@@ -45,6 +45,16 @@ final GoRouter router = GoRouter(
         return ChatPage(conversationId: conversationId);
       },
     ),
-    // settings page removed
+    GoRoute(
+      path: '/register',
+      builder: (context, state) => RegisterPage(),
+    ),
+    GoRoute(
+      path: '/register/:token',
+      builder: (context, state) {
+        final token = state.pathParameters['token'];
+        return RegisterPage(registrationCode: token);
+      },
+    ),
   ],
 );

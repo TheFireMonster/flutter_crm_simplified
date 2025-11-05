@@ -63,7 +63,6 @@ let CustomersService = class CustomersService {
             if (existing)
                 return existing;
         }
-        // Do not use special 'chat-lead' source — everything is a customer
         const created = await this.create({ name: payload.name || 'Cliente' });
         return created;
     }

@@ -1,12 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-// home_page and login_page imports are unused here
 import 'package:flutter_crm/widgets/register/resgister_desktop.dart';
 import 'package:flutter_crm/services/auth_service.dart';
 import 'package:go_router/go_router.dart';
 
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
+  final String? registrationCode;
+  const RegisterPage({super.key, this.registrationCode});
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();
@@ -43,6 +43,7 @@ class _RegisterPageState extends State<RegisterPage> {
           name: _nameController.text.trim(),
           email: _emailController.text.trim(),
           password: _passwordController.text,
+          registrationCode: widget.registrationCode,
         );
         if (user != null) {
           if (!mounted) return;

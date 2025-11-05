@@ -21,9 +21,6 @@ export class AIChatService {
     private readonly chatService: ChatService,
   ) {}
 
-  // prompt: the latest user message
-  // conversationId (optional): DB id used to fetch recent messages for context
-  // customerName (optional): name typed by the user to personalize replies
   async ask(prompt: string, conversationId?: string, customerName?: string): Promise<string> {
     const apiKey = this.configService.get<string>('OPENAI_API_KEY');
 
@@ -52,23 +49,15 @@ export class AIChatService {
       'Ajude os clientes/pacientes a agendar consultas e resolver problemas.' +
       'Não crie agendamentos ou clientes fictícios, apenas sugira quando apropriado.'
       'Não presuma coisas sobre as quais você não tem certeza. Se não souber a resposta, diga que não sabe.';
-
-    // If a customer name is provided, add it to the system prompt so the model
-    // can use it to personalize replies. Keep it short to avoid token bloat.
     if (customerName) {
       systemPrompt += `\nNome do cliente: ${customerName}. Use isto para personalizar respostas quando apropriado.`;
     }
-
-    // Build messages including recent history (if available). We keep only
-    // the last N messages to avoid hitting token limits; for heavier needs
-    // consider implementing summarization or embeddings-based retrieval.
     const messages: Array<{ role: string; content: string }> = [];
     messages.push({ role: 'system', content: systemPrompt });
 
     if (conversationId) {
       try {
         const history = await this.chatService.getRecentMessages(conversationId, 20);
-        // Map persisted messages to chat roles. AI messages become 'assistant', others 'user'.
         for (const m of history) {
           const role = (m.sender === 'staff' || m.sender?.toLowerCase().includes('ai') ) ? 'assistant' : 'user';
           messages.push({ role, content: m.content });

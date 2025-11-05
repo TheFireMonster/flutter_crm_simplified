@@ -44,8 +44,6 @@ export class CustomersService {
         async findByName(name: string) {
             return this.customersRepository.findOne({ where: { name } });
         }
-
-        // Find existing customer by id or name, otherwise create a new customer
         async findOrCreateCustomer(payload: { id?: number; name?: string }) {
             if (payload?.id) {
                 try {
@@ -56,7 +54,6 @@ export class CustomersService {
                 const existing = await this.findByName(payload.name);
                 if (existing) return existing;
             }
-            // Do not mark a special 'lead' source anymore — everything is a customer
             const created = await this.create({ name: payload.name || 'Cliente' });
             return created;
         }

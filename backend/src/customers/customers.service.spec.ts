@@ -26,11 +26,11 @@ describe('CustomersService', () => {
     service = module.get<CustomersService>(CustomersService);
   });
 
-  it('should be defined', () => {
+  it('deve estar definido', () => {
     expect(service).toBeDefined();
   });
 
-  it('should create a customer', async () => {
+  it('deve criar um cliente', async () => {
     repo.create.mockReturnValue({ name: 'Ana' });
     repo.save.mockResolvedValue({ id: 1, name: 'Ana' });
     const result = await service.create({ name: 'Ana' });
@@ -39,26 +39,26 @@ describe('CustomersService', () => {
     expect(result).toEqual({ id: 1, name: 'Ana' });
   });
 
-  it('should find all customers', async () => {
+  it('deve encontrar todos os clientes', async () => {
     repo.find.mockResolvedValue([{ id: 1 }, { id: 2 }]);
     const result = await service.findAll();
     expect(result).toEqual([{ id: 1 }, { id: 2 }]);
     expect(repo.find).toHaveBeenCalled();
   });
 
-  it('should find one customer', async () => {
+  it('deve encontrar um cliente', async () => {
     repo.findOneBy.mockResolvedValue({ id: 1, name: 'Ana' });
     const result = await service.findOne(1);
     expect(result).toEqual({ id: 1, name: 'Ana' });
     expect(repo.findOneBy).toHaveBeenCalledWith({ id: 1 });
   });
 
-  it('should throw if customer not found', async () => {
+  it('deve lançar se cliente não for encontrado', async () => {
     repo.findOneBy.mockResolvedValue(undefined);
     await expect(service.findOne(99)).rejects.toThrow(NotFoundException);
   });
 
-  it('should update a customer', async () => {
+  it('deve atualizar um cliente', async () => {
     repo.update.mockResolvedValue({});
     repo.findOneBy.mockResolvedValue({ id: 1, name: 'Ana', email: 'ana@email.com' });
     const result = await service.update(1, { email: 'ana@email.com' });
@@ -66,14 +66,14 @@ describe('CustomersService', () => {
     expect(result).toEqual({ id: 1, name: 'Ana', email: 'ana@email.com' });
   });
 
-  it('should remove a customer', async () => {
+  it('deve remover um cliente', async () => {
     repo.delete.mockResolvedValue({ affected: 1 });
     const result = await service.remove(1);
     expect(repo.delete).toHaveBeenCalledWith({ id: 1 });
     expect(result).toEqual({ affected: 1 });
   });
 
-  it('should throw if customer not found on remove', async () => {
+  it('deve lançar se cliente não for encontrado ao remover', async () => {
     repo.delete.mockResolvedValue({ affected: 0 });
     await expect(service.remove(99)).rejects.toThrow(NotFoundException);
   });

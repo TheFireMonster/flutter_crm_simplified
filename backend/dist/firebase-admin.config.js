@@ -34,7 +34,7 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const admin = __importStar(require("firebase-admin"));
-const saJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON || process.env.FIREBASE_ADMIN_JSON;
+const saJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
 if (!admin.apps.length) {
     if (saJson) {
         try {

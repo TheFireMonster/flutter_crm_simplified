@@ -19,13 +19,11 @@ export class CustomersController {
     
     @Get('search')
     search() {
-        // placeholder for future search implementation
         return this.customersService.findAll();
     }  
     
     @Get('export')
     export() {
-        // export implementation pending
         return this.customersService.findAll();
     }
     

@@ -37,6 +37,12 @@ let AuthController = class AuthController {
         const idToken = authHeader.replace('Bearer ', '');
         return await this.authService.firebaseLogin(idToken);
     }
+    async validateRegistrationCode(code) {
+        if (!code) {
+            throw new common_1.UnauthorizedException('Código de registro é obrigatório');
+        }
+        return await this.authService.validateRegistrationCode(code);
+    }
 };
 exports.AuthController = AuthController;
 __decorate([
@@ -54,6 +60,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "firebaseLogin", null);
+__decorate([
+    (0, common_1.Get)('validate-registration-code'),
+    __param(0, (0, common_1.Query)('code')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "validateRegistrationCode", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)('auth'),
     __metadata("design:paramtypes", [auth_service_1.AuthService])

@@ -14,14 +14,7 @@ export class ChatGateway {
     @MessageBody() data: { conversationId: string; sender: string },
     @ConnectedSocket() client: Socket,
   ) {
-    // Log for troubleshooting in production (Render) so we can confirm the event
-    // reaches the server and which socket connection sent it.
-    try {
-      if (process.env.NODE_ENV !== 'production') {
-        console.log(`typing event from client ${client.id} for conversation ${data.conversationId} sender=${data.sender}`);
-      }
-    } catch (_) {}
-
+    
     this.server.to(data.conversationId).emit('typing', {
       sender: data.sender,
       conversationId: data.conversationId,
@@ -45,7 +38,6 @@ export class ChatGateway {
   ) {
     try {
   const updated = await this.chatService.updateCustomerForConversation(data.conversationId, data.update, client.id);
-      // Notify the room that customer data changed
       this.server.to(data.conversationId).emit('customer_updated', updated);
     } catch (err) {
       console.error('handleUpdateCustomer error', err);
@@ -53,22 +45,11 @@ export class ChatGateway {
   }
 
   handleConnection(client: Socket) {
-    // Log handshake details to help diagnose production issues (origins, auth)
-    try {
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('🔗 Socket.IO client connected:', client.id, 'from', client.handshake.address);
-      }
-    } catch (_) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('🔗 Socket.IO client connected:', client.id);
-      }
-    }
+    
   }
 
   handleDisconnect(client: Socket) {
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('❌ Socket.IO client disconnected:', client.id, 'from', client.handshake.address);
-    }
+    
   }
 
   @SubscribeMessage('join_conversation')
@@ -77,9 +58,7 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
   ) {
     client.join(conversationId);
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`Client ${client.id} joined conversation ${conversationId}`);
-    }
+    
   }
 
   @SubscribeMessage('send_message')
@@ -89,9 +68,6 @@ export class ChatGateway {
   ) {
     const conversation = await this.conversationRepo.findOne({ where: { linkId: data.conversationId } });
     if (!conversation) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('Conversation not found:', data.conversationId);
-      }
       return;
     }
 
@@ -101,21 +77,15 @@ export class ChatGateway {
       data.text,
     );
 
-  // Emit the saved message to the conversation room. This will deliver to
-  // all joined clients (including the sender), so emitting directly to the
-  // client as well caused duplicates.
   this.server.to(data.conversationId).emit('receive_message', savedMessage);
 
     console.error(`onMessage: conversation ${conversation.linkId} AIChatActive=${conversation.AIChatActive}`);
     if (conversation.AIChatActive) {
       console.error('onMessage: AI is active, calling ask (non-streaming)...');
-      // Notify clients the AI is 'typing' (simple indicator).
       try {
         this.server.to(data.conversationId).emit('typing', { sender: 'staff' });
       } catch (_) {}
-
-      // Call the simpler synchronous completion method. It will include
-      // recent history and customerName when available (handled inside service).
+      
       const AIChatReply = await this.aiChatService.ask(
         data.text,
         conversation.id,
