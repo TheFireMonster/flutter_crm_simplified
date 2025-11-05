@@ -282,7 +282,21 @@ class _SalesPageState extends State<SalesPage> {
                                       child: ListTile(
                                         title: Text(custName.isNotEmpty ? 'Cliente: $custName' : 'Cliente: —'),
                                         subtitle: Text('Total: R\$${total.toString()}'),
-                                        trailing: Text(created),
+                                        trailing: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(created, style: TextStyle(fontSize: 12)),
+                                            SizedBox(width: 8),
+                                            IconButton(
+                                              icon: Icon(Icons.edit, color: Colors.blue),
+                                              onPressed: () => _editSale(sale['id'], sale),
+                                            ),
+                                            IconButton(
+                                              icon: Icon(Icons.delete, color: Colors.red),
+                                              onPressed: () => _deleteSale(sale['id']),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     );
                                   },
@@ -333,7 +347,6 @@ class _SalesPageState extends State<SalesPage> {
       final uri = Uri.parse('/sales');
       final resp = await http.post(uri, body: jsonEncode(payload), headers: {'Content-Type': 'application/json'});
       if (resp.statusCode == 201 || resp.statusCode == 200) {
-        // clear form and refresh
         _serviceController.clear();
         _priceController.clear();
         _customerNameController.clear();
@@ -343,7 +356,6 @@ class _SalesPageState extends State<SalesPage> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Sale created')));
       } else {
         
-        // try to surface server-side message
         String userMsg = 'Failed to create sale';
         try {
           final parsed = jsonDecode(resp.body);
@@ -363,6 +375,117 @@ class _SalesPageState extends State<SalesPage> {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error creating sale')));
     } finally {
       if (mounted) setState(() => loading = false);
+    }
+  }
+
+  Future<void> _editSale(int id, Map<String, dynamic> currentData) async {
+    final serviceController = TextEditingController(text: currentData['serviceName'] ?? '');
+    final priceController = TextEditingController(text: currentData['price']?.toString() ?? '');
+    final custNameController = TextEditingController(text: currentData['customerName'] ?? '');
+    final custEmailController = TextEditingController(text: currentData['customerEmail'] ?? '');
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Edit Sale'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: serviceController,
+                decoration: InputDecoration(labelText: 'Service'),
+              ),
+              TextField(
+                controller: priceController,
+                decoration: InputDecoration(labelText: 'Price'),
+                keyboardType: TextInputType.number,
+              ),
+              TextField(
+                controller: custNameController,
+                decoration: InputDecoration(labelText: 'Customer Name'),
+              ),
+              TextField(
+                controller: custEmailController,
+                decoration: InputDecoration(labelText: 'Customer Email'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      final response = await http.put(
+        Uri.parse('/sales/$id'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'serviceName': serviceController.text,
+          'price': double.tryParse(priceController.text) ?? 0,
+          'customerName': custNameController.text.isNotEmpty ? custNameController.text : null,
+          'customerEmail': custEmailController.text.isNotEmpty ? custEmailController.text : null,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        await fetchSales();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Sale updated successfully!')),
+        );
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update sale.')),
+        );
+      }
+    }
+  }
+
+  Future<void> _deleteSale(int id) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Delete Sale'),
+        content: Text('Are you sure you want to delete this sale?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      final response = await http.delete(Uri.parse('/sales/$id'));
+      if (response.statusCode == 200) {
+        await fetchSales();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Sale deleted successfully!')),
+        );
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete sale.')),
+        );
+      }
     }
   }
 }

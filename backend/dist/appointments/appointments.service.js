@@ -25,10 +25,20 @@ let AppointmentsService = class AppointmentsService {
     async getAll() {
         return this.appointmentRepo.find();
     }
-    async hasOverlap(date, startTime, endTime) {
+    async findOne(id) {
+        const appointment = await this.appointmentRepo.findOneBy({ id });
+        if (!appointment) {
+            throw new common_1.NotFoundException(`Agendamento com ID ${id} não encontrado`);
+        }
+        return appointment;
+    }
+    async hasOverlap(date, startTime, endTime, excludeId) {
         const qb = this.appointmentRepo.createQueryBuilder('a')
             .where('a.appointmentDate = :date', { date })
             .andWhere('NOT (a.endTime <= :start OR a.startTime >= :end)', { start: startTime, end: endTime });
+        if (excludeId) {
+            qb.andWhere('a.id != :excludeId', { excludeId });
+        }
         const found = await qb.getOne();
         return !!found;
     }
@@ -45,6 +55,16 @@ let AppointmentsService = class AppointmentsService {
             customerName: data.customerName ?? null,
         });
         return this.appointmentRepo.save(appointment);
+    }
+    async update(id, data) {
+        await this.appointmentRepo.update(id, data);
+        return this.findOne(id);
+    }
+    async remove(id) {
+        const result = await this.appointmentRepo.delete(id);
+        if (result.affected === 0) {
+            throw new common_1.NotFoundException(`Agendamento com ID ${id} não encontrado`);
+        }
     }
 };
 exports.AppointmentsService = AppointmentsService;

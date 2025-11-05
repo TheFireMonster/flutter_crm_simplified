@@ -5,7 +5,7 @@ export declare class AuthService {
     private readonly userRepo;
     private readonly registrationService;
     constructor(userRepo: Repository<User>, registrationService: RegistrationService);
-    firebaseRegister(idToken: string, name?: string): Promise<User>;
+    firebaseRegister(idToken: string, name?: string, registrationCode?: string): Promise<User>;
     firebaseLogin(idToken: string): Promise<User>;
     validateRegistrationCode(code: string): Promise<{
         valid: boolean;

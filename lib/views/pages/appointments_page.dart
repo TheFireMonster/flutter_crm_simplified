@@ -40,6 +40,126 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
     _loadChatCustomers();
   }
 
+  Future<void> _editAppointment(int id, Map<String, dynamic> currentData) async {
+    final titleController = TextEditingController(text: currentData['title'] ?? '');
+    final locationController = TextEditingController(text: currentData['location'] ?? '');
+    int duration = currentData['duration'] ?? 60;
+
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: Text('Edit Appointment'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: titleController,
+                  decoration: InputDecoration(labelText: 'Title'),
+                ),
+                TextField(
+                  controller: locationController,
+                  decoration: InputDecoration(labelText: 'Location'),
+                ),
+                SizedBox(height: 8),
+                Row(
+                  children: [
+                    Text('Duration:'),
+                    SizedBox(width: 8),
+                    DropdownButton<int>(
+                      value: duration,
+                      items: [15, 30, 60, 90, 120].map((d) => DropdownMenuItem<int>(value: d, child: Text('$d min'))).toList(),
+                      onChanged: (v) {
+                        if (v != null) {
+                          setDialogState(() {
+                            duration = v;
+                          });
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, null),
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, {
+                'title': titleController.text,
+                'location': locationController.text,
+                'duration': duration,
+              }),
+              child: Text('Save'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (result != null) {
+      final response = await http.put(
+        Uri.parse('/appointments/$id'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(result),
+      );
+
+      if (response.statusCode == 200) {
+        await fetchAppointments();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Appointment updated successfully!')),
+        );
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update appointment.')),
+        );
+      }
+    }
+  }
+
+  Future<void> _deleteAppointment(int id) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Delete Appointment'),
+        content: Text('Are you sure you want to delete this appointment?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      final response = await http.delete(Uri.parse('/appointments/$id'));
+      if (response.statusCode == 200) {
+        await fetchAppointments();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Appointment deleted successfully!')),
+        );
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete appointment.')),
+        );
+      }
+    }
+  }
+
   Future<void> fetchCustomers() async {
     final uri = Uri.parse('/customers');
     final response = await http.get(uri);
@@ -482,7 +602,21 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                             ),
                             title: Text(title, style: TextStyle(fontWeight: FontWeight.w600)),
                             subtitle: Text('Client: $clientName\nDuration: $durDisplay min', style: TextStyle(height: 1.3)),
-                            trailing: Text(timeRange, style: TextStyle(fontSize: 12, color: Colors.black54)),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(timeRange, style: TextStyle(fontSize: 12, color: Colors.black54)),
+                                SizedBox(width: 8),
+                                IconButton(
+                                  icon: Icon(Icons.edit, color: Colors.blue),
+                                  onPressed: () => _editAppointment(appointment['id'], appointment),
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.delete, color: Colors.red),
+                                  onPressed: () => _deleteAppointment(appointment['id']),
+                                ),
+                              ],
+                            ),
                           ),
                         );
                       },

@@ -29,6 +29,23 @@ let ServiceService = class ServiceService {
     async findAll() {
         return this.serviceRepository.find();
     }
+    async findOne(id) {
+        const service = await this.serviceRepository.findOneBy({ id });
+        if (!service) {
+            throw new common_1.NotFoundException(`Serviço com ID ${id} não encontrado`);
+        }
+        return service;
+    }
+    async update(id, updateDto) {
+        await this.serviceRepository.update(id, updateDto);
+        return this.findOne(id);
+    }
+    async remove(id) {
+        const result = await this.serviceRepository.delete(id);
+        if (result.affected === 0) {
+            throw new common_1.NotFoundException(`Serviço com ID ${id} não encontrado`);
+        }
+    }
 };
 exports.ServiceService = ServiceService;
 exports.ServiceService = ServiceService = __decorate([

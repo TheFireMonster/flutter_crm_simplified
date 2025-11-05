@@ -68,6 +68,117 @@ class _ServicePageState extends State<ServicePage> {
     }
   }
 
+  Future<void> editService(int id, Map<String, dynamic> currentData) async {
+    final nameController = TextEditingController(text: currentData['serviceName']);
+    final priceController = TextEditingController(text: currentData['price']?.toString() ?? '');
+    final custNameController = TextEditingController(text: currentData['customerName'] ?? '');
+    final custEmailController = TextEditingController(text: currentData['customerEmail'] ?? '');
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Edit Service'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(labelText: 'Service Name'),
+              ),
+              TextField(
+                controller: priceController,
+                decoration: InputDecoration(labelText: 'Price'),
+                keyboardType: TextInputType.number,
+              ),
+              TextField(
+                controller: custNameController,
+                decoration: InputDecoration(labelText: 'Customer Name'),
+              ),
+              TextField(
+                controller: custEmailController,
+                decoration: InputDecoration(labelText: 'Customer Email'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      final response = await http.put(
+        Uri.parse('/services/$id'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'serviceName': nameController.text,
+          'price': double.tryParse(priceController.text) ?? 0,
+          'customerName': custNameController.text.isNotEmpty ? custNameController.text : null,
+          'customerEmail': custEmailController.text.isNotEmpty ? custEmailController.text : null,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        await fetchServices();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Service updated successfully!')),
+        );
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update service.')),
+        );
+      }
+    }
+  }
+
+  Future<void> deleteService(int id) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Delete Service'),
+        content: Text('Are you sure you want to delete this service?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      final response = await http.delete(Uri.parse('/services/$id'));
+      if (response.statusCode == 200) {
+        await fetchServices();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Service deleted successfully!')),
+        );
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete service.')),
+        );
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -149,13 +260,22 @@ class _ServicePageState extends State<ServicePage> {
                                   child: ListTile(
                                     title: Text(s['serviceName'] ?? ''),
                                     subtitle: Text('Price: ${s['price']}'),
-                                    trailing: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                    trailing: Row(
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
                                         if (s['customerName'] != null)
-                                          Text('Customer: ${s['customerName']}'),
-                                        if (s['customerEmail'] != null)
-                                          Text('Email: ${s['customerEmail']}'),
+                                          Padding(
+                                            padding: const EdgeInsets.only(right: 8.0),
+                                            child: Text('Customer: ${s['customerName']}', style: TextStyle(fontSize: 12)),
+                                          ),
+                                        IconButton(
+                                          icon: Icon(Icons.edit, color: Colors.blue),
+                                          onPressed: () => editService(s['id'], s),
+                                        ),
+                                        IconButton(
+                                          icon: Icon(Icons.delete, color: Colors.red),
+                                          onPressed: () => deleteService(s['id']),
+                                        ),
                                       ],
                                     ),
                                   ),

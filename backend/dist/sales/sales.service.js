@@ -31,6 +31,23 @@ let SalesService = class SalesService {
     async findAll() {
         return this.saleRepository.find({ relations: ['customer'] });
     }
+    async findOne(id) {
+        const sale = await this.saleRepository.findOne({ where: { id }, relations: ['customer'] });
+        if (!sale) {
+            throw new common_1.NotFoundException(`Venda com ID ${id} não encontrada`);
+        }
+        return sale;
+    }
+    async update(id, updateDto) {
+        await this.saleRepository.update(id, updateDto);
+        return this.findOne(id);
+    }
+    async remove(id) {
+        const result = await this.saleRepository.delete(id);
+        if (result.affected === 0) {
+            throw new common_1.NotFoundException(`Venda com ID ${id} não encontrada`);
+        }
+    }
 };
 exports.SalesService = SalesService;
 exports.SalesService = SalesService = __decorate([

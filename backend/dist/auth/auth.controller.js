@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
 const common_1 = require("@nestjs/common");
 const auth_service_1 = require("./auth.service");
-const firebase_register_dto_1 = require("./dto/firebase-register.dto");
 let AuthController = class AuthController {
     authService;
     constructor(authService) {
@@ -27,7 +26,7 @@ let AuthController = class AuthController {
             throw new common_1.UnauthorizedException('Missing Firebase token');
         }
         const idToken = authHeader.replace('Bearer ', '');
-        return await this.authService.firebaseRegister(idToken, body.name);
+        return await this.authService.firebaseRegister(idToken, body.name, body.registrationCode);
     }
     async firebaseLogin(req) {
         const authHeader = req.headers.authorization;
@@ -50,7 +49,7 @@ __decorate([
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, firebase_register_dto_1.FirebaseRegisterDto]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "firebaseRegister", null);
 __decorate([

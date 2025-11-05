@@ -7,7 +7,10 @@ export declare class AppointmentsController {
     private readonly appointmentsService;
     constructor(appointmentRepo: Repository<Appointment>, appointmentsService: AppointmentsService);
     getAll(): Promise<Appointment[]>;
+    findOne(id: string): Promise<Appointment>;
     create(body: CreateAppointmentDto): Promise<Appointment | {
         error: string;
     }>;
+    update(id: string, body: Partial<CreateAppointmentDto>): Promise<Appointment>;
+    remove(id: string): Promise<void>;
 }

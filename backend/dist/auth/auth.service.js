@@ -60,13 +60,16 @@ let AuthService = class AuthService {
         this.userRepo = userRepo;
         this.registrationService = registrationService;
     }
-    async firebaseRegister(idToken, name) {
+    async firebaseRegister(idToken, name, registrationCode) {
         let decoded;
         try {
             decoded = await admin.auth().verifyIdToken(idToken);
         }
         catch (e) {
             throw new common_1.UnauthorizedException('Invalid Firebase token');
+        }
+        if (registrationCode) {
+            await this.registrationService.validateRegistrationCode(registrationCode);
         }
         let user = await this.userRepo.findOne({
             where: { email: decoded.email },
@@ -78,6 +81,9 @@ let AuthService = class AuthService {
                 refreshToken: crypto.randomBytes(32).toString('hex'),
             });
             await this.userRepo.save(user);
+            if (registrationCode) {
+                await this.registrationService.markCodeAsUsed(registrationCode, decoded.email);
+            }
         }
         return user;
     }

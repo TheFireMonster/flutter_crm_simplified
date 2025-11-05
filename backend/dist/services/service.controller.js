@@ -27,6 +27,15 @@ let ServiceController = class ServiceController {
     async findAll() {
         return this.serviceService.findAll();
     }
+    async findOne(id) {
+        return this.serviceService.findOne(Number(id));
+    }
+    async update(id, updateDto) {
+        return this.serviceService.update(Number(id), updateDto);
+    }
+    async remove(id) {
+        return this.serviceService.remove(Number(id));
+    }
 };
 exports.ServiceController = ServiceController;
 __decorate([
@@ -42,6 +51,28 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], ServiceController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ServiceController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Put)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], ServiceController.prototype, "update", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ServiceController.prototype, "remove", null);
 exports.ServiceController = ServiceController = __decorate([
     (0, common_1.Controller)('services'),
     __metadata("design:paramtypes", [service_service_1.ServiceService])

@@ -6,4 +6,7 @@ export declare class SalesController {
     constructor(salesService: SalesService);
     create(createSaleDto: CreateSaleDto): Promise<Sale>;
     findAll(): Promise<Sale[]>;
+    findOne(id: string): Promise<Sale>;
+    update(id: string, updateDto: Partial<CreateSaleDto>): Promise<Sale>;
+    remove(id: string): Promise<void>;
 }

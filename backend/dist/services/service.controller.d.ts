@@ -6,4 +6,7 @@ export declare class ServiceController {
     constructor(serviceService: ServiceService);
     create(createDto: CreateServiceDto): Promise<Service>;
     findAll(): Promise<Service[]>;
+    findOne(id: string): Promise<Service>;
+    update(id: string, updateDto: Partial<CreateServiceDto>): Promise<Service>;
+    remove(id: string): Promise<void>;
 }

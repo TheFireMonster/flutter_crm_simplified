@@ -9,7 +9,7 @@ async function generateRegistrationCode() {
     try {
         const code = await registrationService.generateRegistrationCode();
         const appUrl = process.env.API_BASE_URL || 'http://localhost:3000';
-        const registrationLink = `${appUrl}/register?code=${code}`;
+        const registrationLink = `${appUrl}/register/${code}`;
         console.log('✅ Código de registro gerado com sucesso!');
         console.log('📋 Código:', code);
         console.log('🔗 Link:', registrationLink);

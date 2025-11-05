@@ -27,6 +27,15 @@ let SalesController = class SalesController {
     async findAll() {
         return this.salesService.findAll();
     }
+    async findOne(id) {
+        return this.salesService.findOne(Number(id));
+    }
+    async update(id, updateDto) {
+        return this.salesService.update(Number(id), updateDto);
+    }
+    async remove(id) {
+        return this.salesService.remove(Number(id));
+    }
 };
 exports.SalesController = SalesController;
 __decorate([
@@ -43,6 +52,28 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], SalesController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], SalesController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Put)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], SalesController.prototype, "update", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], SalesController.prototype, "remove", null);
 exports.SalesController = SalesController = __decorate([
     (0, common_1.Controller)('sales'),
     __metadata("design:paramtypes", [sales_service_1.SalesService])

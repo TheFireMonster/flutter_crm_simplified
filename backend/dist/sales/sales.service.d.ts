@@ -6,4 +6,7 @@ export declare class SalesService {
     constructor(saleRepository: Repository<Sale>);
     create(createSaleDto: CreateSaleDto): Promise<Sale>;
     findAll(): Promise<Sale[]>;
+    findOne(id: number): Promise<Sale>;
+    update(id: number, updateDto: Partial<CreateSaleDto>): Promise<Sale>;
+    remove(id: number): Promise<void>;
 }

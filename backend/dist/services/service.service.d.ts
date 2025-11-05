@@ -6,4 +6,7 @@ export declare class ServiceService {
     constructor(serviceRepository: Repository<Service>);
     create(createDto: CreateServiceDto): Promise<Service>;
     findAll(): Promise<Service[]>;
+    findOne(id: number): Promise<Service>;
+    update(id: number, updateDto: Partial<CreateServiceDto>): Promise<Service>;
+    remove(id: number): Promise<void>;
 }
