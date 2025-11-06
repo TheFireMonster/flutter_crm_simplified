@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:flutter_crm/widgets/chat/messages.dart';
@@ -71,9 +70,13 @@ class _ChatPageState extends State<ChatPage> {
             );
           }).toList();
         });
-      } else {
       }
     } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao carregar histórico: ${e.toString()}')),
+        );
+      }
     }
   }
   final TextEditingController _controller = TextEditingController();
@@ -141,7 +144,9 @@ class _ChatPageState extends State<ChatPage> {
     try {
       socket.disconnect();
       socket.dispose();
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Erro ao desconectar socket: $e');
+    }
     _controller.dispose();
     _customerNameController.dispose();
     super.dispose();
@@ -150,14 +155,15 @@ class _ChatPageState extends State<ChatPage> {
   void _joinConversationIfNeeded() {
     if (linkId == null) return;
     try {
-      try { socket.emit('join_conversation', linkId); } catch (_) {}
-    } catch (_) {}
+      socket.emit('join_conversation', linkId);
+    } catch (e) {
+      debugPrint('Erro ao entrar na conversa: $e');
+    }
     loadMessageHistory(linkId!);
     fetchChatGptStatus();
   }
 
   void connectToServer() {
-    // Determine server URL: prefer current origin (useful on web / deployed apps).
   final origin = Uri.base.origin;
   final serverUrl = (origin.isNotEmpty && origin.startsWith('http')) ? origin : 'http://localhost:3000';
 
@@ -169,7 +175,11 @@ class _ChatPageState extends State<ChatPage> {
     socket.onConnect((_){
       if (mounted) setState(() => isSocketConnected = true);
       if (linkId != null) {
-        try { socket.emit('join_conversation', linkId); } catch (_) {}
+        try {
+          socket.emit('join_conversation', linkId);
+        } catch (e) {
+          debugPrint('Erro ao entrar na conversa no connect: $e');
+        }
       }
     });
 
@@ -242,7 +252,6 @@ class _ChatPageState extends State<ChatPage> {
       }
 
       Future<Map<String, dynamic>> fetchConversationInfo(String? customerId, String customerName) async {
-    // Only include customerId in the request if it can be parsed as a numeric id.
     final parsed = _toNullableInt(customerId);
     final body = (parsed != null) ? {'customerId': parsed, 'customerName': customerName} : {'customerName': customerName};
         final response = await http.post(
@@ -329,12 +338,15 @@ class _ChatPageState extends State<ChatPage> {
                             setState(() {
                               generatedChatLinks.add(newLink);
                               customerNames[linkId!] = name;
-                              // preserve the original type returned by the server (number when possible)
                               if (info.containsKey('customerId') && info['customerId'] != null) {
                                 customerIds[linkId!] = info['customerId'];
                               }
                             });
-                              try { socket.emit('join_conversation', linkId); } catch (_) {}
+                            try {
+                              socket.emit('join_conversation', linkId);
+                            } catch (e) {
+                              debugPrint('Erro ao entrar na conversa após gerar link: $e');
+                            }
                             saveChatLinks();
                             if (!mounted) return;
                             showDialog(
@@ -491,17 +503,17 @@ class _ChatPageState extends State<ChatPage> {
                                       });
                                       await saveChatLinks();
 
-                                      // if the deleted conversation is currently open on the right,
-                                      // clear it and leave the conversation on the socket
                                       try {
                                         if (linkId == localLinkId) {
-                                          try { socket.emit('leave_conversation', localLinkId); } catch (_) {}
+                                          socket.emit('leave_conversation', localLinkId);
                                           setState(() {
                                             linkId = null;
                                             messages.clear();
                                           });
                                         }
-                                      } catch (_) {}
+                                      } catch (e) {
+                                        debugPrint('Erro ao sair da conversa: $e');
+                                      }
                                     },
                                 ),
                               ],
