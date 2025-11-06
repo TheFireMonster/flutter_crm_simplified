@@ -59,9 +59,15 @@ class _ChatPageCustomerState extends State<ChatPageCustomer> {
       if (incomingId != null && _receivedMessageIds.contains(incomingId)) {
         return;
       }
+      DateTime msgDate;
+      try {
+        msgDate = DateTime.parse(data['createdAt'] ?? DateTime.now().toIso8601String());
+      } catch (e) {
+        msgDate = DateTime.now();
+      }
       final message = Message(
         text: data['content'] ?? data['text'],
-        date: DateTime.parse(data['createdAt'] ?? DateTime.now().toIso8601String()),
+        date: msgDate,
         isSentByMe: data['sender'] == 'client',
       );
       if (incomingId != null) _receivedMessageIds.add(incomingId);
@@ -106,11 +112,19 @@ class _ChatPageCustomerState extends State<ChatPageCustomer> {
     if (resp.statusCode == 200) {
       final List<dynamic> data = jsonDecode(resp.body);
       setState(() {
-        messages = data.map((msg) => Message(
-          text: msg['content'],
-          date: DateTime.parse(msg['createdAt']),
-          isSentByMe: msg['sender'] == 'client',
-        )).toList();
+        messages = data.map((msg) {
+          DateTime msgDate;
+          try {
+            msgDate = DateTime.parse(msg['createdAt']);
+          } catch (e) {
+            msgDate = DateTime.now();
+          }
+          return Message(
+            text: msg['content'],
+            date: msgDate,
+            isSentByMe: msg['sender'] == 'client',
+          );
+        }).toList();
       });
     }
   }

@@ -57,11 +57,19 @@ class _ChatPageState extends State<ChatPage> {
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
         setState(() {
-          messages = data.map((msg) => Message(
-            text: msg['content'],
-            date: DateTime.parse(msg['createdAt']),
-            isSentByMe: (msg['sender'] == 'staff'),
-          )).toList();
+          messages = data.map((msg) {
+            DateTime msgDate;
+            try {
+              msgDate = DateTime.parse(msg['createdAt']);
+            } catch (e) {
+              msgDate = DateTime.now();
+            }
+            return Message(
+              text: msg['content'],
+              date: msgDate,
+              isSentByMe: (msg['sender'] == 'staff'),
+            );
+          }).toList();
         });
       } else {
       }
@@ -73,7 +81,6 @@ class _ChatPageState extends State<ChatPage> {
   String? generatedCustomerId;
   List<String> generatedChatLinks = [];
   Map<String, String> customerNames = {};
-  // keep dynamic to handle existing string ids and numeric ids during migration
   Map<String, dynamic> customerIds = {};
   Future<void> loadChatLinks() async {
     final prefs = await SharedPreferences.getInstance();
@@ -175,9 +182,15 @@ class _ChatPageState extends State<ChatPage> {
       if (incomingId.isNotEmpty && _receivedMessageIds.contains(incomingId)) {
         return;
       }
+      DateTime msgDate;
+      try {
+        msgDate = DateTime.parse(data['createdAt'] ?? DateTime.now().toIso8601String());
+      } catch (e) {
+        msgDate = DateTime.now();
+      }
       final message = Message(
         text: data['content'] ?? data['text'],
-        date: DateTime.parse(data['createdAt'] ?? DateTime.now().toIso8601String()),
+        date: msgDate,
         isSentByMe: (data['sender'] == 'staff'),
       );
   if (incomingId.isNotEmpty) _receivedMessageIds.add(incomingId);
