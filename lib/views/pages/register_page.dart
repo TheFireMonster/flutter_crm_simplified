@@ -72,7 +72,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Register Page'), centerTitle: true),
+      appBar: AppBar(title: const Text('Cadastro'), centerTitle: true),
       body: Center(
         child: SizedBox(
           width: 400,

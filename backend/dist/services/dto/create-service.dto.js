@@ -4,8 +4,7 @@ exports.CreateServiceDto = void 0;
 class CreateServiceDto {
     serviceName;
     price;
-    customerName;
-    customerEmail;
+    description;
 }
 exports.CreateServiceDto = CreateServiceDto;
 //# sourceMappingURL=create-service.dto.js.map

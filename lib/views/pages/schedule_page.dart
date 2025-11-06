@@ -12,7 +12,7 @@ class _SchedulePageState extends State<SchedulePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Flutter'), centerTitle: true),
+      appBar: AppBar(title: Text('Agenda'), centerTitle: true),
     );
   }
 }

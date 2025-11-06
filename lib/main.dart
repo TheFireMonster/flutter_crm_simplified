@@ -17,7 +17,6 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // For Flutter web: extract linkId from URL if present
   final uri = Uri.base;
   String? linkId;
   if (uri.pathSegments.length >= 2 && uri.pathSegments[0] == 'chat') {

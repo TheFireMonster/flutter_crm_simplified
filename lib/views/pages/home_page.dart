@@ -34,11 +34,7 @@ class _HomePageState extends State<HomePage> {
               if (!mounted) return;
               router.go('/login');
             },
-            child: Text('Logout', style: TextStyle(color: Colors.white)),
-          ),
-          IconButton(
-            icon: Icon(Icons.account_circle_rounded, color: Colors.white),
-            onPressed: toggleDrawer,
+            child: Text('Sair', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

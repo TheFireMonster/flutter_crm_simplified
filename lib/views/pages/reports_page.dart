@@ -129,7 +129,7 @@ class _ReportsPageState extends State<ReportsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Reports Page')),
+      appBar: AppBar(title: Text('Relatórios')),
       body: Row(
         children: [
           SideMenu(isDrawerOpen: isDrawerOpen, toggleDrawer: toggleDrawer),
@@ -143,7 +143,7 @@ class _ReportsPageState extends State<ReportsPage> {
                   TextField(
                     controller: _controller,
                     decoration: InputDecoration(
-                      labelText: 'Type your message here',
+                      labelText: 'Digite sua mensagem aqui',
                       labelStyle: TextStyle(color: Colors.black54),
                       floatingLabelStyle: TextStyle(color: Colors.black54),
                       border: OutlineInputBorder(
@@ -164,13 +164,13 @@ class _ReportsPageState extends State<ReportsPage> {
                     Container(
                       color: Colors.red[100],
                       padding: EdgeInsets.all(12),
-                      child: Text('Error: $_errorMessage', style: TextStyle(color: Colors.red[800])),
+                      child: Text('Erro: $_errorMessage', style: TextStyle(color: Colors.red[800])),
                     ),
                   ] else ...[
                     Expanded(
                       child: _chartResult != null
                           ? buildChart(_chartResult!)
-                          : Center(child: Text('No chart yet. Type a prompt and press Enter.')),
+                          : Center(child: Text('Nenhum gráfico ainda. Digite um comando e pressione Enter.')),
                     ),
                   ],
                 ],

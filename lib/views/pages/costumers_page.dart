@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_crm/widgets/menu/side_menu.dart';
-// go_router unused here
+import 'package:go_router/go_router.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+
 
 class CostumersPage extends StatefulWidget {
   const CostumersPage({super.key});
@@ -131,10 +132,10 @@ class _CostumersPageState extends State<CostumersPage> {
   _cepController.clear();
       await fetchCustomers();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Customer registered!')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Cliente registrado!')));
     } else {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error registering customer')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao registrar cliente')));
     }
   }
 
@@ -160,15 +161,14 @@ class _CostumersPageState extends State<CostumersPage> {
       _clearFormFields();
       await fetchCustomers();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Customer updated')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Cliente atualizado')));
     } else {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error updating customer')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao atualizar cliente')));
     }
   }
 
   void _openEditCustomer(Map<String, dynamic> customer) {
-    // populate controllers
     _nameController.text = (customer['name'] ?? '').toString();
     _emailController.text = (customer['email'] ?? '').toString();
     _cpfController.text = (customer['cpf'] ?? '').toString();
@@ -183,29 +183,29 @@ class _CostumersPageState extends State<CostumersPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Edit customer'),
+          title: Text('Editar cliente'),
           content: SingleChildScrollView(
             child: Column(
               children: [
-                TextFormField(controller: _nameController, decoration: InputDecoration(labelText: 'Name')),
+                TextFormField(controller: _nameController, decoration: InputDecoration(labelText: 'Nome')),
                 TextFormField(controller: _emailController, decoration: InputDecoration(labelText: 'Email')),
                 TextFormField(controller: _cpfController, decoration: InputDecoration(labelText: 'CPF')),
-                TextFormField(controller: _dateOfBirthController, decoration: InputDecoration(labelText: 'Date of Birth')),
-                TextFormField(controller: _stateController, decoration: InputDecoration(labelText: 'State')),
+                TextFormField(controller: _dateOfBirthController, decoration: InputDecoration(labelText: 'Data de Nascimento')),
+                TextFormField(controller: _stateController, decoration: InputDecoration(labelText: 'Estado')),
                 TextFormField(controller: _cepController, decoration: InputDecoration(labelText: 'CEP')),
-                TextFormField(controller: _phoneController, decoration: InputDecoration(labelText: 'Phone')),
-                TextFormField(controller: _addressController, decoration: InputDecoration(labelText: 'Address')),
-                TextFormField(controller: _sourceController, decoration: InputDecoration(labelText: 'Source')),
+                TextFormField(controller: _phoneController, decoration: InputDecoration(labelText: 'Telefone')),
+                TextFormField(controller: _addressController, decoration: InputDecoration(labelText: 'Endereço')),
+                TextFormField(controller: _sourceController, decoration: InputDecoration(labelText: 'Origem')),
               ],
             ),
           ),
           actions: [
-            TextButton(onPressed: () { _clearFormFields(); Navigator.of(context).pop(); }, child: Text('Cancel')),
+            TextButton(onPressed: () { _clearFormFields(); Navigator.of(context).pop(); }, child: Text('Cancelar')),
             ElevatedButton(onPressed: () async {
               Navigator.of(context).pop();
               final id = customer['id'];
               if (id != null) await updateCustomer(id);
-            }, child: Text('Save')),
+            }, child: Text('Salvar')),
           ],
         );
       }
@@ -217,15 +217,15 @@ class _CostumersPageState extends State<CostumersPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Delete customer?'),
-          content: Text('Are you sure you want to delete "${customer['name'] ?? ''}"? This cannot be undone.'),
+          title: Text('Excluir cliente?'),
+          content: Text('Tem certeza que deseja excluir "${customer['name'] ?? ''}"? Esta ação não pode ser desfeita.'),
           actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(), child: Text('Cancel')),
+            TextButton(onPressed: () => Navigator.of(context).pop(), child: Text('Cancelar')),
             ElevatedButton(onPressed: () async {
               Navigator.of(context).pop();
               final id = customer['id'];
               if (id != null) await _deleteCustomer(id);
-            }, child: Text('Delete')),
+            }, child: Text('Excluir')),
           ],
         );
       }
@@ -238,10 +238,10 @@ class _CostumersPageState extends State<CostumersPage> {
     if (resp.statusCode == 200 || resp.statusCode == 204) {
       await fetchCustomers();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Customer deleted')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Cliente excluído')));
     } else {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error deleting customer')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao excluir cliente')));
     }
   }
 
@@ -268,7 +268,8 @@ class _CostumersPageState extends State<CostumersPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Costumers'),
+        title: const Text('Clientes'),
+        centerTitle: true,
       ),
       body: Row(
         children: [
@@ -292,56 +293,56 @@ class _CostumersPageState extends State<CostumersPage> {
 
                             TextFormField(
                               controller: _nameController,
-                              decoration: InputDecoration(labelText: 'Name'),
-                              validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                              decoration: InputDecoration(labelText: 'Nome'),
+                              validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
                             ),
                             TextFormField(
                               controller: _emailController,
                               decoration: InputDecoration(labelText: 'Email'),
-                              validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                              validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
                             ),
                             TextFormField(
                               controller: _cpfController,
                               decoration: InputDecoration(labelText: 'CPF'),
-                              validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                              validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
                             ),
                             TextFormField(
                               controller: _dateOfBirthController,
-                              decoration: InputDecoration(labelText: 'Date of Birth (DD/MM/AAAA)'),
-                              validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                              decoration: InputDecoration(labelText: 'Data de Nascimento (DD/MM/AAAA)'),
+                              validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
                             ),
                             TextFormField(
                               controller: _stateController,
-                              decoration: InputDecoration(labelText: 'State (e.g. SC)'),
-                              validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                              decoration: InputDecoration(labelText: 'Estado (ex: SC)'),
+                              validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
                             ),
                             TextFormField(
                               controller: _cepController,
                               decoration: InputDecoration(labelText: 'CEP'),
-                              validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                              validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
                             ),
                             TextFormField(
                               controller: _phoneController,
-                              decoration: InputDecoration(labelText: 'Phone'),
+                              decoration: InputDecoration(labelText: 'Telefone'),
                             ),
                             TextFormField(
                               controller: _addressController,
-                              decoration: InputDecoration(labelText: 'Address'),
+                              decoration: InputDecoration(labelText: 'Endereço'),
                             ),
                             TextFormField(
                               controller: _sourceController,
-                              decoration: InputDecoration(labelText: 'Source'),
+                              decoration: InputDecoration(labelText: 'Origem'),
                             ),
                             SizedBox(height: 16),
                             ElevatedButton(
                               onPressed: registerCustomer,
-                              child: Text('Register Customer'),
+                              child: Text('Registrar Cliente'),
                             ),
                           ],
                         ),
                       ),
                       SizedBox(height: 32),
-                      Text('Registered Customers:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text('Clientes Registrados:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                       SizedBox(height: 8),
                       ListView.builder(
                         shrinkWrap: true,

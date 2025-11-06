@@ -107,12 +107,17 @@ class LoginDesktop extends StatelessWidget {
                   SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: onLoginPressed,
+                    style: ElevatedButton.styleFrom( 
+                      backgroundColor: Colors.green[100],
+                    ),
                     child: Text(
                       "Login",
                       style: TextStyle(
                         fontFamily: 'Roboto',
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
+                        color: Colors.white,
+
                       ),
                     ),
                   ),
@@ -125,7 +130,7 @@ class LoginDesktop extends StatelessWidget {
             child: GestureDetector(
               onTap: onSignUpTapped,
               child: Text(
-                        "Sign up",
+                        "Cadastrar-se",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontFamily: 'Roboto',

@@ -15,8 +15,7 @@ class _ServicePageState extends State<ServicePage> {
   final _formKey = GlobalKey<FormState>();
   String serviceName = '';
   String price = '';
-  String customerName = '';
-  String customerEmail = '';
+  String description = '';
   bool isLoading = false;
   List<Map<String, dynamic>> services = [];
 
@@ -44,8 +43,7 @@ class _ServicePageState extends State<ServicePage> {
       body: json.encode({
         'serviceName': serviceName,
         'price': double.tryParse(price) ?? 0,
-        'customerName': customerName.isNotEmpty ? customerName : null,
-        'customerEmail': customerEmail.isNotEmpty ? customerEmail : null,
+        'description': description.isNotEmpty ? description : null,
       }),
     );
     setState(() { isLoading = false; });
@@ -53,17 +51,16 @@ class _ServicePageState extends State<ServicePage> {
       _formKey.currentState!.reset();
   serviceName = '';
   price = '';
-      customerName = '';
-      customerEmail = '';
+      description = '';
       await fetchServices();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Service registered successfully!')),
+        SnackBar(content: Text('Serviço registrado com sucesso!')),
       );
     } else {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to register service.')),
+        SnackBar(content: Text('Falha ao registrar serviço.')),
       );
     }
   }
@@ -71,33 +68,29 @@ class _ServicePageState extends State<ServicePage> {
   Future<void> editService(int id, Map<String, dynamic> currentData) async {
     final nameController = TextEditingController(text: currentData['serviceName']);
     final priceController = TextEditingController(text: currentData['price']?.toString() ?? '');
-    final custNameController = TextEditingController(text: currentData['customerName'] ?? '');
-    final custEmailController = TextEditingController(text: currentData['customerEmail'] ?? '');
+    final descController = TextEditingController(text: currentData['description'] ?? '');
 
     final result = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Edit Service'),
+        title: Text('Editar Serviço'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: nameController,
-                decoration: InputDecoration(labelText: 'Service Name'),
+                decoration: InputDecoration(labelText: 'Nome do Serviço'),
               ),
               TextField(
                 controller: priceController,
-                decoration: InputDecoration(labelText: 'Price'),
+                decoration: InputDecoration(labelText: 'Preço'),
                 keyboardType: TextInputType.number,
               ),
               TextField(
-                controller: custNameController,
-                decoration: InputDecoration(labelText: 'Customer Name'),
-              ),
-              TextField(
-                controller: custEmailController,
-                decoration: InputDecoration(labelText: 'Customer Email'),
+                controller: descController,
+                decoration: InputDecoration(labelText: 'Descrição'),
+                maxLines: 3,
               ),
             ],
           ),
@@ -105,11 +98,11 @@ class _ServicePageState extends State<ServicePage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel'),
+            child: Text('Cancelar'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Save'),
+            child: Text('Salvar'),
           ),
         ],
       ),
@@ -122,8 +115,7 @@ class _ServicePageState extends State<ServicePage> {
         body: json.encode({
           'serviceName': nameController.text,
           'price': double.tryParse(priceController.text) ?? 0,
-          'customerName': custNameController.text.isNotEmpty ? custNameController.text : null,
-          'customerEmail': custEmailController.text.isNotEmpty ? custEmailController.text : null,
+          'description': descController.text.isNotEmpty ? descController.text : null,
         }),
       );
 
@@ -131,12 +123,12 @@ class _ServicePageState extends State<ServicePage> {
         await fetchServices();
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Service updated successfully!')),
+          SnackBar(content: Text('Serviço atualizado com sucesso!')),
         );
       } else {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update service.')),
+          SnackBar(content: Text('Falha ao atualizar serviço.')),
         );
       }
     }
@@ -146,17 +138,17 @@ class _ServicePageState extends State<ServicePage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Delete Service'),
-        content: Text('Are you sure you want to delete this service?'),
+        title: Text('Excluir Serviço'),
+        content: Text('Tem certeza que deseja excluir este serviço?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel'),
+            child: Text('Cancelar'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: Text('Delete'),
+            child: Text('Excluir'),
           ),
         ],
       ),
@@ -168,12 +160,12 @@ class _ServicePageState extends State<ServicePage> {
         await fetchServices();
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Service deleted successfully!')),
+          SnackBar(content: Text('Serviço excluído com sucesso!')),
         );
       } else {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete service.')),
+          SnackBar(content: Text('Falha ao excluir serviço.')),
         );
       }
     }
@@ -207,7 +199,7 @@ class _ServicePageState extends State<ServicePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Register New Service',
+                        'Registrar Novo Serviço',
                         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 16),
@@ -216,40 +208,37 @@ class _ServicePageState extends State<ServicePage> {
                         child: Column(
                           children: [
                             TextFormField(
-                              decoration: InputDecoration(labelText: 'Service Name'),
+                              decoration: InputDecoration(labelText: 'Nome do Serviço'),
                               onChanged: (val) => serviceName = val,
-                              validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                              validator: (val) => val == null || val.isEmpty ? 'Obrigatório' : null,
                             ),
                             TextFormField(
-                              decoration: InputDecoration(labelText: 'Price'),
+                              decoration: InputDecoration(labelText: 'Preço'),
                               keyboardType: TextInputType.number,
                               onChanged: (val) => price = val,
-                              validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                              validator: (val) => val == null || val.isEmpty ? 'Obrigatório' : null,
                             ),
                             TextFormField(
-                              decoration: InputDecoration(labelText: 'Customer Name (optional)'),
-                              onChanged: (val) => customerName = val,
-                            ),
-                            TextFormField(
-                              decoration: InputDecoration(labelText: 'Customer Email (optional)'),
-                              onChanged: (val) => customerEmail = val,
+                              decoration: InputDecoration(labelText: 'Descrição (opcional)'),
+                              maxLines: 3,
+                              onChanged: (val) => description = val,
                             ),
                             SizedBox(height: 16),
                             ElevatedButton(
                               onPressed: isLoading ? null : registerService,
-                              child: isLoading ? CircularProgressIndicator() : Text('Register'),
+                              child: isLoading ? CircularProgressIndicator() : Text('Registrar'),
                             ),
                           ],
                         ),
                       ),
                       SizedBox(height: 32),
                       Text(
-                        'Registered Services',
+                        'Serviços Registrados',
                         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 16),
                       services.isEmpty
-                          ? Text('No services registered yet.')
+                          ? Text('Nenhum serviço registrado ainda.')
                           : ListView.builder(
                               shrinkWrap: true,
                               physics: NeverScrollableScrollPhysics(),
@@ -259,15 +248,17 @@ class _ServicePageState extends State<ServicePage> {
                                 return Card(
                                   child: ListTile(
                                     title: Text(s['serviceName'] ?? ''),
-                                    subtitle: Text('Price: ${s['price']}'),
+                                    subtitle: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text('Preço: R\$ ${s['price']}'),
+                                        if (s['description'] != null && s['description'].toString().isNotEmpty)
+                                          Text('Descrição: ${s['description']}', style: TextStyle(fontSize: 12, color: Colors.grey[700])),
+                                      ],
+                                    ),
                                     trailing: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        if (s['customerName'] != null)
-                                          Padding(
-                                            padding: const EdgeInsets.only(right: 8.0),
-                                            child: Text('Customer: ${s['customerName']}', style: TextStyle(fontSize: 12)),
-                                          ),
                                         IconButton(
                                           icon: Icon(Icons.edit, color: Colors.blue),
                                           onPressed: () => editService(s['id'], s),

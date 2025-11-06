@@ -49,23 +49,23 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          title: Text('Edit Appointment'),
+          title: Text('Editar Agendamento'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   controller: titleController,
-                  decoration: InputDecoration(labelText: 'Title'),
+                  decoration: InputDecoration(labelText: 'Título'),
                 ),
                 TextField(
                   controller: locationController,
-                  decoration: InputDecoration(labelText: 'Location'),
+                  decoration: InputDecoration(labelText: 'Local'),
                 ),
                 SizedBox(height: 8),
                 Row(
                   children: [
-                    Text('Duration:'),
+                    Text('Duração:'),
                     SizedBox(width: 8),
                     DropdownButton<int>(
                       value: duration,
@@ -86,7 +86,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, null),
-              child: Text('Cancel'),
+              child: Text('Cancelar'),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(ctx, {
@@ -94,7 +94,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                 'location': locationController.text,
                 'duration': duration,
               }),
-              child: Text('Save'),
+              child: Text('Salvar'),
             ),
           ],
         ),
@@ -112,12 +112,12 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
         await fetchAppointments();
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Appointment updated successfully!')),
+          SnackBar(content: Text('Agendamento atualizado com sucesso!')),
         );
       } else {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update appointment.')),
+          SnackBar(content: Text('Falha ao atualizar agendamento.')),
         );
       }
     }
@@ -127,17 +127,17 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Delete Appointment'),
-        content: Text('Are you sure you want to delete this appointment?'),
+        title: Text('Excluir Agendamento'),
+        content: Text('Tem certeza que deseja excluir este agendamento?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel'),
+            child: Text('Cancelar'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: Text('Delete'),
+            child: Text('Excluir'),
           ),
         ],
       ),
@@ -149,12 +149,12 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
         await fetchAppointments();
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Appointment deleted successfully!')),
+          SnackBar(content: Text('Agendamento excluído com sucesso!')),
         );
       } else {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete appointment.')),
+          SnackBar(content: Text('Falha ao excluir agendamento.')),
         );
       }
     }
@@ -318,16 +318,16 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
           children: [
             Text('Date: $date'),
             SizedBox(height: 6),
-            Text('Start: $start'),
+            Text('Início: $start'),
             SizedBox(height: 6),
-            Text('Duration: $_selectedDuration min'),
+            Text('Duração: $_selectedDuration min'),
             SizedBox(height: 6),
-            Text('Client: $client'),
+            Text('Cliente: $client'),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text('Cancel')),
-          ElevatedButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text('Confirm')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text('Cancelar')),
+          ElevatedButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text('Confirmar')),
         ],
       ),
     );
@@ -354,7 +354,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
       final slotIdx = _selectedSlot! + s;
       if (slotIdx < 0 || slotIdx >= 20 || (_slotStatus[slotIdx] != null && _slotStatus[slotIdx] != 'free')) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Selected time overlaps an existing appointment')),
+          SnackBar(content: Text('Horário selecionado se sobrepõe a um agendamento existente')),
         );
         return;
       }
@@ -394,7 +394,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
     } else {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to create appointment.')),
+        SnackBar(content: Text('Falha ao criar agendamento.')),
       );
     }
   }
@@ -402,7 +402,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Appointments'), centerTitle: true),
+      appBar: AppBar(title: Text('Agendamentos'), centerTitle: true),
       body: Row(
         children: [
           SideMenu(
@@ -443,7 +443,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Select start hour', style: TextStyle(fontWeight: FontWeight.w600)),
+                        Text('Selecionar hora de início', style: TextStyle(fontWeight: FontWeight.w600)),
                         SizedBox(height: 8),
                         SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
@@ -510,7 +510,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                         Expanded(
                           child: TextField(
                             controller: _nameController,
-                            decoration: InputDecoration(labelText: 'Appointment Name'),
+                            decoration: InputDecoration(labelText: 'Nome do Agendamento'),
                           ),
                         ),
                         SizedBox(width: 8),
@@ -537,7 +537,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                           child: DropdownButton<Map<String, dynamic>>(
                             isExpanded: true,
                             value: _selectedCustomer,
-                            hint: Text('Select Client'),
+                            hint: Text('Selecionar Cliente'),
                             items: _customers.map((c) {
                               return DropdownMenuItem<Map<String, dynamic>>(
                                 value: c,
@@ -561,7 +561,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                                   : 'Start: -',
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
-                            Text('Duration: $_selectedDuration min', style: Theme.of(context).textTheme.bodySmall),
+                            Text('Duração: $_selectedDuration min', style: Theme.of(context).textTheme.bodySmall),
                             SizedBox(height: 6),
                             ElevatedButton(
                               onPressed: _canAdd() ? _confirmAndCreate : null,

@@ -113,6 +113,9 @@ class RegisterDesktop extends StatelessWidget {
                     width: 400,
                     height: 48,
                     child: ElevatedButton(
+                      style: ElevatedButton.styleFrom( 
+                      backgroundColor: Colors.green[100],
+                    ),
                       onPressed: loading
                           ? null
                           : () {
@@ -130,10 +133,11 @@ class RegisterDesktop extends StatelessWidget {
                               ),
                             )
                           : const Text(
-                              "Registrar",
+                              "Cadastrar",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 18,
+                                color: Colors.white,
                               ),
                             ),
                     ),

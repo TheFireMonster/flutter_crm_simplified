@@ -29,14 +29,21 @@ class _SideMenuState extends State<SideMenu> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   GestureDetector(
+                    onTap: () => context.go('/home'),
+                    child: Text(
+                      "Home", style: TextStyle(color: Colors.white)),
+                  ),
+                  SizedBox(height: 10),
+                  GestureDetector(
                     onTap: () => context.go('/chat'),
-                    child: Text("Chat", style: TextStyle(color: Colors.white)),
+                    child: Text(
+                      "Chat", style: TextStyle(color: Colors.white)),
                   ),
                   SizedBox(height: 10),
                   GestureDetector(
                     onTap: () => context.go('/sales'),
                     child: Text(
-                      "Sales",
+                      "Vendas",
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
@@ -44,7 +51,7 @@ class _SideMenuState extends State<SideMenu> {
                   GestureDetector(
                     onTap: () => context.go('/appointments'),
                     child: Text(
-                      "Appointments",
+                      "Agendamentos",
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
@@ -52,7 +59,7 @@ class _SideMenuState extends State<SideMenu> {
                   GestureDetector(
                     onTap: () => context.go('/costumers'),
                     child: Text(
-                      "Costumers",
+                      "Clientes",
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
@@ -60,7 +67,7 @@ class _SideMenuState extends State<SideMenu> {
                   GestureDetector(
                     onTap: () => context.go('/services'),
                     child: Text(
-                      "Services",
+                      "Serviços",
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
@@ -68,7 +75,7 @@ class _SideMenuState extends State<SideMenu> {
                   GestureDetector(
                     onTap: () => context.go('/reports'),
                     child: Text(
-                      "Reports",
+                      "Relatórios",
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
@@ -78,10 +85,13 @@ class _SideMenuState extends State<SideMenu> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   IconButton(
+                    icon: Icon(Icons.home, color: Colors.white, size: 30),
+                    onPressed: () => context.go('/home'),
+                  ),
+                  IconButton(
                     icon: Icon(Icons.chat, color: Colors.white, size: 30),
                     onPressed: () => context.go('/chat'),
                   ),
-                  SizedBox.shrink(),
                   IconButton(
                     icon: Icon(Icons.attach_money, color: Colors.white, size: 30),
                     onPressed: () => context.go('/sales'),

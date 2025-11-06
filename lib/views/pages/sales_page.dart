@@ -60,7 +60,6 @@ class _SalesPageState extends State<SalesPage> {
         }
         _services = data;
         if (_services.isNotEmpty) {
-          // don't auto-select, allow user to pick
         }
         if (mounted) setState(() {});
       }
@@ -125,7 +124,7 @@ class _SalesPageState extends State<SalesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Sales Page'), centerTitle: true),
+      appBar: AppBar(title: Text('Vendas'), centerTitle: true),
       body: Row(
         children: [
           SideMenu(isDrawerOpen: isDrawerOpen, toggleDrawer: toggleDrawer),
@@ -155,20 +154,20 @@ class _SalesPageState extends State<SalesPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Text('Register service sale', style: Theme.of(context).textTheme.titleMedium),
+                                Text('Registrar venda de serviço', style: Theme.of(context).textTheme.titleMedium),
                                 const SizedBox(height: 8),
                                 // Services dropdown (optional). Selecting fills service + price.
                                 _services.isEmpty
                                     ? TextFormField(
                                         controller: _serviceController,
-                                        decoration: InputDecoration(labelText: 'Service'),
-                                        validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+                                        decoration: InputDecoration(labelText: 'Serviço'),
+                                        validator: (v) => (v == null || v.isEmpty) ? 'Obrigatório' : null,
                                       )
                                     : DropdownButtonFormField<int>(
                                         initialValue: _selectedServiceId,
-                                        decoration: InputDecoration(labelText: 'Select service (or Other)'),
+                                        decoration: InputDecoration(labelText: 'Selecionar serviço (ou Outro)'),
                                         items: [
-                                          DropdownMenuItem<int>(value: 0, child: Text('Other / custom')),
+                                          DropdownMenuItem<int>(value: 0, child: Text('Outro / personalizado')),
                                           ..._services.map((s) {
                                             final id = (s['id'] ?? s['Id'] ?? s['ID']) as dynamic;
                                             final name = s['serviceName'] ?? s['service_name'] ?? s['name'] ?? '';
@@ -202,16 +201,16 @@ class _SalesPageState extends State<SalesPage> {
                                         },
                                         validator: (v) {
                                           // if user picked 'Other' or nothing, ensure manual field is filled
-                                          if ((v == null || v == 0) && (_serviceController.text.trim().isEmpty)) return 'Required';
+                                          if ((v == null || v == 0) && (_serviceController.text.trim().isEmpty)) return 'Obrigatório';
                                           return null;
                                         },
                                       ),
                                 const SizedBox(height: 8),
                                 TextFormField(
                                   controller: _priceController,
-                                  decoration: InputDecoration(labelText: 'Price'),
+                                  decoration: InputDecoration(labelText: 'Preço'),
                                   keyboardType: TextInputType.numberWithOptions(decimal: true),
-                                  validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+                                  validator: (v) => (v == null || v.isEmpty) ? 'Obrigatório' : null,
                                 ),
                                 const SizedBox(height: 8),
                                 Row(
@@ -219,7 +218,7 @@ class _SalesPageState extends State<SalesPage> {
                                     Expanded(
                                       child: TextFormField(
                                         controller: _customerNameController,
-                                        decoration: InputDecoration(labelText: 'Customer name (optional)'),
+                                        decoration: InputDecoration(labelText: 'Nome do cliente (opcional)'),
                                       ),
                                     ),
                                     const SizedBox(width: 8),
@@ -227,7 +226,7 @@ class _SalesPageState extends State<SalesPage> {
                                         ? SizedBox.shrink()
                                         : DropdownButton<String>(
                                             value: _selectedChatCustomerLinkId,
-                                            hint: Text('Pick chat'),
+                                            hint: Text('Escolher conversa'),
                                             items: _chatCustomerNames.entries
                                                 .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
                                                 .toList(),
@@ -243,13 +242,13 @@ class _SalesPageState extends State<SalesPage> {
                                 const SizedBox(height: 8),
                                 TextFormField(
                                   controller: _customerEmailController,
-                                  decoration: InputDecoration(labelText: 'Customer email (optional)'),
+                                  decoration: InputDecoration(labelText: 'Email do cliente (opcional)'),
                                   keyboardType: TextInputType.emailAddress,
                                 ),
                                 const SizedBox(height: 12),
                                 ElevatedButton(
                                   onPressed: _createSale,
-                                  child: Text('Create sale'),
+                                  child: Text('Criar venda'),
                                 ),
                                 const SizedBox(height: 16),
                                 Divider(),
@@ -260,7 +259,7 @@ class _SalesPageState extends State<SalesPage> {
                         sales.isEmpty
                             ? Padding(
                                 padding: const EdgeInsets.all(24.0),
-                                child: Text('No sales yet'),
+                                child: Text('Nenhuma venda ainda'),
                               )
                             : RefreshIndicator(
                                 onRefresh: fetchSales,
@@ -319,7 +318,7 @@ class _SalesPageState extends State<SalesPage> {
     final customerEmail = _customerEmailController.text.trim();
     double? price = double.tryParse(priceText.replaceAll(',', '.'));
     if (price == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Invalid price')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Preço inválido')));
       return;
     }
 
@@ -353,10 +352,10 @@ class _SalesPageState extends State<SalesPage> {
         _customerEmailController.clear();
         await fetchSales();
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Sale created')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Venda criada')));
       } else {
         
-        String userMsg = 'Failed to create sale';
+        String userMsg = 'Falha ao criar venda';
         try {
           final parsed = jsonDecode(resp.body);
           if (parsed is Map && parsed.containsKey('message')) {
@@ -372,7 +371,7 @@ class _SalesPageState extends State<SalesPage> {
         if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(userMsg)));
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error creating sale')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao criar venda')));
     } finally {
       if (mounted) setState(() => loading = false);
     }
@@ -387,27 +386,27 @@ class _SalesPageState extends State<SalesPage> {
     final result = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Edit Sale'),
+        title: Text('Editar Venda'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: serviceController,
-                decoration: InputDecoration(labelText: 'Service'),
+                decoration: InputDecoration(labelText: 'Serviço'),
               ),
               TextField(
                 controller: priceController,
-                decoration: InputDecoration(labelText: 'Price'),
+                decoration: InputDecoration(labelText: 'Preço'),
                 keyboardType: TextInputType.number,
               ),
               TextField(
                 controller: custNameController,
-                decoration: InputDecoration(labelText: 'Customer Name'),
+                decoration: InputDecoration(labelText: 'Nome do Cliente'),
               ),
               TextField(
                 controller: custEmailController,
-                decoration: InputDecoration(labelText: 'Customer Email'),
+                decoration: InputDecoration(labelText: 'Email do Cliente'),
               ),
             ],
           ),
@@ -415,11 +414,11 @@ class _SalesPageState extends State<SalesPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel'),
+            child: Text('Cancelar'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Save'),
+            child: Text('Salvar'),
           ),
         ],
       ),
@@ -441,12 +440,12 @@ class _SalesPageState extends State<SalesPage> {
         await fetchSales();
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Sale updated successfully!')),
+          SnackBar(content: Text('Venda atualizada com sucesso!')),
         );
       } else {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update sale.')),
+          SnackBar(content: Text('Falha ao atualizar venda.')),
         );
       }
     }
@@ -456,17 +455,17 @@ class _SalesPageState extends State<SalesPage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Delete Sale'),
-        content: Text('Are you sure you want to delete this sale?'),
+        title: Text('Excluir Venda'),
+        content: Text('Tem certeza que deseja excluir esta venda?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel'),
+            child: Text('Cancelar'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: Text('Delete'),
+            child: Text('Excluir'),
           ),
         ],
       ),
@@ -478,12 +477,12 @@ class _SalesPageState extends State<SalesPage> {
         await fetchSales();
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Sale deleted successfully!')),
+          SnackBar(content: Text('Venda excluída com sucesso!')),
         );
       } else {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete sale.')),
+          SnackBar(content: Text('Falha ao excluir venda.')),
         );
       }
     }
