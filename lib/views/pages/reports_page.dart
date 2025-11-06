@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_crm/widgets/menu/side_menu.dart';
-// fl_chart and go_router unused in this page
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../widgets/charts/chartscreen.dart';
