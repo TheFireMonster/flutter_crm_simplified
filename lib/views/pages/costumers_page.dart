@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_crm/widgets/menu/side_menu.dart';
-import 'package:go_router/go_router.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -43,7 +42,6 @@ class _CostumersPageState extends State<CostumersPage> {
       setState(() {
         _customers = data.map<Map<String, dynamic>>((c) => Map<String, dynamic>.from(c)).toList();
       });
-      // merge in any chat-created customers that are stored locally
       await _mergeChatCustomersIfAny();
     }
   }

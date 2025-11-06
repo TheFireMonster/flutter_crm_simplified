@@ -114,7 +114,7 @@ class RegisterDesktop extends StatelessWidget {
                     height: 48,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom( 
-                      backgroundColor: Colors.green[100],
+                      backgroundColor: Colors.green[300],
                     ),
                       onPressed: loading
                           ? null

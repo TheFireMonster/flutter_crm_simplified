@@ -23,92 +23,90 @@ class LoginDesktop extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20.0),
-            height: 500,
-            width: 700,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withValues(alpha: 0.5),
-                  spreadRadius: 5,
-                  blurRadius: 7,
-                  offset: Offset(0, 3),
-                ),
-              ],
+      child: Container(
+        padding: const EdgeInsets.all(20.0),
+        height: 500,
+        width: 700,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withValues(alpha: 0.5),
+              spreadRadius: 5,
+              blurRadius: 7,
+              offset: Offset(0, 3),
             ),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 400,
-                    height: 48,
-                    child: TextField(
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        label: Text(
-                          "Email",
-                          style: TextStyle(
-                            fontFamily: 'Roboto',
-                            fontWeight: FontWeight.w500,
-                            fontSize: 18,
-                            color: Colors.blueGrey,
-                          ),
-                        ),
-                      ),
-                      style: TextStyle(
+          ],
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(25.0),
+                child: SizedBox(
+                  width: 400,
+                  height: 48,
+                  child: TextField(
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(
+                      labelText: "Email",
+                      labelStyle: TextStyle(
                         fontFamily: 'Roboto',
-                        fontSize: 20,
-                        color: Colors.black87,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 18,
+                        color: Colors.blueGrey,
                       ),
-                      onChanged: onEmailChanged,
+                      border: OutlineInputBorder(),
                     ),
+                    style: TextStyle(
+                      fontFamily: 'Roboto',
+                      fontSize: 20,
+                      color: Colors.black87,
+                    ),
+                    onChanged: onEmailChanged,
                   ),
-                  SizedBox(height: 16),
-                  SizedBox(
-                    width: 400,
-                    height: 48,
-                    child: TextField(
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        label: Text(
-                          "Senha",
-                          style: TextStyle(
-                            fontFamily: 'Roboto',
-                            fontWeight: FontWeight.w500,
-                            fontSize: 18,
-                            color: Colors.blueGrey,
-                          ),
-                        ),
-                        labelStyle: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 18,
-                          color: Colors.blueGrey,
-                        ),
-                      ),
-                      style: TextStyle(
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(25.0),
+                child: SizedBox(
+                  width: 400,
+                  height: 48,
+                  child: TextField(
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: "Senha",
+                      labelStyle: TextStyle(
                         fontFamily: 'Roboto',
-                        fontSize: 20,
-                        color: Colors.black87,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 18,
+                        color: Colors.blueGrey,
                       ),
-                      onChanged: onPasswordChanged,
+                      border: OutlineInputBorder(),
                     ),
+                    style: TextStyle(
+                      fontFamily: 'Roboto',
+                      fontSize: 20,
+                      color: Colors.black87,
+                    ),
+                    onChanged: onPasswordChanged,
                   ),
-                  SizedBox(height: 24),
-                  ElevatedButton(
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 25),
+                child: SizedBox(
+                  width: 400,
+                  height: 48,
+                  child: ElevatedButton(
                     onPressed: onLoginPressed,
                     style: ElevatedButton.styleFrom( 
-                      backgroundColor: Colors.green[100],
+                      backgroundColor: Colors.green[300],
                     ),
                     child: Text(
                       "Login",
@@ -117,32 +115,28 @@ class LoginDesktop extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
                         color: Colors.white,
-
                       ),
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
+              GestureDetector(
+                onTap: onSignUpTapped,
+                child: Text(
+                  "Cadastrar-se",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'Roboto',
+                    fontWeight: FontWeight.w400,
+                    fontSize: 16,
+                    color: Colors.blueGrey[700],
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: GestureDetector(
-              onTap: onSignUpTapped,
-              child: Text(
-                        "Cadastrar-se",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.w400,
-                          fontSize: 16,
-                          color: Colors.blueGrey[700],
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
