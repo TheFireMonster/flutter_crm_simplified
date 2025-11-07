@@ -28,6 +28,9 @@ class _ServicePageState extends State<ServicePage> {
   Future<void> fetchServices() async {
     try {
       final response = await http.get(Uri.parse('/services'));
+      print('Services response status: ${response.statusCode}');
+      print('Services response body (first 200 chars): ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}');
+      
       if (response.statusCode == 200) {
         final decoded = json.decode(response.body);
         if (decoded is List) {
@@ -39,8 +42,9 @@ class _ServicePageState extends State<ServicePage> {
         print('Failed to fetch services: ${response.statusCode}');
         print('Response body: ${response.body}');
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       print('Error fetching services: $e');
+      print('Stack trace: $stackTrace');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erro ao carregar serviços')),

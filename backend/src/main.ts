@@ -49,6 +49,10 @@ async function bootstrap() {
       !req.path.startsWith('/chat/history') &&
       !req.path.startsWith('/chat/conversations') &&
       !req.path.startsWith('/appointments') &&
+      !req.path.startsWith('/services') &&
+      !req.path.startsWith('/customers') &&
+      !req.path.startsWith('/sales') &&
+      !req.path.startsWith('/chartai') &&
       !req.path.includes('.') &&
       req.accepts('html')
     ) {
