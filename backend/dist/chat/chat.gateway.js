@@ -67,7 +67,7 @@ let ChatGateway = class ChatGateway {
                 this.server.to(data.conversationId).emit('typing', { sender: 'staff' });
             }
             catch (_) { }
-            const AIChatReply = await this.aiChatService.ask(data.text, conversation.id, conversation.customerName || undefined);
+            const AIChatReply = await this.aiChatService.ask(data.text, conversation.id, conversation.customerName || undefined, conversation.customerId || undefined);
             try {
                 this.server.to(data.conversationId).emit('typing', { sender: 'staff', done: true });
             }

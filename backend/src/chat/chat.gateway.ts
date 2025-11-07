@@ -90,6 +90,7 @@ export class ChatGateway {
         data.text,
         conversation.id,
         conversation.customerName || undefined,
+        conversation.customerId || undefined,
       );
 
       try {

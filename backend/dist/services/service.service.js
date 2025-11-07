@@ -23,8 +23,14 @@ let ServiceService = class ServiceService {
         this.serviceRepository = serviceRepository;
     }
     async create(createDto) {
-        const item = this.serviceRepository.create(createDto);
-        return this.serviceRepository.save(item);
+        try {
+            const item = this.serviceRepository.create(createDto);
+            return await this.serviceRepository.save(item);
+        }
+        catch (error) {
+            console.error('Error creating service:', error);
+            throw error;
+        }
     }
     async findAll() {
         return this.serviceRepository.find();

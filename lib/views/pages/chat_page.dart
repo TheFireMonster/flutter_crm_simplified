@@ -112,7 +112,7 @@ class _ChatPageState extends State<ChatPage> {
   late io.Socket socket;
   bool isSocketConnected = false;
   List<Message> messages = [];
-  // message IDs can be numeric or UUID strings depending on backend; store as strings for dedupe
+
   final Set<String> _receivedMessageIds = {};
   bool isSomeoneTyping = false;
   String typingUser = '';
@@ -360,7 +360,7 @@ class _ChatPageState extends State<ChatPage> {
                                         child: Icon(Icons.chat, color: Colors.white),
                                       ),
                                       SizedBox(width: 8),
-                                      Text('WhatsApp'),
+                                      Text('Link Gerado'),
                                     ],
                                   ),
                                   content: Column(
@@ -496,6 +496,28 @@ class _ChatPageState extends State<ChatPage> {
                                 IconButton(
                                   icon: Icon(Icons.delete, color: Colors.red[400]),
                                   onPressed: () async {
+                                    final confirm = await showDialog<bool>(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: Text('Excluir Conversa'),
+                                        content: Text(
+                                          'Tem certeza que deseja excluir esta conversa?\n\n'
+                                          'ATENÇÃO: O cliente associado também será removido do sistema.',
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () => Navigator.of(context).pop(false),
+                                            child: Text('Cancelar'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () => Navigator.of(context).pop(true),
+                                            child: Text('Excluir', style: TextStyle(color: Colors.red)),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+
+                                    if (confirm == true) {
                                       setState(() {
                                         generatedChatLinks.removeAt(index);
                                         customerNames.remove(localLinkId);
@@ -514,7 +536,8 @@ class _ChatPageState extends State<ChatPage> {
                                       } catch (e) {
                                         debugPrint('Erro ao sair da conversa: $e');
                                       }
-                                    },
+                                    }
+                                  },
                                 ),
                               ],
                             ),
