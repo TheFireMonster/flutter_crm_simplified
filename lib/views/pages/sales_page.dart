@@ -133,27 +133,30 @@ class _SalesPageState extends State<SalesPage> {
                 ? Center(child: CircularProgressIndicator())
                 : SingleChildScrollView(
                     physics: AlwaysScrollableScrollPhysics(),
-                    child: Column(
-                      children: [
-                        if (errorMessage != null) ...[
-                          Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Card(
-                              color: Colors.red[50],
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(errorMessage!, style: TextStyle(color: Colors.red[800])),
+                    child: Center(
+                      child: Container(
+                        constraints: BoxConstraints(maxWidth: 800),
+                        child: Column(
+                          children: [
+                            if (errorMessage != null) ...[
+                              Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Card(
+                                  color: Colors.red[50],
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(errorMessage!, style: TextStyle(color: Colors.red[800])),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        ],
-                        Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Form(
-                            key: _formKey,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
+                            ],
+                            Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Form(
+                                key: _formKey,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
                                 Text('Registrar venda de serviço', style: Theme.of(context).textTheme.titleMedium),
                                 const SizedBox(height: 8),
                                 // Services dropdown (optional). Selecting fills service + price.
@@ -248,7 +251,15 @@ class _SalesPageState extends State<SalesPage> {
                                 const SizedBox(height: 12),
                                 ElevatedButton(
                                   onPressed: _createSale,
-                                  child: Text('Criar venda'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green[300],
+                                  ),
+                                  child: Text(
+                                    'Criar venda',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                    ),
+                                  ),
                                 ),
                                 const SizedBox(height: 16),
                                 Divider(),
@@ -301,7 +312,9 @@ class _SalesPageState extends State<SalesPage> {
                                   },
                                 ),
                               ),
-                      ],
+                          ],
+                        ),
+                      ),
                     ),
                   ),
           ),

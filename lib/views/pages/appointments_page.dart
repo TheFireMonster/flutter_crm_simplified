@@ -610,8 +610,17 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                             SizedBox(height: 6),
                             ElevatedButton(
                               onPressed: _canAdd() ? _confirmAndCreate : null,
-                              style: ElevatedButton.styleFrom(elevation: 4, padding: EdgeInsets.symmetric(horizontal: 18, vertical: 12)),
-                              child: Text('+'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green[300],
+                                elevation: 4,
+                                padding: EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                              ),
+                              child: Text(
+                                '+',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
                           ],
                         ),

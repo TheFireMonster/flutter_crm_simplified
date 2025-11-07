@@ -26,41 +26,67 @@ class _ServicePageState extends State<ServicePage> {
   }
 
   Future<void> fetchServices() async {
-    final response = await http.get(Uri.parse('/services'));
-    if (response.statusCode == 200) {
-      setState(() {
-        services = List<Map<String, dynamic>>.from(json.decode(response.body));
-      });
+    try {
+      final response = await http.get(Uri.parse('/services'));
+      if (response.statusCode == 200) {
+        final decoded = json.decode(response.body);
+        if (decoded is List) {
+          setState(() {
+            services = List<Map<String, dynamic>>.from(decoded);
+          });
+        }
+      } else {
+        print('Failed to fetch services: ${response.statusCode}');
+        print('Response body: ${response.body}');
+      }
+    } catch (e) {
+      print('Error fetching services: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao carregar serviços')),
+        );
+      }
     }
   }
 
   Future<void> registerService() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() { isLoading = true; });
-    final response = await http.post(
-      Uri.parse('/services'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'serviceName': serviceName,
-        'price': double.tryParse(price) ?? 0,
-        'description': description.isNotEmpty ? description : null,
-      }),
-    );
-    setState(() { isLoading = false; });
-    if (response.statusCode == 201 || response.statusCode == 200) {
-      _formKey.currentState!.reset();
-  serviceName = '';
-  price = '';
-      description = '';
-      await fetchServices();
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Serviço registrado com sucesso!')),
+    try {
+      final response = await http.post(
+        Uri.parse('/services'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'serviceName': serviceName,
+          'price': double.tryParse(price) ?? 0,
+          'description': description.isNotEmpty ? description : null,
+        }),
       );
-    } else {
+      setState(() { isLoading = false; });
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        _formKey.currentState!.reset();
+        serviceName = '';
+        price = '';
+        description = '';
+        await fetchServices();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Serviço registrado com sucesso!')),
+        );
+      } else {
+        print('Failed to register service: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Falha ao registrar serviço: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      setState(() { isLoading = false; });
+      print('Error registering service: $e');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Falha ao registrar serviço.')),
+        SnackBar(content: Text('Erro ao registrar serviço')),
       );
     }
   }
@@ -181,7 +207,7 @@ class _ServicePageState extends State<ServicePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Services'),
+        title: const Text('Serviços'),
       ),
       body: Row(
         children: [
@@ -193,19 +219,21 @@ class _ServicePageState extends State<ServicePage> {
             child: Container(
               color: Colors.blue[50],
               child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Registrar Novo Serviço',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 16),
-                      Form(
-                        key: _formKey,
-                        child: Column(
+                child: Center(
+                  child: Container(
+                    constraints: BoxConstraints(maxWidth: 800),
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Registrar Novo Serviço',
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 16),
+                        Form(
+                          key: _formKey,
+                          child: Column(
                           children: [
                             TextFormField(
                               decoration: InputDecoration(labelText: 'Nome do Serviço'),
@@ -226,7 +254,17 @@ class _ServicePageState extends State<ServicePage> {
                             SizedBox(height: 16),
                             ElevatedButton(
                               onPressed: isLoading ? null : registerService,
-                              child: isLoading ? CircularProgressIndicator() : Text('Registrar'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green[300],
+                              ),
+                              child: isLoading 
+                                ? CircularProgressIndicator() 
+                                : Text(
+                                    'Registrar',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                    ),
+                                  ),
                             ),
                           ],
                         ),
@@ -273,7 +311,8 @@ class _ServicePageState extends State<ServicePage> {
                                 );
                               },
                             ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

@@ -279,17 +279,18 @@ class _CostumersPageState extends State<CostumersPage> {
             child: Container(
               color: Colors.blue[50],
               child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Form(
-                        key: _formKey,
-                        child: Column(
-                          children: [
-
-                            TextFormField(
+                child: Center(
+                  child: Container(
+                    constraints: BoxConstraints(maxWidth: 800),
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Form(
+                          key: _formKey,
+                          child: Column(
+                            children: [
+                              TextFormField(
                               controller: _nameController,
                               decoration: InputDecoration(labelText: 'Nome'),
                               validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
@@ -334,7 +335,15 @@ class _CostumersPageState extends State<CostumersPage> {
                             SizedBox(height: 16),
                             ElevatedButton(
                               onPressed: registerCustomer,
-                              child: Text('Registrar Cliente'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green[300],
+                              ),
+                              child: Text(
+                                'Registrar Cliente',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -376,7 +385,8 @@ class _CostumersPageState extends State<CostumersPage> {
                           );
                         },
                       ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
