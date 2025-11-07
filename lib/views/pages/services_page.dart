@@ -216,11 +216,9 @@ class _ServicePageState extends State<ServicePage> {
             toggleDrawer: toggleDrawer,
           ),
           Expanded(
-            child: Container(
-              color: Colors.blue[50],
-              child: SingleChildScrollView(
-                child: Center(
-                  child: Container(
+            child: SingleChildScrollView(
+              child: Center(
+                child: Container(
                     constraints: BoxConstraints(maxWidth: 800),
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
@@ -316,7 +314,6 @@ class _ServicePageState extends State<ServicePage> {
                   ),
                 ),
               ),
-            ),
           ),
         ],
       ),

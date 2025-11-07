@@ -135,7 +135,6 @@ class _ReportsPageState extends State<ReportsPage> {
           SideMenu(isDrawerOpen: isDrawerOpen, toggleDrawer: toggleDrawer),
           Expanded(
             child: Container(
-              color: Colors.grey[200],
               padding: EdgeInsets.all(24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
