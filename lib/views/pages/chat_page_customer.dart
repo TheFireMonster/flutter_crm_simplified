@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:async';
 
 class ChatPageCustomer extends StatefulWidget {
   final String conversationId;
@@ -18,20 +19,32 @@ class _ChatPageCustomerState extends State<ChatPageCustomer> {
   final TextEditingController _controller = TextEditingController();
   late io.Socket socket;
   bool isSocketConnected = false;
+  bool isSocketConnecting = true;
   List<Message> messages = [];
   final Set<String> _receivedMessageIds = {};
   bool isSomeoneTyping = false;
   String typingUser = '';
+  Timer? _connectionCheckTimer;
 
   @override
   void initState() {
     super.initState();
     connectToServer();
     loadHistory();
+    
+    _connectionCheckTimer = Timer.periodic(Duration(seconds: 3), (timer) {
+      if (mounted && socket.connected != isSocketConnected) {
+        setState(() {
+          isSocketConnected = socket.connected;
+          isSocketConnecting = false;
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
+    _connectionCheckTimer?.cancel();
     try {
       socket.disconnect();
       socket.dispose();
@@ -49,10 +62,31 @@ class _ChatPageCustomerState extends State<ChatPageCustomer> {
       'autoConnect': true,
     });
 
-    socket.onConnect((_){ if (mounted) setState(() => isSocketConnected = true); socket.emit('join_conversation', widget.conversationId); });
-    socket.onConnectError((err){ if (mounted) setState(() => isSocketConnected = false); });
-    socket.onError((err){ if (mounted) setState(() => isSocketConnected = false); });
-    socket.onDisconnect((_){ if (mounted) setState(() => isSocketConnected = false); });
+    socket.onConnect((_){ 
+      if (mounted) setState(() {
+        isSocketConnected = true;
+        isSocketConnecting = false;
+      }); 
+      socket.emit('join_conversation', widget.conversationId); 
+    });
+    socket.onConnectError((err){ 
+      if (mounted) setState(() {
+        isSocketConnected = false;
+        isSocketConnecting = false;
+      }); 
+    });
+    socket.onError((err){ 
+      if (mounted) setState(() {
+        isSocketConnected = false;
+        isSocketConnecting = false;
+      }); 
+    });
+    socket.onDisconnect((_){ 
+      if (mounted) setState(() {
+        isSocketConnected = false;
+        isSocketConnecting = false;
+      }); 
+    });
 
     socket.on('receive_message', (data) {
       final incomingId = data['id']?.toString();
@@ -155,12 +189,19 @@ class _ChatPageCustomerState extends State<ChatPageCustomer> {
                   width: 10,
                   height: 10,
                   decoration: BoxDecoration(
-                    color: isSocketConnected ? Colors.greenAccent : Colors.redAccent,
+                    color: isSocketConnecting 
+                      ? Colors.orangeAccent 
+                      : (isSocketConnected ? Colors.greenAccent : Colors.redAccent),
                     shape: BoxShape.circle,
                   ),
                 ),
                 SizedBox(width: 8),
-                Text(isSocketConnected ? 'Conectado' : 'Desconectado', style: TextStyle(color: Colors.white)),
+                Text(
+                  isSocketConnecting 
+                    ? 'Conectando...' 
+                    : (isSocketConnected ? 'Conectado' : 'Desconectado'), 
+                  style: TextStyle(color: Colors.white, fontSize: 14)
+                ),
               ],
             ),
           ],

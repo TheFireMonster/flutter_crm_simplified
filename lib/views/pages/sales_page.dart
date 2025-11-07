@@ -152,13 +152,21 @@ class _SalesPageState extends State<SalesPage> {
                             ],
                             Padding(
                               padding: const EdgeInsets.all(12.0),
-                              child: Form(
-                                key: _formKey,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: [
-                                Text('Registrar venda de serviço', style: Theme.of(context).textTheme.titleMedium),
-                                const SizedBox(height: 8),
+                              child: Card(
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  side: BorderSide(color: Colors.grey.shade300, width: 1),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Form(
+                                    key: _formKey,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                                      children: [
+                                    Text('Registrar venda de serviço', style: Theme.of(context).textTheme.titleMedium),
+                                    const SizedBox(height: 8),
                                 // Services dropdown (optional). Selecting fills service + price.
                                 _services.isEmpty
                                     ? TextFormField(
@@ -267,6 +275,8 @@ class _SalesPageState extends State<SalesPage> {
                             ),
                           ),
                         ),
+                      ),
+                    ),
                         sales.isEmpty
                             ? Padding(
                                 padding: const EdgeInsets.all(24.0),

@@ -20,6 +20,33 @@ Widget buildChart(Map<String, dynamic> chartData) {
               color: Colors.blue,
             );
           }).toList(),
+          titlesData: FlTitlesData(
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, meta) {
+                  final index = value.toInt();
+                  if (index >= 0 && index < labels.length) {
+                    final label = labels[index].toString();
+                    if (label.contains('-')) {
+                      final parts = label.split('-');
+                      if (parts.length == 3) {
+                        return Text('${parts[2]}/${parts[1]}', style: TextStyle(fontSize: 10));
+                      }
+                    }
+                    return Text(label, style: TextStyle(fontSize: 10));
+                  }
+                  return Text('');
+                },
+                reservedSize: 30,
+              ),
+            ),
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(showTitles: true, reservedSize: 40),
+            ),
+            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          ),
         ),
       );
 
@@ -38,6 +65,43 @@ Widget buildChart(Map<String, dynamic> chartData) {
               }).toList(),
             );
           }),
+          titlesData: FlTitlesData(
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, meta) {
+                  final index = value.toInt();
+                  if (index >= 0 && index < labels.length) {
+                    final label = labels[index].toString();
+                    if (label.contains('-')) {
+                      final parts = label.split('-');
+                      if (parts.length == 3) {
+                        final meses = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+                        final mes = int.tryParse(parts[1]);
+                        if (mes != null && mes >= 1 && mes <= 12) {
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(meses[mes], style: TextStyle(fontSize: 10)),
+                          );
+                        }
+                      }
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(label, style: TextStyle(fontSize: 10)),
+                    );
+                  }
+                  return Text('');
+                },
+                reservedSize: 30,
+              ),
+            ),
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(showTitles: true, reservedSize: 40),
+            ),
+            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          ),
         ),
       );
 

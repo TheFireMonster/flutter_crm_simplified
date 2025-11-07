@@ -284,66 +284,76 @@ class _CostumersPageState extends State<CostumersPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Form(
-                          key: _formKey,
-                          child: Column(
-                            children: [
-                              TextFormField(
-                              controller: _nameController,
-                              decoration: InputDecoration(labelText: 'Nome'),
-                              validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
-                            ),
-                            TextFormField(
-                              controller: _emailController,
-                              decoration: InputDecoration(labelText: 'Email'),
-                              validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
-                            ),
-                            TextFormField(
-                              controller: _cpfController,
-                              decoration: InputDecoration(labelText: 'CPF'),
-                              validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
-                            ),
-                            TextFormField(
-                              controller: _dateOfBirthController,
-                              decoration: InputDecoration(labelText: 'Data de Nascimento (DD/MM/AAAA)'),
-                              validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
-                            ),
-                            TextFormField(
-                              controller: _stateController,
-                              decoration: InputDecoration(labelText: 'Estado (ex: SC)'),
-                              validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
-                            ),
-                            TextFormField(
-                              controller: _cepController,
-                              decoration: InputDecoration(labelText: 'CEP'),
-                              validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
-                            ),
-                            TextFormField(
-                              controller: _phoneController,
-                              decoration: InputDecoration(labelText: 'Telefone'),
-                            ),
-                            TextFormField(
-                              controller: _addressController,
-                              decoration: InputDecoration(labelText: 'Endereço'),
-                            ),
-                            TextFormField(
-                              controller: _sourceController,
-                              decoration: InputDecoration(labelText: 'Origem'),
-                            ),
-                            SizedBox(height: 16),
-                            ElevatedButton(
-                              onPressed: registerCustomer,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green[300],
-                              ),
-                              child: Text(
-                                'Registrar Cliente',
-                                style: TextStyle(
-                                  color: Colors.white,
+                        Card(
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(color: Colors.grey.shade300, width: 1),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Form(
+                              key: _formKey,
+                              child: Column(
+                                children: [
+                                  TextFormField(
+                                  controller: _nameController,
+                                  decoration: InputDecoration(labelText: 'Nome'),
+                                  validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
                                 ),
-                              ),
+                                TextFormField(
+                                  controller: _emailController,
+                                  decoration: InputDecoration(labelText: 'Email'),
+                                  validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
+                                ),
+                                TextFormField(
+                                  controller: _cpfController,
+                                  decoration: InputDecoration(labelText: 'CPF'),
+                                  validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
+                                ),
+                                TextFormField(
+                                  controller: _dateOfBirthController,
+                                  decoration: InputDecoration(labelText: 'Data de Nascimento (DD/MM/AAAA)'),
+                                  validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
+                                ),
+                                TextFormField(
+                                  controller: _stateController,
+                                  decoration: InputDecoration(labelText: 'Estado (ex: SC)'),
+                                  validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
+                                ),
+                                TextFormField(
+                                  controller: _cepController,
+                                  decoration: InputDecoration(labelText: 'CEP'),
+                                  validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
+                                ),
+                                TextFormField(
+                                  controller: _phoneController,
+                                  decoration: InputDecoration(labelText: 'Telefone'),
+                                ),
+                                TextFormField(
+                                  controller: _addressController,
+                                  decoration: InputDecoration(labelText: 'Endereço'),
+                                ),
+                                TextFormField(
+                                  controller: _sourceController,
+                                  decoration: InputDecoration(labelText: 'Origem'),
+                                ),
+                                SizedBox(height: 16),
+                                ElevatedButton(
+                                  onPressed: registerCustomer,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green[300],
+                                  ),
+                                  child: Text(
+                                    'Registrar Cliente',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                       ),
                       SizedBox(height: 32),

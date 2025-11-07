@@ -233,42 +233,52 @@ class _ServicePageState extends State<ServicePage> {
                           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                         ),
                         SizedBox(height: 16),
-                        Form(
-                          key: _formKey,
-                          child: Column(
-                          children: [
-                            TextFormField(
-                              decoration: InputDecoration(labelText: 'Nome do Serviço'),
-                              onChanged: (val) => serviceName = val,
-                              validator: (val) => val == null || val.isEmpty ? 'Obrigatório' : null,
-                            ),
-                            TextFormField(
-                              decoration: InputDecoration(labelText: 'Preço'),
-                              keyboardType: TextInputType.number,
-                              onChanged: (val) => price = val,
-                              validator: (val) => val == null || val.isEmpty ? 'Obrigatório' : null,
-                            ),
-                            TextFormField(
-                              decoration: InputDecoration(labelText: 'Descrição (opcional)'),
-                              maxLines: 3,
-                              onChanged: (val) => description = val,
-                            ),
-                            SizedBox(height: 16),
-                            ElevatedButton(
-                              onPressed: isLoading ? null : registerService,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green[300],
-                              ),
-                              child: isLoading 
-                                ? CircularProgressIndicator() 
-                                : Text(
-                                    'Registrar',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                    ),
+                        Card(
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(color: Colors.grey.shade300, width: 1),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Form(
+                              key: _formKey,
+                              child: Column(
+                              children: [
+                                TextFormField(
+                                  decoration: InputDecoration(labelText: 'Nome do Serviço'),
+                                  onChanged: (val) => serviceName = val,
+                                  validator: (val) => val == null || val.isEmpty ? 'Obrigatório' : null,
+                                ),
+                                TextFormField(
+                                  decoration: InputDecoration(labelText: 'Preço'),
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (val) => price = val,
+                                  validator: (val) => val == null || val.isEmpty ? 'Obrigatório' : null,
+                                ),
+                                TextFormField(
+                                  decoration: InputDecoration(labelText: 'Descrição (opcional)'),
+                                  maxLines: 3,
+                                  onChanged: (val) => description = val,
+                                ),
+                                SizedBox(height: 16),
+                                ElevatedButton(
+                                  onPressed: isLoading ? null : registerService,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green[300],
                                   ),
+                                  child: isLoading 
+                                    ? CircularProgressIndicator() 
+                                    : Text(
+                                        'Registrar',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                       ),
                       SizedBox(height: 32),

@@ -45,16 +45,35 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
     final locationController = TextEditingController(text: currentData['location'] ?? '');
     int duration = currentData['duration'] ?? 60;
     
-    // Parse current appointment time
     DateTime currentDateTime = DateTime.now();
+    TimeOfDay selectedTime = TimeOfDay(hour: 0, minute: 0);
+    
     try {
       final apptDateStr = currentData['appointmentDate']?.toString();
+      final startTimeStr = currentData['startTime']?.toString();
+      
       if (apptDateStr != null) {
         currentDateTime = DateTime.parse(apptDateStr);
       }
-    } catch (_) {}
-    
-    TimeOfDay selectedTime = TimeOfDay(hour: currentDateTime.hour, minute: currentDateTime.minute);
+      
+      if (startTimeStr != null) {
+        final timeParts = startTimeStr.split(':');
+        if (timeParts.length >= 2) {
+          final hour = int.tryParse(timeParts[0]) ?? 0;
+          final minute = int.tryParse(timeParts[1]) ?? 0;
+          selectedTime = TimeOfDay(hour: hour, minute: minute);
+          currentDateTime = DateTime(
+            currentDateTime.year,
+            currentDateTime.month,
+            currentDateTime.day,
+            hour,
+            minute,
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ Erro ao parsear data/hora: $e');
+    }
 
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
@@ -407,6 +426,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
   // combine selected day with selected slot (30-minute increments)
     final slotMinutes = 8 * 60 + _selectedSlot! * 30;
     final apptDate = DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day, slotMinutes ~/ 60, slotMinutes % 60);
+    debugPrint('🕐 Criando agendamento: slot=$_selectedSlot, slotMinutes=$slotMinutes, apptDate=$apptDate');
     final uri = Uri.parse('/appointments');
     final response = await http.post(
       uri,
@@ -420,6 +440,14 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
         'customerName': _selectedCustomer!['name'],
       }),
     );
+    debugPrint('📤 Payload enviado: ${jsonEncode({
+        'title': name,
+        'description': 'Duration: $duration',
+        'duration': duration,
+        'appointmentDate': apptDate.toIso8601String(),
+        'customerId': _selectedCustomer!['id'],
+        'customerName': _selectedCustomer!['name'],
+      })}');
     if (response.statusCode == 200 || response.statusCode == 201) {
       final data = jsonDecode(response.body);
       if (data is Map && data.containsKey('error')) {
@@ -635,14 +663,19 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                         final appointment = _appointments[index];
                         String timeRange = '';
                         try {
-                          final apptDateStr = appointment['appointmentDate']?.toString();
-                          if (apptDateStr != null) {
-                            final dt = DateTime.parse(apptDateStr);
-                            final dur = (appointment['duration'] is int) ? appointment['duration'] as int : (int.tryParse(RegExp(r"(\d+)").firstMatch(appointment['description']?.toString() ?? '')?.group(0) ?? '60') ?? 60);
-                            final end = dt.add(Duration(minutes: dur));
-                            timeRange = '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')} - ${end.hour.toString().padLeft(2, '0')}:${end.minute.toString().padLeft(2, '0')}';
+                          final startTimeStr = appointment['startTime']?.toString();
+                          final endTimeStr = appointment['endTime']?.toString();
+                          
+                          if (startTimeStr != null && endTimeStr != null) {
+                            final startParts = startTimeStr.split(':');
+                            final endParts = endTimeStr.split(':');
+                            if (startParts.length >= 2 && endParts.length >= 2) {
+                              timeRange = '${startParts[0]}:${startParts[1]} - ${endParts[0]}:${endParts[1]}';
+                            }
                           }
-                        } catch (_) {}
+                        } catch (e) {
+                          debugPrint('❌ Erro ao formatar horário: $e');
+                        }
                         final clientName = appointment['customerName'] ?? '';
                         final title = appointment['title'] ?? '';
                         final durDisplay = appointment['duration']?.toString() ?? '60';

@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:async';
 
 
 class ChatPage extends StatefulWidget {
@@ -111,7 +112,9 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController _customerNameController = TextEditingController();
   late io.Socket socket;
   bool isSocketConnected = false;
+  bool isSocketConnecting = true; // Novo estado para mostrar "Conectando..."
   List<Message> messages = [];
+  Timer? _connectionCheckTimer;
 
   final Set<String> _receivedMessageIds = {};
   bool isSomeoneTyping = false;
@@ -128,19 +131,31 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
-  connectToServer();
-  loadChatLinks();
-  
-  if (widget.conversationId != null && widget.conversationId!.isNotEmpty) {
-    linkId = widget.conversationId;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _joinConversationIfNeeded();
+    connectToServer();
+    loadChatLinks();
+    
+    // Verifica periodicamente o estado da conexão
+    _connectionCheckTimer = Timer.periodic(Duration(seconds: 3), (timer) {
+      if (mounted && socket.connected != isSocketConnected) {
+        setState(() {
+          isSocketConnected = socket.connected;
+          isSocketConnecting = false; // Se está verificando, já passou da fase de "conectando"
+        });
+        debugPrint('🔄 Estado atualizado: ${socket.connected}');
+      }
     });
-  }
+    
+    if (widget.conversationId != null && widget.conversationId!.isNotEmpty) {
+      linkId = widget.conversationId;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _joinConversationIfNeeded();
+      });
+    }
   }
 
   @override
   void dispose() {
+    _connectionCheckTimer?.cancel();
     try {
       socket.disconnect();
       socket.dispose();
@@ -166,6 +181,8 @@ class _ChatPageState extends State<ChatPage> {
   void connectToServer() {
   final origin = Uri.base.origin;
   final serverUrl = (origin.isNotEmpty && origin.startsWith('http')) ? origin : 'http://localhost:3000';
+  
+    debugPrint('🔌 Conectando ao servidor: $serverUrl');
 
     socket = io.io(serverUrl, <String, dynamic>{
       'transports': ['websocket'],
@@ -173,19 +190,42 @@ class _ChatPageState extends State<ChatPage> {
     });
 
     socket.onConnect((_){
-      if (mounted) setState(() => isSocketConnected = true);
+      debugPrint('✅ Socket conectado!');
+      if (mounted) setState(() {
+        isSocketConnected = true;
+        isSocketConnecting = false;
+      });
       if (linkId != null) {
         try {
           socket.emit('join_conversation', linkId);
+          debugPrint('📨 Entrou na conversa: $linkId');
         } catch (e) {
           debugPrint('Erro ao entrar na conversa no connect: $e');
         }
       }
     });
 
-    socket.onConnectError((err){ if (mounted) setState(() => isSocketConnected = false); });
-    socket.onError((err){ if (mounted) setState(() => isSocketConnected = false); });
-    socket.onDisconnect((_){ if (mounted) setState(() => isSocketConnected = false); });
+    socket.onConnectError((err){ 
+      debugPrint('❌ Erro de conexão: $err');
+      if (mounted) setState(() {
+        isSocketConnected = false;
+        isSocketConnecting = false;
+      }); 
+    });
+    socket.onError((err){ 
+      debugPrint('❌ Erro no socket: $err');
+      if (mounted) setState(() {
+        isSocketConnected = false;
+        isSocketConnecting = false;
+      }); 
+    });
+    socket.onDisconnect((_){ 
+      debugPrint('🔌 Socket desconectado');
+      if (mounted) setState(() {
+        isSocketConnected = false;
+        isSocketConnecting = false;
+      }); 
+    });
 
     socket.on('receive_message', (data) {
       final incomingId = data['id']?.toString() ?? '';
@@ -500,10 +540,7 @@ class _ChatPageState extends State<ChatPage> {
                                       context: context,
                                       builder: (context) => AlertDialog(
                                         title: Text('Excluir Conversa'),
-                                        content: Text(
-                                          'Tem certeza que deseja excluir esta conversa?\n\n'
-                                          'ATENÇÃO: O cliente associado também será removido do sistema.',
-                                        ),
+                                        content: Text('Tem certeza que deseja excluir esta conversa?'),
                                         actions: [
                                           TextButton(
                                             onPressed: () => Navigator.of(context).pop(false),
@@ -578,14 +615,30 @@ class _ChatPageState extends State<ChatPage> {
                             width: 10,
                             height: 10,
                             decoration: BoxDecoration(
-                              color: isSocketConnected ? Colors.greenAccent : Colors.redAccent,
+                              color: isSocketConnecting 
+                                ? Colors.orangeAccent 
+                                : (isSocketConnected ? Colors.greenAccent : Colors.redAccent),
                               shape: BoxShape.circle,
                             ),
                           ),
                           SizedBox(width: 8),
-                          Text(
-                            isSocketConnected ? 'Conectado' : 'Desconectado',
-                            style: TextStyle(color: Colors.white),
+                          GestureDetector(
+                            onTap: () {
+                              // Atualiza o estado com o estado real do socket
+                              if (mounted) {
+                                setState(() {
+                                  isSocketConnected = socket.connected;
+                                  isSocketConnecting = false;
+                                });
+                                debugPrint('🔍 Estado do socket: ${socket.connected}');
+                              }
+                            },
+                            child: Text(
+                              isSocketConnecting 
+                                ? 'Conectando...' 
+                                : (isSocketConnected ? 'Conectado' : 'Desconectado'),
+                              style: TextStyle(color: Colors.white, fontSize: 14),
+                            ),
                           ),
                           SizedBox(width: 8),
                         ],
