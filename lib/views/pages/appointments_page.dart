@@ -102,6 +102,12 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                         final picked = await showTimePicker(
                           context: ctx,
                           initialTime: selectedTime,
+                          builder: (context, child) {
+                            return MediaQuery(
+                              data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+                              child: child!,
+                            );
+                          },
                         );
                         if (picked != null) {
                           setDialogState(() {
@@ -109,6 +115,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                           });
                         }
                       },
+                      style: TextButton.styleFrom(foregroundColor: Colors.green[700]),
                       child: Text(
                         '${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}',
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -140,6 +147,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, null),
+              style: TextButton.styleFrom(foregroundColor: Colors.green[700]),
               child: Text('Cancelar'),
             ),
             ElevatedButton(
@@ -196,6 +204,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
+            style: TextButton.styleFrom(foregroundColor: Colors.green[700]),
             child: Text('Cancelar'),
           ),
           ElevatedButton(
@@ -320,10 +329,16 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
 
     for (final a in _appointments) {
       try {
-        final apptDateStr = a['appointmentDate']?.toString();
-        if (apptDateStr == null) continue;
-        final dt = DateTime.parse(apptDateStr);
-        final startMin = dt.hour * 60 + dt.minute;
+        final startTimeStr = a['startTime']?.toString();
+        if (startTimeStr == null) continue;
+        
+        final timeParts = startTimeStr.split(':');
+        if (timeParts.length < 2) continue;
+        
+        final hour = int.tryParse(timeParts[0]) ?? 0;
+        final minute = int.tryParse(timeParts[1]) ?? 0;
+        final startMin = hour * 60 + minute;
+        
         final dur = (a['duration'] is int)
             ? a['duration'] as int
             : (int.tryParse(RegExp(r"(\d+)").firstMatch(a['description']?.toString() ?? '')?.group(0) ?? '60') ?? 60);
@@ -332,15 +347,12 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
         for (int slotIdx = 0; slotIdx < 20; slotIdx++) {
           final slotStart = 8 * 60 + slotIdx * 30;
           final slotEnd = slotStart + 30;
-          // check overlap
           final overlap = !(endMin <= slotStart || startMin >= slotEnd);
           if (!overlap) continue;
-          // if appointment fully covers the slot
           final fullyCovers = (startMin <= slotStart && endMin >= slotEnd);
           if (fullyCovers) {
             status[slotIdx] = 'full';
           } else {
-            // only mark partial if not already full
             if (status[slotIdx] != 'full') status[slotIdx] = 'partial';
           }
         }
@@ -354,10 +366,8 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
     if (_nameController.text.trim().isEmpty) return false;
     if (_selectedCustomer == null) return false;
     if (_selectedSlot == null) return false;
-    // check duration fits in schedule
     final slotsNeeded = (_selectedDuration + 29) ~/ 30;
     if (_selectedSlot! + slotsNeeded > 20) return false;
-    // check no overlap
     for (int s = 0; s < slotsNeeded; s++) {
       final idx = _selectedSlot! + s;
       if (_slotStatus[idx] != null && _slotStatus[idx] != 'free') return false;
@@ -375,7 +385,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Confirm appointment'),
+        title: Text('Confirmar Agendamento'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -390,7 +400,11 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text('Cancelar')),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            style: TextButton.styleFrom(foregroundColor: Colors.green[700]),
+            child: Text('Cancelar'),
+          ),
           ElevatedButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text('Confirmar')),
         ],
       ),

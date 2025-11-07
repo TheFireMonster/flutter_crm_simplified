@@ -493,12 +493,14 @@ class _ChatPageState extends State<ChatPage> {
                                           ),
                                           actions: [
                                             TextButton(
-                                              child: Text('Cancelar'),
                                               onPressed: () => Navigator.of(context).pop(),
+                                              style: TextButton.styleFrom(foregroundColor: Colors.green[700]),
+                                              child: Text('Cancelar'),
                                             ),
                                             TextButton(
-                                              child: Text('Salvar'),
                                               onPressed: () => Navigator.of(context).pop(controller.text.trim()),
+                                              style: TextButton.styleFrom(foregroundColor: Colors.green[700]),
+                                              child: Text('Salvar'),
                                             ),
                                           ],
                                         );
@@ -544,11 +546,13 @@ class _ChatPageState extends State<ChatPage> {
                                         actions: [
                                           TextButton(
                                             onPressed: () => Navigator.of(context).pop(false),
+                                            style: TextButton.styleFrom(foregroundColor: Colors.green[700]),
                                             child: Text('Cancelar'),
                                           ),
                                           TextButton(
                                             onPressed: () => Navigator.of(context).pop(true),
-                                            child: Text('Excluir', style: TextStyle(color: Colors.red)),
+                                            style: TextButton.styleFrom(foregroundColor: Colors.red),
+                                            child: Text('Excluir'),
                                           ),
                                         ],
                                       ),

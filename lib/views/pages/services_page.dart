@@ -128,6 +128,7 @@ class _ServicePageState extends State<ServicePage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
+            style: TextButton.styleFrom(foregroundColor: Colors.green[700]),
             child: Text('Cancelar'),
           ),
           ElevatedButton(
@@ -173,6 +174,7 @@ class _ServicePageState extends State<ServicePage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
+            style: TextButton.styleFrom(foregroundColor: Colors.green[700]),
             child: Text('Cancelar'),
           ),
           ElevatedButton(
@@ -237,7 +239,7 @@ class _ServicePageState extends State<ServicePage> {
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
-                            side: BorderSide(color: Colors.grey.shade300, width: 1),
+                            side: BorderSide(color: Colors.black12, width: 1),
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),

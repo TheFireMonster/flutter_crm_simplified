@@ -198,7 +198,11 @@ class _CostumersPageState extends State<CostumersPage> {
             ),
           ),
           actions: [
-            TextButton(onPressed: () { _clearFormFields(); Navigator.of(context).pop(); }, child: Text('Cancelar')),
+            TextButton(
+              onPressed: () { _clearFormFields(); Navigator.of(context).pop(); },
+              style: TextButton.styleFrom(foregroundColor: Colors.green[700]),
+              child: Text('Cancelar'),
+            ),
             ElevatedButton(onPressed: () async {
               Navigator.of(context).pop();
               final id = customer['id'];
@@ -218,7 +222,11 @@ class _CostumersPageState extends State<CostumersPage> {
           title: Text('Excluir cliente?'),
           content: Text('Tem certeza que deseja excluir "${customer['name'] ?? ''}"? Esta ação não pode ser desfeita.'),
           actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(), child: Text('Cancelar')),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: TextButton.styleFrom(foregroundColor: Colors.green[700]),
+              child: Text('Cancelar'),
+            ),
             ElevatedButton(onPressed: () async {
               Navigator.of(context).pop();
               final id = customer['id'];
@@ -288,7 +296,7 @@ class _CostumersPageState extends State<CostumersPage> {
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
-                            side: BorderSide(color: Colors.grey.shade300, width: 1),
+                            side: BorderSide(color: Colors.black12, width: 1),
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),
@@ -299,32 +307,26 @@ class _CostumersPageState extends State<CostumersPage> {
                                   TextFormField(
                                   controller: _nameController,
                                   decoration: InputDecoration(labelText: 'Nome'),
-                                  validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
                                 ),
                                 TextFormField(
                                   controller: _emailController,
                                   decoration: InputDecoration(labelText: 'Email'),
-                                  validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
                                 ),
                                 TextFormField(
                                   controller: _cpfController,
                                   decoration: InputDecoration(labelText: 'CPF'),
-                                  validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
                                 ),
                                 TextFormField(
                                   controller: _dateOfBirthController,
                                   decoration: InputDecoration(labelText: 'Data de Nascimento (DD/MM/AAAA)'),
-                                  validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
                                 ),
                                 TextFormField(
                                   controller: _stateController,
                                   decoration: InputDecoration(labelText: 'Estado (ex: SC)'),
-                                  validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
                                 ),
                                 TextFormField(
                                   controller: _cepController,
                                   decoration: InputDecoration(labelText: 'CEP'),
-                                  validator: (v) => v == null || v.isEmpty ? 'Obrigatório' : null,
                                 ),
                                 TextFormField(
                                   controller: _phoneController,
@@ -369,21 +371,21 @@ class _CostumersPageState extends State<CostumersPage> {
                             child: ListTile(
                               title: Text(c['name'] ?? ''),
                               subtitle: Text(
-                                'Email: ${c['email'] ?? ''}\nCPF: ${c['cpf'] ?? ''}\nDate of Birth: ${c['dateOfBirth'] ?? ''}\nState: ${c['state'] ?? ''}\nCEP: ${c['cep'] ?? ''}'
+                                'Email: ${c['email'] ?? ''}\nCPF: ${c['cpf'] ?? ''}\nData de Nascimento: ${c['dateOfBirth'] ?? ''}\nEstado: ${c['state'] ?? ''}\nCEP: ${c['cep'] ?? ''}'
                               ),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text(c['phone'] ?? ''),
+                                  Text(c['telefone'] ?? ''),
                                   const SizedBox(width: 8),
                                   IconButton(
                                     icon: Icon(Icons.edit, size: 20),
-                                    tooltip: 'Edit',
+                                    tooltip: 'Editar',
                                     onPressed: () => _openEditCustomer(c),
                                   ),
                                   IconButton(
                                     icon: Icon(Icons.delete, size: 20),
-                                    tooltip: 'Delete',
+                                    tooltip: 'Deletar',
                                     onPressed: () => _confirmDeleteCustomer(c),
                                   ),
                                 ],
