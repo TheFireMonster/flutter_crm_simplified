@@ -500,6 +500,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
             child: Column(
               children: [
                 TableCalendar(
+                  locale: 'pt_BR',
                   firstDay: DateTime.utc(2020, 1, 1),
                   lastDay: DateTime.utc(2030, 12, 31),
                   focusedDay: _focusedDay,
