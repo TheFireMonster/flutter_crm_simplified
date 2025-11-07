@@ -44,6 +44,17 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
     final titleController = TextEditingController(text: currentData['title'] ?? '');
     final locationController = TextEditingController(text: currentData['location'] ?? '');
     int duration = currentData['duration'] ?? 60;
+    
+    // Parse current appointment time
+    DateTime currentDateTime = DateTime.now();
+    try {
+      final apptDateStr = currentData['appointmentDate']?.toString();
+      if (apptDateStr != null) {
+        currentDateTime = DateTime.parse(apptDateStr);
+      }
+    } catch (_) {}
+    
+    TimeOfDay selectedTime = TimeOfDay(hour: currentDateTime.hour, minute: currentDateTime.minute);
 
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
@@ -61,6 +72,30 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                 TextField(
                   controller: locationController,
                   decoration: InputDecoration(labelText: 'Local'),
+                ),
+                SizedBox(height: 16),
+                Row(
+                  children: [
+                    Text('Horário:'),
+                    SizedBox(width: 8),
+                    TextButton(
+                      onPressed: () async {
+                        final picked = await showTimePicker(
+                          context: ctx,
+                          initialTime: selectedTime,
+                        );
+                        if (picked != null) {
+                          setDialogState(() {
+                            selectedTime = picked;
+                          });
+                        }
+                      },
+                      child: Text(
+                        '${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
                 ),
                 SizedBox(height: 8),
                 Row(
@@ -89,11 +124,21 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
               child: Text('Cancelar'),
             ),
             ElevatedButton(
-              onPressed: () => Navigator.pop(ctx, {
-                'title': titleController.text,
-                'location': locationController.text,
-                'duration': duration,
-              }),
+              onPressed: () {
+                final updatedDateTime = DateTime(
+                  currentDateTime.year,
+                  currentDateTime.month,
+                  currentDateTime.day,
+                  selectedTime.hour,
+                  selectedTime.minute,
+                );
+                Navigator.pop(ctx, {
+                  'title': titleController.text,
+                  'location': locationController.text,
+                  'duration': duration,
+                  'appointmentDate': updatedDateTime.toIso8601String(),
+                });
+              },
               child: Text('Salvar'),
             ),
           ],
@@ -591,7 +636,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                         } catch (_) {}
                         final clientName = appointment['customerName'] ?? '';
                         final title = appointment['title'] ?? '';
-                        final durDisplay = (appointment['duration'] is int) ? appointment['duration'].toString() : appointment['description']?.replaceAll('Duration: ', '') ?? '';
+                        final durDisplay = appointment['duration']?.toString() ?? '60';
                         return Card(
                           elevation: 2,
                           margin: EdgeInsets.symmetric(vertical: 6),
@@ -601,7 +646,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                               child: Text(clientName.toString().isNotEmpty ? clientName.toString()[0].toUpperCase() : '?', style: TextStyle(color: Colors.black87)),
                             ),
                             title: Text(title, style: TextStyle(fontWeight: FontWeight.w600)),
-                            subtitle: Text('Client: $clientName\nDuration: $durDisplay min', style: TextStyle(height: 1.3)),
+                            subtitle: Text('Cliente: $clientName\nDuração: $durDisplay min', style: TextStyle(height: 1.3)),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [

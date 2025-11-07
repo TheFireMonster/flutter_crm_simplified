@@ -44,6 +44,14 @@ class _HomePageState extends State<HomePage> {
             isDrawerOpen: isDrawerOpen,
             toggleDrawer: toggleDrawer,
             ),
+          Expanded(
+            child: Center(
+              child: Text(
+                'Bem-vindo!',
+                style: TextStyle(fontSize: 24),
+              ),
+            ),
+          ),
         ],
       ),
     );
