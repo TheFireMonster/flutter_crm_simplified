@@ -9,7 +9,8 @@ import 'dart:async';
 
 class ChatPageCustomer extends StatefulWidget {
   final String conversationId;
-  const ChatPageCustomer({super.key, required this.conversationId});
+  final String accessToken;
+  const ChatPageCustomer({super.key, required this.conversationId, required this.accessToken});
 
   @override
   State<ChatPageCustomer> createState() => _ChatPageCustomerState();
@@ -67,8 +68,25 @@ class _ChatPageCustomerState extends State<ChatPageCustomer> {
         isSocketConnected = true;
         isSocketConnecting = false;
       }); 
-      socket.emit('join_conversation', widget.conversationId); 
+      socket.emit('join_conversation', {
+        'conversationId': widget.conversationId,
+        'token': widget.accessToken,
+      }); 
     });
+    
+    socket.on('error', (data) {
+      final message = data['message'] ?? 'Erro desconhecido';
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 5),
+          ),
+        );
+      }
+    });
+    
     socket.onConnectError((err){ 
       if (mounted) setState(() {
         isSocketConnected = false;
@@ -95,7 +113,7 @@ class _ChatPageCustomerState extends State<ChatPageCustomer> {
       }
       DateTime msgDate;
       try {
-        msgDate = DateTime.parse(data['createdAt'] ?? DateTime.now().toIso8601String());
+        msgDate = DateTime.parse(data['createdAt'] ?? DateTime.now().toIso8601String()).toLocal();
       } catch (e) {
         msgDate = DateTime.now();
       }
@@ -141,15 +159,31 @@ class _ChatPageCustomerState extends State<ChatPageCustomer> {
   }
 
   Future<void> loadHistory() async {
-    final url = '/chat/history/${widget.conversationId}';
+    final url = '/chat/history/${widget.conversationId}/${widget.accessToken}';
     final resp = await http.get(Uri.parse(url));
     if (resp.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(resp.body);
+      final dynamic responseBody = jsonDecode(resp.body);
+      
+      // Check if response contains error
+      if (responseBody is Map && responseBody.containsKey('error')) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(responseBody['error']),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 5),
+            ),
+          );
+        }
+        return;
+      }
+      
+      final List<dynamic> data = responseBody is List ? responseBody : [];
       setState(() {
         messages = data.map((msg) {
           DateTime msgDate;
           try {
-            msgDate = DateTime.parse(msg['createdAt']);
+            msgDate = DateTime.parse(msg['createdAt']).toLocal();
           } catch (e) {
             msgDate = DateTime.now();
           }
@@ -170,6 +204,7 @@ class _ChatPageCustomerState extends State<ChatPageCustomer> {
       'conversationId': widget.conversationId,
       'sender': 'client',
       'text': text,
+      'token': widget.accessToken,
     });
   }
 
@@ -328,6 +363,7 @@ class _ChatPageCustomerState extends State<ChatPageCustomer> {
                         'conversationId': widget.conversationId,
                         'sender': 'client',
                         'text': text,
+                        'token': widget.accessToken,
                       });
                     },
                   ),

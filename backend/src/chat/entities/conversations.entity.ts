@@ -9,6 +9,9 @@ export class Conversation {
   @Column({ unique: true })
   linkId: string;
 
+  @Column({ nullable: false })
+  accessToken: string;
+
   @Column({ nullable: true })
   customerName: string;
 

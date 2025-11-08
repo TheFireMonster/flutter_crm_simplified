@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ChatGateway } from './chat.gateway';
 import { ChatService } from './chat.service';
 import { AIChatService } from '../openai/aichat/aichat.service';
-import { Repository } from 'typeorm';
 import { Conversation } from './entities/conversations.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 

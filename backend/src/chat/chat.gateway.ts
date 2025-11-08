@@ -53,22 +53,38 @@ export class ChatGateway {
   }
 
   @SubscribeMessage('join_conversation')
-  handleJoin(
-    @MessageBody() conversationId: string,
-    @ConnectedSocket() client: Socket,
-  ) {
-    client.join(conversationId);
-    
-  }
-
-  @SubscribeMessage('send_message')
-  async onMessage(
-    @MessageBody() data: { conversationId: string; sender: 'client' | 'staff'; text: string },
+  async handleJoin(
+    @MessageBody() data: { conversationId: string; token: string },
     @ConnectedSocket() client: Socket,
   ) {
     const conversation = await this.conversationRepo.findOne({ where: { linkId: data.conversationId } });
     if (!conversation) {
-      return;
+      client.emit('error', { message: 'Conversa não encontrada. Link inválido.' });
+      return { error: 'Conversation not found' };
+    }
+    if (conversation.accessToken !== data.token) {
+      client.emit('error', { message: 'Token inválido. Acesso negado.' });
+      return { error: 'Invalid token' };
+    }
+    
+    client.join(data.conversationId);
+    return { success: true };
+  }
+
+  @SubscribeMessage('send_message')
+  async onMessage(
+    @MessageBody() data: { conversationId: string; sender: 'client' | 'staff'; text: string; token?: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const conversation = await this.conversationRepo.findOne({ where: { linkId: data.conversationId } });
+    if (!conversation) {
+      client.emit('error', { message: 'Conversa não encontrada. Link inválido.' });
+      return { error: 'Conversation not found' };
+    }
+    // Validate token for client messages
+    if (data.sender === 'client' && data.token && conversation.accessToken !== data.token) {
+      client.emit('error', { message: 'Token inválido. Acesso negado.' });
+      return { error: 'Invalid token' };
     }
 
     const savedMessage = await this.chatService.saveMessage(

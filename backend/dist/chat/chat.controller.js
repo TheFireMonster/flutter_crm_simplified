@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const uuid_1 = require("uuid");
+const crypto_1 = require("crypto");
 const conversations_entity_1 = require("../chat/entities/conversations.entity");
 const customers_service_1 = require("../customers/customers.service");
 const create_conversation_dto_1 = require("./dto/create-conversation.dto");
@@ -57,10 +58,12 @@ let ChatController = class ChatController {
     async createConversation(dto) {
         try {
             const linkId = (0, uuid_1.v4)();
+            const accessToken = (0, crypto_1.randomBytes)(4).toString('hex');
             const apiBase = process.env.API_BASE_URL || 'http://localhost:3000';
             const customer = await (this.customersService ? this.customersService.findOrCreateCustomer({ id: dto?.customerId, name: dto?.customerName }) : null);
             const conv = this.conversationRepo.create({
                 linkId,
+                accessToken,
                 customerName: dto?.customerName || (customer ? customer.name : 'Cliente'),
             });
             const saved = await this.conversationRepo.save(conv);
@@ -70,7 +73,8 @@ let ChatController = class ChatController {
             }
             return {
                 linkId: saved.linkId,
-                url: `${apiBase}/chat/${saved.linkId}`,
+                accessToken: saved.accessToken,
+                url: `${apiBase}/chat/${saved.linkId}/${saved.accessToken}`,
                 customerId: customer ? customer.id : undefined,
             };
         }
@@ -79,7 +83,14 @@ let ChatController = class ChatController {
             return { error: 'Failed to create conversation', details: err?.message || String(err) };
         }
     }
-    async getHistory(linkId) {
+    async getHistory(linkId, token) {
+        const conv = await this.conversationRepo.findOne({ where: { linkId } });
+        if (!conv) {
+            return { error: 'Conversa não encontrada. Link inválido.' };
+        }
+        if (conv.accessToken !== token) {
+            return { error: 'Token inválido. Acesso negado.' };
+        }
         return this.messageRepo.find({
             where: { conversation: { linkId } },
             order: { createdAt: 'ASC' },
@@ -111,10 +122,11 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "createConversation", null);
 __decorate([
-    (0, common_1.Get)('history/:linkId'),
+    (0, common_1.Get)('history/:linkId/:token'),
     __param(0, (0, common_1.Param)('linkId')),
+    __param(1, (0, common_1.Param)('token')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "getHistory", null);
 exports.ChatController = ChatController = __decorate([

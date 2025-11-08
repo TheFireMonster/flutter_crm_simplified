@@ -33,6 +33,7 @@ export declare class ChatController {
     }>;
     createConversation(dto: CreateConversationDto): Promise<{
         linkId: string;
+        accessToken: string;
         url: string;
         customerId: number | undefined;
         error?: undefined;
@@ -41,8 +42,11 @@ export declare class ChatController {
         error: string;
         details: any;
         linkId?: undefined;
+        accessToken?: undefined;
         url?: undefined;
         customerId?: undefined;
     }>;
-    getHistory(linkId: string): Promise<Message[]>;
+    getHistory(linkId: string, token: string): Promise<Message[] | {
+        error: string;
+    }>;
 }

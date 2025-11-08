@@ -50,13 +50,28 @@ let ChatGateway = class ChatGateway {
     }
     handleDisconnect(client) {
     }
-    handleJoin(conversationId, client) {
-        client.join(conversationId);
+    async handleJoin(data, client) {
+        const conversation = await this.conversationRepo.findOne({ where: { linkId: data.conversationId } });
+        if (!conversation) {
+            client.emit('error', { message: 'Conversa não encontrada. Link inválido.' });
+            return { error: 'Conversation not found' };
+        }
+        if (conversation.accessToken !== data.token) {
+            client.emit('error', { message: 'Token inválido. Acesso negado.' });
+            return { error: 'Invalid token' };
+        }
+        client.join(data.conversationId);
+        return { success: true };
     }
     async onMessage(data, client) {
         const conversation = await this.conversationRepo.findOne({ where: { linkId: data.conversationId } });
         if (!conversation) {
-            return;
+            client.emit('error', { message: 'Conversa não encontrada. Link inválido.' });
+            return { error: 'Conversation not found' };
+        }
+        if (data.sender === 'client' && data.token && conversation.accessToken !== data.token) {
+            client.emit('error', { message: 'Token inválido. Acesso negado.' });
+            return { error: 'Invalid token' };
         }
         const savedMessage = await this.chatService.saveMessage(conversation.id, data.sender, data.text);
         this.server.to(data.conversationId).emit('receive_message', savedMessage);
@@ -105,8 +120,8 @@ __decorate([
     __param(0, (0, websockets_1.MessageBody)()),
     __param(1, (0, websockets_1.ConnectedSocket)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, socket_io_1.Socket]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [Object, socket_io_1.Socket]),
+    __metadata("design:returntype", Promise)
 ], ChatGateway.prototype, "handleJoin", null);
 __decorate([
     (0, websockets_1.SubscribeMessage)('send_message'),

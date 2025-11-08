@@ -493,8 +493,8 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
       body: Row(
         children: [
           SideMenu(
-            isDrawerOpen: false,
-            toggleDrawer: () {},
+            isDrawerOpen: isDrawerOpen,
+            toggleDrawer: toggleDrawer,
           ),
           Expanded(
             child: Column(

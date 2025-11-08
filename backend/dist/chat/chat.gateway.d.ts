@@ -19,10 +19,22 @@ export declare class ChatGateway {
     }, client: Socket): Promise<void>;
     handleConnection(client: Socket): void;
     handleDisconnect(client: Socket): void;
-    handleJoin(conversationId: string, client: Socket): void;
+    handleJoin(data: {
+        conversationId: string;
+        token: string;
+    }, client: Socket): Promise<{
+        error: string;
+        success?: undefined;
+    } | {
+        success: boolean;
+        error?: undefined;
+    }>;
     onMessage(data: {
         conversationId: string;
         sender: 'client' | 'staff';
         text: string;
-    }, client: Socket): Promise<void>;
+        token?: string;
+    }, client: Socket): Promise<{
+        error: string;
+    } | undefined>;
 }

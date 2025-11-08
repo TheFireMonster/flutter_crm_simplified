@@ -294,7 +294,7 @@ class _SalesPageState extends State<SalesPage> {
                                     String created = sale['saleDate'] ?? '';
                                     try {
                                       // Use day-first format (DD/MM/YYYY) with 24h time to match local expectation
-                                      created = DateFormat('dd/MM/yyyy HH:mm').format(DateTime.parse(created));
+                                      created = DateFormat('dd/MM/yyyy HH:mm').format(DateTime.parse(created).toLocal());
                                     } catch (_) {}
                                     final total = sale['price'] ?? sale['amount'] ?? 0;
                                     return Card(

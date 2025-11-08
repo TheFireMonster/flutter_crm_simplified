@@ -60,7 +60,7 @@ class _ChatPageState extends State<ChatPage> {
           messages = data.map((msg) {
             DateTime msgDate;
             try {
-              msgDate = DateTime.parse(msg['createdAt']);
+              msgDate = DateTime.parse(msg['createdAt']).toLocal();
             } catch (e) {
               msgDate = DateTime.now();
             }
@@ -234,7 +234,7 @@ class _ChatPageState extends State<ChatPage> {
       }
       DateTime msgDate;
       try {
-        msgDate = DateTime.parse(data['createdAt'] ?? DateTime.now().toIso8601String());
+        msgDate = DateTime.parse(data['createdAt'] ?? DateTime.now().toIso8601String()).toLocal();
       } catch (e) {
         msgDate = DateTime.now();
       }

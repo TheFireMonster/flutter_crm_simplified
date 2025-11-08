@@ -51,7 +51,7 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const users_entity_1 = require("../users/entities/users.entity");
 const registration_service_1 = require("../registration/registration.service");
-const crypto = __importStar(require("crypto"));
+const crypto_1 = require("crypto");
 const admin = __importStar(require("firebase-admin"));
 let AuthService = class AuthService {
     userRepo;
@@ -78,7 +78,7 @@ let AuthService = class AuthService {
             user = this.userRepo.create({
                 email: decoded.email,
                 name: name || decoded.name || '',
-                refreshToken: crypto.randomBytes(32).toString('hex'),
+                refreshToken: (0, crypto_1.randomBytes)(32).toString('hex'),
             });
             await this.userRepo.save(user);
             if (registrationCode) {
@@ -102,7 +102,7 @@ let AuthService = class AuthService {
             user = this.userRepo.create({
                 email: decoded.email,
                 name: decoded.name || '',
-                refreshToken: crypto.randomBytes(32).toString('hex'),
+                refreshToken: (0, crypto_1.randomBytes)(32).toString('hex'),
             });
             await this.userRepo.save(user);
         }

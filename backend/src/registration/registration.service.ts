@@ -2,7 +2,7 @@ import { Injectable, BadRequestException, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan } from 'typeorm';
 import { RegistrationCode } from './entities/registration-code.entity';
-import * as crypto from 'crypto';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class RegistrationService {
@@ -12,7 +12,7 @@ export class RegistrationService {
   ) {}
 
   async generateRegistrationCode(): Promise<string> {
-    const code = crypto.randomBytes(16).toString('hex');
+    const code = randomBytes(16).toString('hex');
     
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 30);

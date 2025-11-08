@@ -19,14 +19,18 @@ void main() async {
 
   final uri = Uri.base;
   String? linkId;
+  String? accessToken;
   if (uri.pathSegments.length >= 2 && uri.pathSegments[0] == 'chat') {
     linkId = uri.pathSegments[1];
+    if (uri.pathSegments.length >= 3) {
+      accessToken = uri.pathSegments[2];
+    }
   }
 
   runApp(
-    linkId != null
+    linkId != null && accessToken != null
       ? MaterialApp(
-          home: ChatPageCustomer(conversationId: linkId),
+          home: ChatPageCustomer(conversationId: linkId, accessToken: accessToken),
           debugShowCheckedModeBanner: false,
         )
       : const MyApp()

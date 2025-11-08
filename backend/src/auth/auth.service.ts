@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/users.entity';
 import { RegistrationService } from '../registration/registration.service';
-import * as crypto from 'crypto';
+import { randomBytes } from 'crypto';
 import * as admin from 'firebase-admin';
 
 @Injectable()
@@ -34,7 +34,7 @@ export class AuthService {
       user = this.userRepo.create({
         email: decoded.email,
         name: name || decoded.name || '',
-        refreshToken: crypto.randomBytes(32).toString('hex'),
+        refreshToken: randomBytes(32).toString('hex'),
       });
       await this.userRepo.save(user);
       
@@ -63,7 +63,7 @@ export class AuthService {
       user = this.userRepo.create({
         email: decoded.email,
         name: decoded.name || '',
-        refreshToken: crypto.randomBytes(32).toString('hex'),
+        refreshToken: randomBytes(32).toString('hex'),
       });
       await this.userRepo.save(user);
     }

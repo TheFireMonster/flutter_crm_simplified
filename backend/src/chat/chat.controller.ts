@@ -2,6 +2,7 @@ import { Controller, Get, Post, Patch, Body, Param } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
+import { randomBytes } from 'crypto';
 import { Conversation } from '../chat/entities/conversations.entity';
 import { CustomersService } from '../customers/customers.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
@@ -51,12 +52,14 @@ export class ChatController {
   async createConversation(@Body() dto: CreateConversationDto) {
     try {
       const linkId = uuidv4();
+      const accessToken = randomBytes(4).toString('hex'); // 8 caracteres hexadecimais
       const apiBase = process.env.API_BASE_URL || 'http://localhost:3000';
 
   const customer = await (this.customersService ? this.customersService.findOrCreateCustomer({ id: dto?.customerId, name: dto?.customerName }) : null);
 
       const conv = this.conversationRepo.create({
         linkId,
+        accessToken,
         customerName: dto?.customerName || (customer ? customer.name : 'Cliente'),
       });
 
@@ -69,7 +72,8 @@ export class ChatController {
 
       return {
         linkId: saved.linkId,
-        url: `${apiBase}/chat/${saved.linkId}`,
+        accessToken: saved.accessToken,
+        url: `${apiBase}/chat/${saved.linkId}/${saved.accessToken}`,
         customerId: customer ? customer.id : undefined,
       };
     } catch (err) {
@@ -78,8 +82,17 @@ export class ChatController {
     }
   }
 
-  @Get('history/:linkId')
-  async getHistory(@Param('linkId') linkId: string) {
+  @Get('history/:linkId/:token')
+  async getHistory(@Param('linkId') linkId: string, @Param('token') token: string) {
+    // Validate that conversation exists and token matches
+    const conv = await this.conversationRepo.findOne({ where: { linkId } });
+    if (!conv) {
+      return { error: 'Conversa não encontrada. Link inválido.' };
+    }
+    if (conv.accessToken !== token) {
+      return { error: 'Token inválido. Acesso negado.' };
+    }
+    
     return this.messageRepo.find({
       where: { conversation: { linkId } },
       order: { createdAt: 'ASC' },

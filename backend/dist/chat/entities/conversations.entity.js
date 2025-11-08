@@ -15,6 +15,7 @@ const messages_entity_1 = require("../entities/messages.entity");
 let Conversation = class Conversation {
     id;
     linkId;
+    accessToken;
     customerName;
     customerId;
     createdAt;
@@ -30,6 +31,10 @@ __decorate([
     (0, typeorm_1.Column)({ unique: true }),
     __metadata("design:type", String)
 ], Conversation.prototype, "linkId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false }),
+    __metadata("design:type", String)
+], Conversation.prototype, "accessToken", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
