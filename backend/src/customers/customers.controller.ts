@@ -9,7 +9,11 @@ export class CustomersController {
 
     @Post()
     create(@Body() body: CreateCustomerDto) {
-        return this.customersService.create(body as any);
+        const sanitized = { ...body } as any;
+        if (sanitized.cpf) {
+            sanitized.cpf = sanitized.cpf.replace(/\D/g, '');
+        }
+        return this.customersService.create(sanitized);
     }
 
     @Get()
@@ -34,7 +38,11 @@ export class CustomersController {
     
     @Put(':id')
     update(@Param('id') id: string, @Body() body: CreateCustomerDto) {
-        return this.customersService.update(Number(id), body as any);
+        const sanitized = { ...body } as any;
+        if (sanitized.cpf) {
+            sanitized.cpf = sanitized.cpf.replace(/\D/g, '');
+        }
+        return this.customersService.update(Number(id), sanitized);
     }
     
     @Delete(':id')

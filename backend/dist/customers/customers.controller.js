@@ -22,7 +22,11 @@ let CustomersController = class CustomersController {
         this.customersService = customersService;
     }
     create(body) {
-        return this.customersService.create(body);
+        const sanitized = { ...body };
+        if (sanitized.cpf) {
+            sanitized.cpf = sanitized.cpf.replace(/\D/g, '');
+        }
+        return this.customersService.create(sanitized);
     }
     findAll() {
         return this.customersService.findAll();
@@ -37,7 +41,11 @@ let CustomersController = class CustomersController {
         return this.customersService.findOne(Number(id));
     }
     update(id, body) {
-        return this.customersService.update(Number(id), body);
+        const sanitized = { ...body };
+        if (sanitized.cpf) {
+            sanitized.cpf = sanitized.cpf.replace(/\D/g, '');
+        }
+        return this.customersService.update(Number(id), sanitized);
     }
     remove(id) {
         return this.customersService.remove(Number(id));

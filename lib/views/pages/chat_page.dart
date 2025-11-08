@@ -488,7 +488,8 @@ class _ChatPageState extends State<ChatPage> {
                     itemCount: generatedChatLinks.length,
                     itemBuilder: (context, index) {
                       final link = generatedChatLinks[index];
-                      final localLinkId = link.split('/').last;
+                      final parts = link.split('/');
+                      final localLinkId = parts.length >= 2 ? parts[parts.length - 2] : parts.last;
                       final name = customerNames[localLinkId] ?? '';
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 8.0),
@@ -588,6 +589,7 @@ class _ChatPageState extends State<ChatPage> {
                                         generatedChatLinks.removeAt(index);
                                         customerNames.remove(localLinkId);
                                         customerIds.remove(localLinkId);
+                                        accessTokens.remove(localLinkId);
                                       });
                                       await saveChatLinks();
 

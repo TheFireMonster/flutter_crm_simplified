@@ -180,6 +180,9 @@ export class AIChatService {
           
           if (fnName === 'update_customer_info') {
             const { customerId, ...updateData } = args;
+            if (updateData.cpf) {
+              updateData.cpf = updateData.cpf.replace(/\D/g, '');
+            }
             const updated = await this.customersService.update(customerId, updateData);
             return `Informações do cliente atualizadas com sucesso: ${JSON.stringify(updated)}`;
           }

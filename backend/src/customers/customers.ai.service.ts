@@ -24,7 +24,7 @@ export class CustomersAiService {
     const created = await this.customersService.create({
       name: dto.name,
       email: dto.email,
-      cpf: dto.cpf,
+      cpf: dto.cpf?.replace(/\D/g, ''),
       phone: dto.phone,
       address: dto.address,
       source: dto.source,
