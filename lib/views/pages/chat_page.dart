@@ -49,9 +49,14 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
   Future<void> loadMessageHistory(String conversationId) async {
+    final token = accessTokens[conversationId];
+    if (token == null) {
+      debugPrint('⚠️ Token não disponível para carregar histórico de $conversationId');
+      return;
+    }
     try {
       final response = await http.get(
-        Uri.parse('/chat/history/$conversationId'),
+        Uri.parse('/chat/history/$conversationId/$token'),
         headers: {'Content-Type': 'application/json'},
       );
       if (response.statusCode == 200) {
@@ -71,6 +76,8 @@ class _ChatPageState extends State<ChatPage> {
             );
           }).toList();
         });
+      } else if (response.statusCode == 403) {
+        debugPrint('❌ Token inválido para conversa $conversationId');
       }
     } catch (e) {
       if (mounted) {
@@ -86,6 +93,7 @@ class _ChatPageState extends State<ChatPage> {
   List<String> generatedChatLinks = [];
   Map<String, String> customerNames = {};
   Map<String, dynamic> customerIds = {};
+  Map<String, String> accessTokens = {};
   Future<void> loadChatLinks() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -99,6 +107,10 @@ class _ChatPageState extends State<ChatPage> {
       if (idsJson != null) {
         customerIds = Map<String, dynamic>.from(jsonDecode(idsJson));
       }
+      final tokensJson = prefs.getString('accessTokens');
+      if (tokensJson != null) {
+        accessTokens = Map<String, String>.from(jsonDecode(tokensJson));
+      }
     });
   }
 
@@ -107,6 +119,7 @@ class _ChatPageState extends State<ChatPage> {
     await prefs.setStringList('chatLinks', generatedChatLinks);
     await prefs.setString('customerNames', jsonEncode(customerNames));
     await prefs.setString('customerIds', jsonEncode(customerIds));
+    await prefs.setString('accessTokens', jsonEncode(accessTokens));
   }
   bool isGeneratingLink = false;
   final TextEditingController _customerNameController = TextEditingController();
@@ -169,8 +182,13 @@ class _ChatPageState extends State<ChatPage> {
 
   void _joinConversationIfNeeded() {
     if (linkId == null) return;
+    final token = accessTokens[linkId];
+    if (token == null) {
+      debugPrint('⚠️ Token não encontrado para conversa $linkId');
+      return;
+    }
     try {
-      socket.emit('join_conversation', linkId);
+      socket.emit('join_conversation', {'conversationId': linkId, 'token': token});
     } catch (e) {
       debugPrint('Erro ao entrar na conversa: $e');
     }
@@ -196,11 +214,16 @@ class _ChatPageState extends State<ChatPage> {
         isSocketConnecting = false;
       });
       if (linkId != null) {
-        try {
-          socket.emit('join_conversation', linkId);
-          debugPrint('📨 Entrou na conversa: $linkId');
-        } catch (e) {
-          debugPrint('Erro ao entrar na conversa no connect: $e');
+        final token = accessTokens[linkId];
+        if (token != null) {
+          try {
+            socket.emit('join_conversation', {'conversationId': linkId, 'token': token});
+            debugPrint('📨 Entrou na conversa: $linkId');
+          } catch (e) {
+            debugPrint('Erro ao entrar na conversa no connect: $e');
+          }
+        } else {
+          debugPrint('⚠️ Token não disponível para $linkId');
         }
       }
     });
@@ -374,16 +397,18 @@ class _ChatPageState extends State<ChatPage> {
                           try {
                             final info = await fetchConversationInfo(null, name);
                             linkId = info['linkId'];
+                            final accessToken = info['accessToken'];
                             final newLink = info['url'];
                             setState(() {
                               generatedChatLinks.add(newLink);
                               customerNames[linkId!] = name;
+                              accessTokens[linkId!] = accessToken;
                               if (info.containsKey('customerId') && info['customerId'] != null) {
                                 customerIds[linkId!] = info['customerId'];
                               }
                             });
                             try {
-                              socket.emit('join_conversation', linkId);
+                              socket.emit('join_conversation', {'conversationId': linkId, 'token': accessToken});
                             } catch (e) {
                               debugPrint('Erro ao entrar na conversa após gerar link: $e');
                             }
@@ -773,10 +798,12 @@ class _ChatPageState extends State<ChatPage> {
                                 onSubmitted: chatGptActive ? null : (text) {
                                   if (text.trim().isEmpty) return;
                                   _controller.clear();
+                                  final token = accessTokens[linkId];
                                   socket.emit('send_message', {
                                     'conversationId': linkId,
                                     'sender': 'staff',
                                     'text': text,
+                                    'token': token,
                                   });
                                 },
                               ),
@@ -788,10 +815,12 @@ class _ChatPageState extends State<ChatPage> {
                                   final text = _controller.text;
                                   if (text.trim().isEmpty) return;
                                   _controller.clear();
+                                  final token = accessTokens[linkId];
                                   socket.emit('send_message', {
                                     'conversationId': linkId,
                                     'sender': 'staff',
                                     'text': text,
+                                    'token': token,
                                   });
                                 },
                               ),
