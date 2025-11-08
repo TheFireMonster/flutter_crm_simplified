@@ -245,9 +245,13 @@ class _CostumersPageState extends State<CostumersPage> {
       await fetchCustomers();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Cliente excluído')));
+    } else if (resp.statusCode == 404) {
+      await fetchCustomers();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Cliente não encontrado (já foi excluído)')));
     } else {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao excluir cliente')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao excluir cliente: ${resp.statusCode}')));
     }
   }
 
