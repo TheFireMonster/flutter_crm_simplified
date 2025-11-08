@@ -72,7 +72,7 @@ class _ChatPageState extends State<ChatPage> {
             return Message(
               text: msg['content'],
               date: msgDate,
-              isSentByMe: (msg['sender'] == 'staff'),
+              isSentByMe: (msg['sender'] == 'Staff' || msg['sender'] == 'AIChat'),
             );
           }).toList();
         });
@@ -264,10 +264,10 @@ class _ChatPageState extends State<ChatPage> {
       final message = Message(
         text: data['content'] ?? data['text'],
         date: msgDate,
-        isSentByMe: (data['sender'] == 'staff'),
+        isSentByMe: (data['sender'] == 'Staff' || data['sender'] == 'AIChat'),
       );
   if (incomingId.isNotEmpty) _receivedMessageIds.add(incomingId);
-      if ((data['sender'] ?? '') == 'staff') {
+      if ((data['sender'] ?? '') == 'Staff' || (data['sender'] ?? '') == 'AIChat') {
         setState(() {
           isSomeoneTyping = false;
           typingUser = '';

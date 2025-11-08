@@ -99,7 +99,7 @@ export class ChatGateway {
     if (conversation.AIChatActive) {
       console.error('onMessage: AI is active, calling ask (non-streaming)...');
       try {
-        this.server.to(data.conversationId).emit('typing', { sender: 'staff' });
+        this.server.to(data.conversationId).emit('typing', { sender: 'Staff' });
       } catch (_) {}
       
       const AIChatReply = await this.aiChatService.ask(
@@ -110,7 +110,7 @@ export class ChatGateway {
       );
 
       try {
-        this.server.to(data.conversationId).emit('typing', { sender: 'staff', done: true });
+        this.server.to(data.conversationId).emit('typing', { sender: 'Staff', done: true });
       } catch (_) {}
 
       console.error('onMessage: ask returned, saving bot message');

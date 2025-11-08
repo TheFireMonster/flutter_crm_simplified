@@ -97567,9 +97567,11 @@ s=A.X(s,s.$ti.i("al.E"))
 this.a.ch=s},
 $S:0}
 A.aA0.prototype={
-$1(a){var s,r,q=null
-try{q=A.CP(J.a0(a,"createdAt")).u1()}catch(s){q=new A.bF(Date.now(),0,!1)}r=J.a_(a)
-return new A.he(r.h(a,"content"),q,J.d(r.h(a,"sender"),"staff"))},
+$1(a){var s,r,q,p,o=null
+try{o=A.CP(J.a0(a,"createdAt")).u1()}catch(s){o=new A.bF(Date.now(),0,!1)}r=J.a_(a)
+q=r.h(a,"content")
+p=o
+return new A.he(q,p,J.d(r.h(a,"sender"),"Staff")||J.d(r.h(a,"sender"),"AIChat"))},
 $S:228}
 A.aA_.prototype={
 $0(){var s,r,q,p,o=null,n=this.a,m=this.b.a,l=J.a_(m),k=t.kc.a(l.h(m,"chatLinks"))
@@ -97657,21 +97659,23 @@ $0(){var s=this.a
 s.ay=s.ax=!1},
 $S:0}
 A.azU.prototype={
-$1(a){var s,r,q,p,o,n=this,m=J.a_(a),l=m.h(a,"id"),k=l==null?null:J.b2(l)
-if(k==null)k=""
-l=k.length!==0
-if(l&&n.a.cx.p(0,k))return
+$1(a){var s,r,q,p,o,n=this,m="sender",l=J.a_(a),k=l.h(a,"id"),j=k==null?null:J.b2(k)
+if(j==null)j=""
+k=j.length!==0
+if(k&&n.a.cx.p(0,j))return
 s=null
-try{r=m.h(a,"createdAt")
-s=A.CP(r==null?new A.bF(Date.now(),0,!1).u_():r).u1()}catch(q){s=new A.bF(Date.now(),0,!1)}r=m.h(a,"content")
-if(r==null)r=m.h(a,"text")
+try{r=l.h(a,"createdAt")
+s=A.CP(r==null?new A.bF(Date.now(),0,!1).u_():r).u1()}catch(q){s=new A.bF(Date.now(),0,!1)}r=l.h(a,"content")
+if(r==null)r=l.h(a,"text")
 p=s
-o=J.d(m.h(a,"sender"),"staff")
-if(l)n.a.cx.D(0,k)
-m=m.h(a,"sender")
-if(J.d(m==null?"":m,"staff")){m=n.a
-m.M(new A.azK(m))}m=n.a
-m.M(new A.azL(m,new A.he(r,p,o)))},
+o=J.d(l.h(a,m),"Staff")||J.d(l.h(a,m),"AIChat")
+if(k)n.a.cx.D(0,j)
+k=l.h(a,m)
+if(!J.d(k==null?"":k,"Staff")){l=l.h(a,m)
+l=J.d(l==null?"":l,"AIChat")}else l=!0
+if(l){l=n.a
+l.M(new A.azK(l))}l=n.a
+l.M(new A.azL(l,new A.he(r,p,o)))},
 $S:6}
 A.azK.prototype={
 $0(){var s=this.a
