@@ -97685,7 +97685,7 @@ A.azV.prototype={
 $1(a){var s,r=J.a_(a),q=r.h(a,"sender")
 if(q==null)q=""
 s=J.d(r.h(a,"done"),!0)
-if(!J.d(q,"staff")){r=this.a
+if(!J.d(q,"Staff")){r=this.a
 if(s)r.M(new A.azH(r))
 else{r.M(new A.azI(r,q))
 A.x9(A.cj(0,0,0,2),new A.azJ(r),t.a)}}},
@@ -97921,7 +97921,7 @@ A.azD.prototype={
 $1(a){var s=this.a,r=s.dy
 if(r!=null&&a.length!==0){s=s.at
 s===$&&A.a()
-s.kE("typing",A.Z(["conversationId",r,"sender","staff"],t.N,t.A))}},
+s.kE("typing",A.Z(["conversationId",r,"sender","Staff"],t.N,t.A))}},
 $S:19}
 A.azE.prototype={
 $1(a){var s,r,q
@@ -98091,7 +98091,7 @@ A.az5.prototype={
 $1(a){var s,r=J.a_(a),q=r.h(a,"sender")
 if(q==null)q=""
 s=J.d(r.h(a,"done"),!0)
-if(!J.d(q,"client")){r=this.a
+if(!J.d(q,"Cliente")){r=this.a
 if(s)r.M(new A.ayR(r))
 else{r.M(new A.ayS(r,q))
 A.x9(A.cj(0,0,0,2),new A.ayT(r),t.a)}}},
@@ -98140,7 +98140,7 @@ $1(a){var s,r=this.a,q=r.a.c
 if(q.length!==0&&a.length!==0){r=r.e
 r===$&&A.a()
 s=t.N
-r.kE("typing",A.Z(["conversationId",q,"sender","client"],s,s))}},
+r.kE("typing",A.Z(["conversationId",q,"sender","Cliente"],s,s))}},
 $S:19}
 A.ayO.prototype={
 $1(a){this.a.a45(a)},

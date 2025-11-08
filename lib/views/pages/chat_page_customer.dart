@@ -137,7 +137,7 @@ class _ChatPageCustomerState extends State<ChatPageCustomer> {
     socket.on('typing', (data) {
       final sender = data['sender'] ?? '';
       final done = data['done'] == true;
-      if (sender != 'client') {
+      if (sender != 'Cliente') {
         if (done) {
           setState(() {
             isSomeoneTyping = false;
@@ -341,7 +341,7 @@ class _ChatPageCustomerState extends State<ChatPageCustomer> {
                       if (widget.conversationId.isNotEmpty && text.isNotEmpty) {
                         socket.emit('typing', {
                           'conversationId': widget.conversationId,
-                          'sender': 'client',
+                          'sender': 'Cliente',
                         });
                       }
                     },
