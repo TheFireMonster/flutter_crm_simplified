@@ -25,5 +25,5 @@ export class CreateCustomerFromAiDto {
 
   @IsOptional()
   @IsString()
-  requestId?: string;
+  requestId?: string; // idempotency key
 }

@@ -81,7 +81,7 @@ export class ChatGateway {
       client.emit('error', { message: 'Conversa não encontrada. Link inválido.' });
       return { error: 'Conversation not found' };
     }
-    
+    // Validate token for client messages
     if (data.sender === 'client' && data.token && conversation.accessToken !== data.token) {
       client.emit('error', { message: 'Token inválido. Acesso negado.' });
       return { error: 'Invalid token' };

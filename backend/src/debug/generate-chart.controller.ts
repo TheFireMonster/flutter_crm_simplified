@@ -4,7 +4,7 @@ import { Controller, Post, Body } from '@nestjs/common';
 export class GenerateChartController {
   @Post('generate_chart')
   generate(@Body() body: any) {
-    
+    // Dev-only: return simple sample chart JSON that the frontend can render or log
     const now = new Date();
     const labels = [
       new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),

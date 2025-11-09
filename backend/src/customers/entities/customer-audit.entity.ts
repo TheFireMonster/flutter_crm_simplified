@@ -14,7 +14,7 @@ export class CustomerAudit {
   @Column({ nullable: true })
   changedBy?: string;
 
-  
+  // store a json object with previous and new values or the raw update payload
   @Column({ type: 'json', nullable: true })
   changes?: any;
 

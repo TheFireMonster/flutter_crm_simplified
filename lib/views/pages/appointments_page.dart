@@ -3,7 +3,7 @@ import 'package:flutter_crm/widgets/menu/side_menu.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class AppointmentsPage extends StatefulWidget {
@@ -37,6 +37,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
   void initState() {
     super.initState();
     fetchCustomers();
+    _loadChatCustomers();
   }
 
   Future<void> _editAppointment(int id, Map<String, dynamic> currentData) async {
@@ -241,12 +242,65 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
       setState(() {
         _customers = data.map<Map<String, dynamic>>((c) => Map<String, dynamic>.from(c)).toList();
       });
+      // merge any chat-created customers persisted locally
+      await _mergeChatCustomersIfAny();
     }
   }
 
-  // Removed _loadChatCustomers: all customer data is now fetched from backend
+  Future<void> _loadChatCustomers() async {
+    final prefs = await SharedPreferences.getInstance();
+    final idsJson = prefs.getString('customerIds');
+    final namesJson = prefs.getString('customerNames');
+    if (idsJson == null || namesJson == null) return;
+    try {
+      final Map<String, dynamic> ids = jsonDecode(idsJson);
+      final Map<String, dynamic> names = jsonDecode(namesJson);
+      final chatCustomers = <Map<String, dynamic>>[];
+      ids.forEach((linkId, custId) {
+        final name = names[linkId]?.toString() ?? '';
+        if (custId != null && custId.toString().isNotEmpty) {
+          chatCustomers.add({'id': custId, 'name': name});
+        }
+      });
+      if (!mounted) return;
+      setState(() {
+        final existingIds = _customers.map((c) => c['id']?.toString()).toSet();
+        for (final c in chatCustomers) {
+          final cid = c['id']?.toString();
+          if (cid == null) continue;
+          if (!existingIds.contains(cid)) {
+            _customers.add(c);
+            existingIds.add(cid);
+          }
+        }
+      });
+    } catch (_) {}
+  }
 
-  // Removed _mergeChatCustomersIfAny: all customer data is now fetched from backend
+  Future<void> _mergeChatCustomersIfAny() async {
+    // helper called after fetching server customers to ensure locally persisted chat customers are merged
+    final prefs = await SharedPreferences.getInstance();
+    final idsJson = prefs.getString('customerIds');
+    final namesJson = prefs.getString('customerNames');
+    if (idsJson == null || namesJson == null) return;
+    try {
+      final Map<String, dynamic> ids = jsonDecode(idsJson);
+      final Map<String, dynamic> names = jsonDecode(namesJson);
+      final existingIds = _customers.map((c) => c['id']?.toString()).toSet();
+      for (final entry in ids.entries) {
+        final linkId = entry.key;
+        final custId = entry.value;
+        final name = names[linkId]?.toString() ?? '';
+        final custIdStr = custId?.toString();
+        if (custIdStr == null || custIdStr.isEmpty) continue;
+        if (!existingIds.contains(custIdStr)) {
+          _customers.add({'id': custId, 'name': name});
+          existingIds.add(custIdStr);
+        }
+      }
+      if (mounted) setState(() {});
+    } catch (_) {}
+  }
 
   Future<void> fetchAppointments() async {
     if (_selectedDay == null) return;

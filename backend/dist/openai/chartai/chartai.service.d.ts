@@ -20,9 +20,9 @@ export declare class ChartAIService {
         meta?: undefined;
     } | {
         chartType: any;
-        chartData: Appointment[] | Customer[] | Service[] | Sale[];
+        chartData: Sale[] | Appointment[] | Customer[] | Service[];
         meta: {
-            table: "customers" | "appointments" | "services" | "sales";
+            table: "customers" | "sales" | "services" | "appointments";
             selectedFields: any;
             count: number;
         };
