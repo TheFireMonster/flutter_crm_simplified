@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import 'package:flutter_crm/widgets/menu/side_menu.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -65,7 +64,6 @@ class _ChatPageState extends State<ChatPage> {
         debugPrint('[TOKEN] Recebido do backend para $conversationId: $token');
         if (token != null) {
           accessTokens[conversationId] = token;
-          await saveChatLinks();
           debugPrint('[TOKEN] Salvo em accessTokens[$conversationId] e persistido.');
         } else {
           debugPrint('❌ Não foi possível obter token para conversa $conversationId');
@@ -105,16 +103,12 @@ class _ChatPageState extends State<ChatPage> {
       else if (historyResponse.statusCode == 404 || (historyResponse.body.contains('Conversa não encontrada') || historyResponse.body.contains('Link inválido'))) {
         debugPrint('🧹 Limpando cache: conversa $conversationId não existe mais no backend.');
         setState(() {
-          generatedChatLinks.removeWhere((link) => link.contains(conversationId));
-          customerNames.remove(conversationId);
-          customerIds.remove(conversationId);
           accessTokens.remove(conversationId);
           if (linkId == conversationId) {
             linkId = null;
             messages.clear();
           }
         });
-        await saveChatLinks();
       }
     } catch (e) {
       if (mounted) {
@@ -127,39 +121,27 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController _controller = TextEditingController();
   bool isDrawerOpen = false;
   String? generatedCustomerId;
-  List<String> generatedChatLinks = [];
-  Map<String, String> customerNames = {};
-  Map<String, dynamic> customerIds = {};
+  List<Map<String, dynamic>> conversations = [];
   Map<String, String> accessTokens = {};
-  Future<void> loadChatLinks() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      generatedChatLinks = prefs.getStringList('chatLinks') ?? [];
-      final namesJson = prefs.getString('customerNames');
-      if (namesJson != null) {
-        customerNames = Map<String, String>.from(jsonDecode(namesJson));
-      }
-      final idsJson = prefs.getString('customerIds');
-      if (idsJson != null) {
-        customerIds = Map<String, dynamic>.from(jsonDecode(idsJson));
-      }
-      final tokensJson = prefs.getString('accessTokens');
-      if (tokensJson != null) {
-        accessTokens = Map<String, String>.from(jsonDecode(tokensJson));
-        debugPrint('[TOKEN] Tokens carregados do SharedPreferences: $accessTokens');
-      } else {
-        debugPrint('[TOKEN] Nenhum token encontrado no SharedPreferences.');
-      }
-    });
-  }
 
-  Future<void> saveChatLinks() async {
-    final prefs = await SharedPreferences.getInstance();
-  await prefs.setStringList('chatLinks', generatedChatLinks);
-  await prefs.setString('customerNames', jsonEncode(customerNames));
-  await prefs.setString('customerIds', jsonEncode(customerIds));
-  await prefs.setString('accessTokens', jsonEncode(accessTokens));
-  debugPrint('[TOKEN] Tokens salvos no SharedPreferences: $accessTokens');
+  Future<void> fetchConversationsFromBackend() async {
+    try {
+      final response = await http.get(Uri.parse('/chat/conversations'));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        setState(() {
+          conversations = List<Map<String, dynamic>>.from(data);
+          accessTokens.clear();
+          for (var conv in conversations) {
+            if (conv['linkId'] != null && conv['accessToken'] != null) {
+              accessTokens[conv['linkId']] = conv['accessToken'];
+            }
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint('Erro ao buscar conversas do backend: $e');
+    }
   }
   bool isGeneratingLink = false;
   final TextEditingController _customerNameController = TextEditingController();
@@ -185,7 +167,7 @@ class _ChatPageState extends State<ChatPage> {
   void initState() {
     super.initState();
     connectToServer();
-    loadChatLinks();
+  fetchConversationsFromBackend();
     _connectionCheckTimer = Timer.periodic(Duration(seconds: 3), (timer) {
       if (mounted && socket.connected != isSocketConnected) {
         setState(() {
@@ -439,20 +421,14 @@ class _ChatPageState extends State<ChatPage> {
                             final newLink = info['url'];
                             debugPrint('[TOKEN] Recebido do backend na criação: $accessToken para linkId $linkId');
                             setState(() {
-                              generatedChatLinks.add(newLink);
-                              customerNames[linkId!] = name;
                               accessTokens[linkId!] = accessToken;
                               debugPrint('[TOKEN] Salvo em accessTokens[$linkId]: $accessToken');
-                              if (info.containsKey('customerId') && info['customerId'] != null) {
-                                customerIds[linkId!] = info['customerId'];
-                              }
                             });
                             try {
                               socket.emit('join_conversation', {'conversationId': linkId, 'token': accessToken});
                             } catch (e) {
                               debugPrint('Erro ao entrar na conversa após gerar link: $e');
                             }
-                            saveChatLinks();
                             if (!mounted) return;
                             showDialog(
                               context: navigator.context,
@@ -491,9 +467,7 @@ class _ChatPageState extends State<ChatPage> {
                             );
                           } catch (e) {
                             setState(() {
-                              generatedChatLinks.add('Erro ao gerar link.');
                             });
-                            saveChatLinks();
                             if (!mounted) return;
                             showDialog(
                               context: navigator.context,
@@ -525,12 +499,12 @@ class _ChatPageState extends State<ChatPage> {
                 SizedBox(height: 16),
                 Expanded(
                   child: ListView.builder(
-                    itemCount: generatedChatLinks.length,
+                    itemCount: conversations.length,
                     itemBuilder: (context, index) {
-                      final link = generatedChatLinks[index];
-                      final parts = link.split('/');
-                      final localLinkId = parts.length >= 2 ? parts[parts.length - 2] : parts.last;
-                      final name = customerNames[localLinkId] ?? '';
+                      final conv = conversations[index];
+                      final localLinkId = conv['linkId'] ?? '';
+                      final name = conv['customerName'] ?? '';
+                      final link = conv['url'] ?? '';
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 8.0),
                         child: Card(
@@ -574,9 +548,7 @@ class _ChatPageState extends State<ChatPage> {
                                     );
                                     if (result != null && result.isNotEmpty) {
                                       setState(() {
-                                        customerNames[localLinkId] = result;
                                       });
-                                      saveChatLinks();
                                       
                                       await http.patch(
                                         Uri.parse('/chat/conversations/$localLinkId'),
@@ -629,12 +601,8 @@ class _ChatPageState extends State<ChatPage> {
 
                                     if (confirm == true) {
                                       setState(() {
-                                        generatedChatLinks.removeAt(index);
-                                        customerNames.remove(localLinkId);
-                                        customerIds.remove(localLinkId);
                                         accessTokens.remove(localLinkId);
                                       });
-                                      await saveChatLinks();
 
                                       try {
                                         if (linkId == localLinkId) {

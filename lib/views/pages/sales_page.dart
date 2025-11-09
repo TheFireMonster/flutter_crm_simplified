@@ -3,7 +3,7 @@ import 'package:flutter_crm/widgets/menu/side_menu.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// ...existing code...
 
 class SalesPage extends StatefulWidget {
   const SalesPage({super.key});
@@ -38,8 +38,8 @@ class _SalesPageState extends State<SalesPage> {
   void initState() {
     super.initState();
     fetchSales();
-    _loadChatCustomers();
     _loadServices();
+    _fetchChatCustomersFromBackend();
   }
 
   Future<void> _loadServices() async {
@@ -68,20 +68,27 @@ class _SalesPageState extends State<SalesPage> {
     }
   }
 
-  Future<void> _loadChatCustomers() async {
+  Future<void> _fetchChatCustomersFromBackend() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final namesJson = prefs.getString('customerNames');
-      if (namesJson != null) {
-        final Map<String, dynamic> map = jsonDecode(namesJson);
-        _chatCustomerNames = map.map((k, v) => MapEntry(k, v.toString()));
-        if (_chatCustomerNames.isNotEmpty) _selectedChatCustomerLinkId = _chatCustomerNames.keys.first;
-        if (mounted) setState(() {});
-      }
-      final idsJson = prefs.getString('customerIds');
-      if (idsJson != null) {
-        final Map<String, dynamic> idmap = jsonDecode(idsJson);
-        _chatCustomerIds = idmap.map((k, v) => MapEntry(k, v.toString()));
+      final uri = Uri.parse('/chat/customers');
+      final resp = await http.get(uri);
+      if (resp.statusCode == 200) {
+        final data = jsonDecode(resp.body);
+        if (data is List) {
+          _chatCustomerNames = {};
+          _chatCustomerIds = {};
+          for (final c in data) {
+            final linkId = c['linkId']?.toString();
+            final name = c['name']?.toString() ?? '';
+            final id = c['id']?.toString();
+            if (linkId != null && id != null) {
+              _chatCustomerNames[linkId] = name;
+              _chatCustomerIds[linkId] = id;
+            }
+          }
+          if (_chatCustomerNames.isNotEmpty) _selectedChatCustomerLinkId = _chatCustomerNames.keys.first;
+          if (mounted) setState(() {});
+        }
       }
     } catch (e) {
       if (mounted) setState(() { errorMessage = 'Failed loading chat customers: $e'; });
