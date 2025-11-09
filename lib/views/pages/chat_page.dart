@@ -58,6 +58,7 @@ class _ChatPageState extends State<ChatPage> {
         Uri.parse('/chat/conversations/$conversationId'),
         headers: {'Content-Type': 'application/json'},
       );
+      debugPrint('[TOKEN] Resposta completa do backend para $conversationId: ${response.body}');
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         token = data['accessToken'] ?? data['access_token'];
@@ -418,6 +419,7 @@ class _ChatPageState extends State<ChatPage> {
                           setState(() { isGeneratingLink = true; });
                           try {
                             final info = await fetchConversationInfo(null, name);
+                            debugPrint('[TOKEN] JSON completo recebido do backend na criação: $info');
                             linkId = info['linkId'];
                             final accessToken = info['accessToken'];
                             final newLink = info['url'];
