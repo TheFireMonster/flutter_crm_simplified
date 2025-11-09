@@ -64,7 +64,7 @@ async function bootstrap() {
   const port = process.env.PORT ? Number(process.env.PORT) : 3000;
   await app.listen(port);
   if (process.env.NODE_ENV !== 'production') {
-    console.log(`Server running on ${process.env.API_BASE_URL || `http://localhost:${port}`}`);
+  console.log(`Server running on ${process.env.API_BASE_URL || `http://localhost:${port}`}`);
   }
 }
 bootstrap();

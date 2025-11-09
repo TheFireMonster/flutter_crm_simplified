@@ -5,7 +5,7 @@ export declare class CustomersAiService {
     private customersService;
     private aiActionsService;
     constructor(customersService: CustomersService, aiActionsService: AiActionsService);
-    createFromAi(dto: CreateCustomerFromAiDto): Promise<import("./entities/customers.entity").Customer | import("../ai-actions/entities/ai-action.entity").AiAction | null>;
+    createFromAi(dto: CreateCustomerFromAiDto): Promise<import("../ai-actions/entities/ai-action.entity").AiAction | import("./entities/customers.entity").Customer | null>;
     updateFromAi(customerId: number, updateData: Partial<CreateCustomerFromAiDto>): Promise<{
         success: boolean;
     }>;

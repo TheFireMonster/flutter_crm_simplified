@@ -33,20 +33,4 @@ export class Customer {
     @Column({ type: 'varchar', nullable: true, length: 50 })
     source?: string;
 
-/*     @Column({ type: 'jsonb', nullable: true })
-    customAttributes: {
-        industry?: string;
-        companySize?: 'small' | 'medium' | 'large';
-        lastPurchase?: Date;
-        preferences?: string[];
-    }; */ // Uncomment if needed
-
-    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-    createdAt: Date;
-
-    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
-    updatedAt: Date;
-
-    @OneToMany(() => Sale, (s) => s.customer)
-    sales?: Sale[];
 }

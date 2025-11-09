@@ -9,7 +9,7 @@ export class CreateConversationDto {
   @IsOptional()
   @IsInt()
   @Transform(({ value }) => {
-    // Treat empty strings as undefined (omit field) and convert numeric strings to numbers
+    
     if (value === '' || value === null || value === undefined) return undefined;
     const n = Number(value);
     return Number.isNaN(n) ? value : n;

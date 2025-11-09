@@ -71,7 +71,7 @@ describe('RegistrationService', () => {
         id: 1,
         code: 'valid123',
         used: false,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Expira amanhã
+  expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
         createdAt: new Date()
       };
 
@@ -88,14 +88,14 @@ describe('RegistrationService', () => {
     });
 
     it('deve rejeitar código já usado', async () => {
-      repo.findOne.mockResolvedValue(null); // Código usado não será encontrado pela query
+  repo.findOne.mockResolvedValue(null);
 
       await expect(service.validateRegistrationCode('used123'))
         .rejects.toThrow(NotFoundException);
     });
 
     it('deve rejeitar código expirado', async () => {
-      repo.findOne.mockResolvedValue(null); // Código expirado não será encontrado pela query
+  repo.findOne.mockResolvedValue(null);
 
       await expect(service.validateRegistrationCode('expired123'))
         .rejects.toThrow(NotFoundException);
@@ -118,7 +118,7 @@ describe('RegistrationService', () => {
         where: { 
           code: 'test123',
           used: false,
-          expiresAt: expect.any(Object) // MoreThan object
+          expiresAt: expect.any(Object)
         }
       });
     });
@@ -146,8 +146,8 @@ describe('RegistrationService', () => {
     it('deve lançar erro se código não for encontrado para marcar', async () => {
       repo.update.mockResolvedValue({ affected: 0 });
 
-      // O método atual não valida se o código existe antes de atualizar
-      // então este teste deve passar sem erro
+      
+      
       await expect(service.markCodeAsUsed('inexistente', 'test@email.com'))
         .resolves.not.toThrow();
     });
@@ -190,7 +190,7 @@ describe('RegistrationService', () => {
     });
 
     it('deve validar formato do código', async () => {
-      // Códigos inválidos
+      
       const invalidCodes = ['', 'short', '12345', 'invalid@code!'];
 
       repo.findOne.mockResolvedValue(null);
@@ -200,7 +200,7 @@ describe('RegistrationService', () => {
           .rejects.toThrow(NotFoundException);
       }
 
-      // O repositório é chamado mesmo para códigos inválidos
+      
       expect(repo.findOne).toHaveBeenCalled();
     });
 
@@ -216,7 +216,7 @@ describe('RegistrationService', () => {
         codes.add(result);
       }
 
-      expect(codes.size).toBe(10); // Todos únicos
+  expect(codes.size).toBe(10);
     });
   });
 });

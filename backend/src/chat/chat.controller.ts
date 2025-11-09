@@ -52,8 +52,8 @@ export class ChatController {
   async createConversation(@Body() dto: CreateConversationDto) {
     try {
       const linkId = uuidv4();
-      const accessToken = randomBytes(4).toString('hex'); // 8 caracteres hexadecimais
-      const apiBase = process.env.API_BASE_URL || 'http://localhost:3000';
+  const accessToken = randomBytes(4).toString('hex');
+  const apiBase = process.env.API_BASE_URL || 'http://localhost:3000';
 
   const customer = await (this.customersService ? this.customersService.findOrCreateCustomer({ id: dto?.customerId, name: dto?.customerName }) : null);
 
@@ -84,7 +84,7 @@ export class ChatController {
 
   @Get('history/:linkId/:token')
   async getHistory(@Param('linkId') linkId: string, @Param('token') token: string) {
-    // Validate that conversation exists and token matches
+    
     const conv = await this.conversationRepo.findOne({ where: { linkId } });
     if (!conv) {
       return { error: 'Conversa não encontrada. Link inválido.' };

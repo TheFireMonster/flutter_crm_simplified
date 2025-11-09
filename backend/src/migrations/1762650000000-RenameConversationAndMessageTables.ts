@@ -4,7 +4,7 @@ export class RenameConversationAndMessageTables1762650000000 implements Migratio
     name = 'RenameConversationAndMessageTables1762650000000'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
-        // Check if old tables exist before renaming
+        
         const conversationExists = await queryRunner.hasTable("conversation");
         const messageExists = await queryRunner.hasTable("message");
 
@@ -16,10 +16,9 @@ export class RenameConversationAndMessageTables1762650000000 implements Migratio
             await queryRunner.query(`ALTER TABLE "message" RENAME TO "messages"`);
         }
 
-        // Update foreign key constraint name if it exists
-        // The FK from messages to conversations might need updating
+        
         if (messageExists && conversationExists) {
-            // Get the existing FK constraint name
+            
             const foreignKeys = await queryRunner.query(`
                 SELECT constraint_name 
                 FROM information_schema.table_constraints 
@@ -27,13 +26,12 @@ export class RenameConversationAndMessageTables1762650000000 implements Migratio
                 AND constraint_type = 'FOREIGN KEY'
             `);
 
-            // This handles the FK reference update automatically in most cases
-            // PostgreSQL updates the references when tables are renamed
+            
         }
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        // Revert back to singular names
+        
         const conversationsExists = await queryRunner.hasTable("conversations");
         const messagesExists = await queryRunner.hasTable("messages");
 

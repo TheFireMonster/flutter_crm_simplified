@@ -5,11 +5,11 @@ export class Service {
   @PrimaryGeneratedColumn()
   id: number;
 
-  // matches migration: serviceName varchar(200)
+  
   @Column({ type: 'varchar', length: 200 })
   serviceName: string;
 
-  // DB column is named 'price' (numeric). Use property `price` across the codebase.
+  
   @Column({
     name: 'price',
     type: 'numeric',

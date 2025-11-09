@@ -11,7 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Customer = void 0;
 const typeorm_1 = require("typeorm");
-const sales_entity_1 = require("../../sales/entities/sales.entity");
 let Customer = class Customer {
     id;
     name;
@@ -23,9 +22,6 @@ let Customer = class Customer {
     state;
     cep;
     source;
-    createdAt;
-    updatedAt;
-    sales;
 };
 exports.Customer = Customer;
 __decorate([
@@ -68,18 +64,6 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'varchar', nullable: true, length: 50 }),
     __metadata("design:type", String)
 ], Customer.prototype, "source", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' }),
-    __metadata("design:type", Date)
-], Customer.prototype, "createdAt", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' }),
-    __metadata("design:type", Date)
-], Customer.prototype, "updatedAt", void 0);
-__decorate([
-    (0, typeorm_1.OneToMany)(() => sales_entity_1.Sale, (s) => s.customer),
-    __metadata("design:type", Array)
-], Customer.prototype, "sales", void 0);
 exports.Customer = Customer = __decorate([
     (0, typeorm_1.Entity)('customers')
 ], Customer);

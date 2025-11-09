@@ -10,9 +10,9 @@ export declare class ChartAIController {
         meta?: undefined;
     } | {
         chartType: any;
-        chartData: import("../../sales/entities/sales.entity").Sale[] | import("../../customers/entities/customers.entity").Customer[] | import("../../appointments/entities/appointments.entity").Appointment[] | import("../../services/entities/service.entity").Service[];
+        chartData: import("../../appointments/entities/appointments.entity").Appointment[] | import("../../customers/entities/customers.entity").Customer[] | import("../../services/entities/service.entity").Service[] | import("../../sales/entities/sales.entity").Sale[];
         meta: {
-            table: "sales" | "customers" | "appointments" | "services";
+            table: "customers" | "appointments" | "services" | "sales";
             selectedFields: any;
             count: number;
         };

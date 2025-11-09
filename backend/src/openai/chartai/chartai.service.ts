@@ -82,9 +82,9 @@ export class ChartAIService {
       Se o usuário pedir métricas específicas (ex.: total vendido, ticket médio), retorne a mesma estrutura e deixe que o backend agregue por COUNT/SUM conforme os campos solicitados.
     `;
 
-    // call OpenAI with a timeout to avoid hanging requests
+    
     const timeoutMs = parseInt(this.configService.get('CHARTAI_TIMEOUT_MS') || '15000', 10);
-    // If OPENAI_API_KEY is missing, skip the model call and rely on heuristics only.
+    
     let chatContent: string | null = null;
     if (apiKey) {
       const response = await firstValueFrom(
@@ -110,14 +110,14 @@ export class ChartAIService {
       chatContent = response?.data?.choices?.[0]?.message?.content || null;
     }
 
-    // tolerant JSON extraction (handles fences like ```json ... ``` or extra text)
+    
     const extractJSONFromText = (text: string): any | null => {
       try {
-        // try fenced json first
+        
         const fenced = /```json\s*([\s\S]*?)```/.exec(text);
         if (fenced && fenced[1]) return JSON.parse(fenced[1]);
 
-        // try any JSON object by finding the first { and matching braces
+        
         const firstBrace = text.indexOf('{');
         if (firstBrace === -1) return null;
         let i = firstBrace;
@@ -174,18 +174,18 @@ export class ChartAIService {
       if (month) {
         const mm = month;
         const yyyy = year;
-        // build YYYY-MM-DD strings for first and last day
+        
         const first = new Date(yyyy, mm - 1, 1);
         const last = new Date(yyyy, mm, 0); // day 0 of next month = last day prev
         const pad = (n: number) => n.toString().padStart(2, '0');
         const from = `${first.getFullYear()}-${pad(first.getMonth() + 1)}-${pad(first.getDate())}`;
         const to = `${last.getFullYear()}-${pad(last.getMonth() + 1)}-${pad(last.getDate())}`;
-        // default date field per table
+        
         const field = table === 'appointments' ? 'appointmentDate' : 'createdAt';
         dateRange = { field, from, to };
       }
 
-      // detect aggregate intent from prompt (heuristic)
+      
       let aggregate: { op: 'count' | 'sum' | 'avg'; field?: string } | null = null;
       const contains = (words: string[]) => words.some(w => t.includes(w));
       if (contains(['ticket médio', 'ticket medio', 'média', 'media', 'avg', 'average'])) {
@@ -196,7 +196,7 @@ export class ChartAIService {
         aggregate = { op: 'count', field: 'id' };
       }
 
-      // default to counting rows; request a single aggregated field 'count' if nothing else
+      
       const dataQuery = {
         table,
         fields: ['id'],
@@ -207,13 +207,13 @@ export class ChartAIService {
     };
 
     if (!chartInstructions || !chartInstructions.dataQuery || !chartInstructions.chartType) {
-      // try heuristics based on the original prompt (not the model's chatContent)
+      
       const heur = parsePromptHeuristics(prompt);
       if (!heur) return { error: 'Não consegui extrair instruções de gráfico válidas do modelo.' };
       chartInstructions = heur;
     }
 
-    // normalize table aliases and whitelist
+    
     const table = String(chartInstructions.dataQuery.table || '').toLowerCase();
     const tableAliasMap: Record<string, 'appointments' | 'customers' | 'services' | 'sales'> = {
       appointments: 'appointments',
@@ -232,7 +232,7 @@ export class ChartAIService {
     const mappedTable = tableAliasMap[table];
     if (!mappedTable) return { error: `Tabela solicitada não permitida: ${table}` };
 
-    // get allowed columns dynamically from TypeORM metadata
+    
     const repoMap: Record<string, Repository<any>> = {
       appointments: this.appointmentRepo,
       customers: this.customerRepo,
@@ -242,56 +242,56 @@ export class ChartAIService {
     const repo = repoMap[mappedTable];
     const allowedFields = repo.metadata.columns.map((c) => c.propertyName);
 
-    // requested fields: if omitted, select all allowed fields (but limit rows)
+    
     const requestedFields = Array.isArray(chartInstructions.dataQuery.fields) && chartInstructions.dataQuery.fields.length > 0
       ? chartInstructions.dataQuery.fields.map((f: any) => String(f))
       : allowedFields;
 
-    // intersect requested with allowed
+    
     const selectFields = requestedFields.filter((f: string) => allowedFields.includes(f));
     if (selectFields.length === 0) return { error: 'Nenhum campo válido solicitado.' };
 
-    // sanitize filters: only allow equality on allowed fields
+    
     const rawFilters = chartInstructions.dataQuery.filters || {};
     const where: Record<string, any> = {};
     for (const k of Object.keys(rawFilters)) {
       if (allowedFields.includes(k)) where[k] = rawFilters[k];
     }
 
-    // support optional dateRange produced by heuristics or by model
+    
     const dateRange = (chartInstructions.dateRange && typeof chartInstructions.dateRange === 'object')
       ? chartInstructions.dateRange
       : null;
 
-    // limit rows to avoid huge result sets
+    
     const maxRows = parseInt(this.configService.get('CHARTAI_MAX_ROWS') || '500', 10);
 
   let chartData: Appointment[] | Customer[] | Service[] | Sale[] = [];
     try {
-      // Determine aggregate requested: from model or heuristics
+      
       const aggregate = (chartInstructions.aggregate && typeof chartInstructions.aggregate === 'object')
         ? chartInstructions.aggregate
         : null;
 
-      // normalize aggregate op
+      
       const aggOpRaw = String(aggregate?.op ?? '').toLowerCase();
       let aggOp: 'count' | 'sum' | 'avg' = 'count';
       if (aggOpRaw.includes('sum') || aggOpRaw.includes('total') || aggOpRaw.includes('soma') || aggOpRaw.includes('fatur')) aggOp = 'sum';
       else if (aggOpRaw.includes('avg') || aggOpRaw.includes('média') || aggOpRaw.includes('media') || aggOpRaw.includes('ticket')) aggOp = 'avg';
 
-      // aggregate field (validate against allowedFields for sum/avg)
+      
       let aggField: string | undefined = aggregate?.field;
       if ((aggOp === 'sum' || aggOp === 'avg') && (!aggField || !allowedFields.includes(aggField))) {
-        // sensible default: sales.price for sales table
+        
         if (mappedTable === 'sales' && allowedFields.includes('price')) aggField = 'price';
         else {
-          // cannot perform SUM/AVG on missing field -> fallback to COUNT
+          
           aggOp = 'count';
           aggField = undefined;
         }
       }
 
-      // build WHERE clauses and params from sanitized `where` object
+      
       const params: any[] = [];
       const conditions: string[] = [];
       for (const k of Object.keys(where)) {
@@ -300,18 +300,18 @@ export class ChartAIService {
       }
 
       if (dateRange && dateRange.field && allowedFields.includes(dateRange.field)) {
-        // add date range params
+        
         params.push(dateRange.from);
         params.push(dateRange.to);
         const tableName = repo.metadata.tableName;
         const fieldName = dateRange.field;
 
-        // build aggregate expression
+        
         let aggExpr = 'COUNT(*)';
   if (aggOp === 'sum') aggExpr = `SUM("${aggField}")`;
   else if (aggOp === 'avg') aggExpr = `AVG("${aggField}")`;
 
-        // combine conditions
+        
         const wherePrefix = conditions.length > 0 ? conditions.join(' AND ') + ' AND ' : '';
         const fromIdx = params.length - 1; // second-to-last pushed
         const toIdx = params.length;       // last pushed
@@ -326,7 +326,7 @@ export class ChartAIService {
           const rows: Array<{ label: string; value: number }> = await repo.query(sql, params);
           chartData = rows.map(r => ({ label: r.label, value: Number(r.value) })) as any;
         } catch (e) {
-          // fallback to simple find if aggregation fails
+        
           chartData = await repo.find({
             select: selectFields as any,
             where,
@@ -334,7 +334,7 @@ export class ChartAIService {
           });
         }
       } else if (aggregate) {
-        // aggregate requested but no dateRange: return a single aggregated value (respecting filters)
+        
         const tableName = repo.metadata.tableName;
         let aggExpr = 'COUNT(*)';
   if (aggOp === 'sum') aggExpr = `SUM("${aggField}")`;
@@ -354,7 +354,7 @@ export class ChartAIService {
           });
         }
       } else {
-        // no dateRange and no aggregate: return raw rows
+        
         chartData = await repo.find({
           select: selectFields as any,
           where,

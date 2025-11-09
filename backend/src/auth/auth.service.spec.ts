@@ -6,7 +6,7 @@ import { RegistrationService } from '../registration/registration.service';
 import { UnauthorizedException } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 
-// Mock Firebase Admin
+
 jest.mock('firebase-admin', () => ({
   auth: jest.fn(() => ({
     verifyIdToken: jest.fn(),
