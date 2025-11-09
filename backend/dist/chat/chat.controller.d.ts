@@ -20,6 +20,7 @@ export declare class ChatController {
         AIChatActive: boolean;
         error?: undefined;
     }>;
+    listConversations(): Promise<Conversation[]>;
     getConversation(linkId: string): Promise<{
         error: string;
         linkId?: undefined;

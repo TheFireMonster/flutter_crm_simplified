@@ -9,6 +9,6 @@ export declare class DebugController {
     aiAction(body: {
         type: 'customer' | 'appointment';
         payload: any;
-    }): Promise<import("../customers/entities/customers.entity").Customer | import("../appointments/entities/appointments.entity").Appointment | import("../ai-actions/entities/ai-action.entity").AiAction | null>;
+    }): Promise<import("../customers/entities/customers.entity").Customer | import("../ai-actions/entities/ai-action.entity").AiAction | import("../appointments/entities/appointments.entity").Appointment | null>;
     getAiAction(requestId: string): Promise<import("../ai-actions/entities/ai-action.entity").AiAction | null>;
 }

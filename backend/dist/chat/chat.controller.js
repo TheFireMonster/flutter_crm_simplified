@@ -49,6 +49,11 @@ let ChatController = class ChatController {
         await this.conversationRepo.save(conv);
         return { success: true, customerName: conv.customerName, AIChatActive: conv.AIChatActive };
     }
+    async listConversations() {
+        return this.conversationRepo.find({
+            order: { createdAt: 'DESC' },
+        });
+    }
     async getConversation(linkId) {
         const conv = await this.conversationRepo.findOne({ where: { linkId } });
         if (!conv)
@@ -107,6 +112,12 @@ __decorate([
     __metadata("design:paramtypes", [String, update_conversation_dto_1.UpdateConversationDto]),
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "updateConversation", null);
+__decorate([
+    (0, common_1.Get)('conversations'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ChatController.prototype, "listConversations", null);
 __decorate([
     (0, common_1.Get)('conversations/:linkId'),
     __param(0, (0, common_1.Param)('linkId')),
