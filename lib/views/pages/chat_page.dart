@@ -50,6 +50,7 @@ class _ChatPageState extends State<ChatPage> {
   }
   Future<void> loadMessageHistory(String conversationId) async {
     String? token = accessTokens[conversationId];
+    debugPrint('[TOKEN] Tentando carregar token para $conversationId: $token');
     if (token == null) {
       debugPrint('⚠️ Token não disponível para carregar histórico de $conversationId. Buscando do backend...');
 
@@ -60,9 +61,11 @@ class _ChatPageState extends State<ChatPage> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         token = data['accessToken'] ?? data['access_token'];
+        debugPrint('[TOKEN] Recebido do backend para $conversationId: $token');
         if (token != null) {
           accessTokens[conversationId] = token;
           await saveChatLinks();
+          debugPrint('[TOKEN] Salvo em accessTokens[$conversationId] e persistido.');
         } else {
           debugPrint('❌ Não foi possível obter token para conversa $conversationId');
           return;
@@ -72,6 +75,7 @@ class _ChatPageState extends State<ChatPage> {
         return;
       }
     }
+    debugPrint('[TOKEN] Usando token para $conversationId: $token');
     try {
       final historyResponse = await http.get(
         Uri.parse('/chat/history/$conversationId/$token'),
@@ -116,7 +120,6 @@ class _ChatPageState extends State<ChatPage> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       generatedChatLinks = prefs.getStringList('chatLinks') ?? [];
-      
       final namesJson = prefs.getString('customerNames');
       if (namesJson != null) {
         customerNames = Map<String, String>.from(jsonDecode(namesJson));
@@ -128,16 +131,20 @@ class _ChatPageState extends State<ChatPage> {
       final tokensJson = prefs.getString('accessTokens');
       if (tokensJson != null) {
         accessTokens = Map<String, String>.from(jsonDecode(tokensJson));
+        debugPrint('[TOKEN] Tokens carregados do SharedPreferences: $accessTokens');
+      } else {
+        debugPrint('[TOKEN] Nenhum token encontrado no SharedPreferences.');
       }
     });
   }
 
   Future<void> saveChatLinks() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('chatLinks', generatedChatLinks);
-    await prefs.setString('customerNames', jsonEncode(customerNames));
-    await prefs.setString('customerIds', jsonEncode(customerIds));
-    await prefs.setString('accessTokens', jsonEncode(accessTokens));
+  await prefs.setStringList('chatLinks', generatedChatLinks);
+  await prefs.setString('customerNames', jsonEncode(customerNames));
+  await prefs.setString('customerIds', jsonEncode(customerIds));
+  await prefs.setString('accessTokens', jsonEncode(accessTokens));
+  debugPrint('[TOKEN] Tokens salvos no SharedPreferences: $accessTokens');
   }
   bool isGeneratingLink = false;
   final TextEditingController _customerNameController = TextEditingController();
@@ -414,10 +421,12 @@ class _ChatPageState extends State<ChatPage> {
                             linkId = info['linkId'];
                             final accessToken = info['accessToken'];
                             final newLink = info['url'];
+                            debugPrint('[TOKEN] Recebido do backend na criação: $accessToken para linkId $linkId');
                             setState(() {
                               generatedChatLinks.add(newLink);
                               customerNames[linkId!] = name;
                               accessTokens[linkId!] = accessToken;
+                              debugPrint('[TOKEN] Salvo em accessTokens[$linkId]: $accessToken');
                               if (info.containsKey('customerId') && info['customerId'] != null) {
                                 customerIds[linkId!] = info['customerId'];
                               }
