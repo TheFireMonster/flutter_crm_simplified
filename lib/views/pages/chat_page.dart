@@ -102,6 +102,20 @@ class _ChatPageState extends State<ChatPage> {
       } else if (historyResponse.statusCode == 403) {
         debugPrint('❌ Token inválido para conversa $conversationId');
       }
+      else if (historyResponse.statusCode == 404 || (historyResponse.body.contains('Conversa não encontrada') || historyResponse.body.contains('Link inválido'))) {
+        debugPrint('🧹 Limpando cache: conversa $conversationId não existe mais no backend.');
+        setState(() {
+          generatedChatLinks.removeWhere((link) => link.contains(conversationId));
+          customerNames.remove(conversationId);
+          customerIds.remove(conversationId);
+          accessTokens.remove(conversationId);
+          if (linkId == conversationId) {
+            linkId = null;
+            messages.clear();
+          }
+        });
+        await saveChatLinks();
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
