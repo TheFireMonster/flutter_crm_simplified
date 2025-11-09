@@ -49,18 +49,36 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
   Future<void> loadMessageHistory(String conversationId) async {
-    final token = accessTokens[conversationId];
+    String? token = accessTokens[conversationId];
     if (token == null) {
-      debugPrint('⚠️ Token não disponível para carregar histórico de $conversationId');
-      return;
-    }
-    try {
+      debugPrint('⚠️ Token não disponível para carregar histórico de $conversationId. Buscando do backend...');
+
       final response = await http.get(
-        Uri.parse('/chat/history/$conversationId/$token'),
+        Uri.parse('/chat/conversations/$conversationId'),
         headers: {'Content-Type': 'application/json'},
       );
       if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
+        final data = jsonDecode(response.body);
+        token = data['accessToken'] ?? data['access_token'];
+        if (token != null) {
+          accessTokens[conversationId] = token;
+          await saveChatLinks();
+        } else {
+          debugPrint('❌ Não foi possível obter token para conversa $conversationId');
+          return;
+        }
+      } else {
+        debugPrint('❌ Falha ao buscar conversa $conversationId: ${response.statusCode}');
+        return;
+      }
+    }
+    try {
+      final historyResponse = await http.get(
+        Uri.parse('/chat/history/$conversationId/$token'),
+        headers: {'Content-Type': 'application/json'},
+      );
+      if (historyResponse.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(historyResponse.body);
         setState(() {
           messages = data.map((msg) {
             DateTime msgDate;
@@ -76,7 +94,7 @@ class _ChatPageState extends State<ChatPage> {
             );
           }).toList();
         });
-      } else if (response.statusCode == 403) {
+      } else if (historyResponse.statusCode == 403) {
         debugPrint('❌ Token inválido para conversa $conversationId');
       }
     } catch (e) {
@@ -125,7 +143,7 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController _customerNameController = TextEditingController();
   late io.Socket socket;
   bool isSocketConnected = false;
-  bool isSocketConnecting = true; // Novo estado para mostrar "Conectando..."
+  bool isSocketConnecting = true;
   List<Message> messages = [];
   Timer? _connectionCheckTimer;
 
@@ -146,18 +164,15 @@ class _ChatPageState extends State<ChatPage> {
     super.initState();
     connectToServer();
     loadChatLinks();
-    
-    // Verifica periodicamente o estado da conexão
     _connectionCheckTimer = Timer.periodic(Duration(seconds: 3), (timer) {
       if (mounted && socket.connected != isSocketConnected) {
         setState(() {
           isSocketConnected = socket.connected;
-          isSocketConnecting = false; // Se está verificando, já passou da fase de "conectando"
+          isSocketConnecting = false;
         });
         debugPrint('🔄 Estado atualizado: ${socket.connected}');
       }
     });
-    
     if (widget.conversationId != null && widget.conversationId!.isNotEmpty) {
       linkId = widget.conversationId;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -577,7 +592,10 @@ class _ChatPageState extends State<ChatPage> {
                                           ),
                                           TextButton(
                                             onPressed: () => Navigator.of(context).pop(true),
-                                            style: TextButton.styleFrom(foregroundColor: Colors.red),
+                                            style: TextButton.styleFrom(
+                                              backgroundColor: Colors.red,
+                                              foregroundColor: Colors.white,
+                                            ),
                                             child: Text('Excluir'),
                                           ),
                                         ],
@@ -655,7 +673,6 @@ class _ChatPageState extends State<ChatPage> {
                           SizedBox(width: 8),
                           GestureDetector(
                             onTap: () {
-                              // Atualiza o estado com o estado real do socket
                               if (mounted) {
                                 setState(() {
                                   isSocketConnected = socket.connected;
@@ -700,7 +717,6 @@ class _ChatPageState extends State<ChatPage> {
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(
-                                  // show day-first date format (DD/MM/YYYY)
                                   DateFormat('dd/MM/yyyy').format(message.date),
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
