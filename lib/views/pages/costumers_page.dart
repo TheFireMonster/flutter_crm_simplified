@@ -241,6 +241,16 @@ class _CostumersPageState extends State<CostumersPage> {
   Future<void> _deleteCustomer(dynamic id) async {
     final uri = Uri.parse('/customers/${id.toString()}');
     final resp = await http.delete(uri);
+  final prefs = await SharedPreferences.getInstance();
+  final idsJson = prefs.getString('customerIds');
+  final namesJson = prefs.getString('customerNames');
+  Map<String, dynamic> ids = idsJson != null ? jsonDecode(idsJson) : {};
+  Map<String, dynamic> names = namesJson != null ? jsonDecode(namesJson) : {};
+  ids.removeWhere((key, value) => value.toString() == id.toString());
+  names.removeWhere((key, value) => value.toString() == id.toString());
+  await prefs.setString('customerIds', jsonEncode(ids));
+  await prefs.setString('customerNames', jsonEncode(names));
+
     if (resp.statusCode == 200 || resp.statusCode == 204) {
       await fetchCustomers();
       if (!mounted) return;

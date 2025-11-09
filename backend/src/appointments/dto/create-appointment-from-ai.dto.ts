@@ -13,7 +13,7 @@ export class CreateAppointmentFromAiDto {
   serviceName?: string;
 
   @IsISO8601()
-  startAt: string; // ISO-8601
+  startAt: string; 
 
   @IsOptional()
   @IsInt()
@@ -30,5 +30,5 @@ export class CreateAppointmentFromAiDto {
 
   @IsOptional()
   @IsString()
-  requestId?: string; // idempotency key from AI
+  requestId?: string;
 }

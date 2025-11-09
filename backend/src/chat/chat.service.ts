@@ -64,7 +64,7 @@ export class ChatService {
         } as any);
       }
 
-      return updated;
+      return { success: true, message: 'Informações atualizadas com sucesso!' };
     }
 
   const created = await this.customersService.create({ ...updateData });
@@ -78,6 +78,6 @@ export class ChatService {
       changes: { created: updateData },
     } as any);
 
-    return created;
+    return { success: true, message: 'Cliente criado com sucesso!' };
   }
 }

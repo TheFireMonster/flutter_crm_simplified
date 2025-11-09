@@ -13,14 +13,12 @@ export class CustomersAiService {
   async createFromAi(dto: CreateCustomerFromAiDto) {
     const requestId = dto.requestId || `ai-${Date.now()}`;
     const { inserted, record } = await this.aiActionsService.reserve(requestId, 'create_customer', dto);
-
     if (!inserted) {
       if (record?.resultTable === 'customers' && record?.resultId) {
         return this.customersService.findOne(record.resultId);
       }
       return record;
     }
-
     const created = await this.customersService.create({
       name: dto.name,
       email: dto.email,
@@ -29,8 +27,15 @@ export class CustomersAiService {
       address: dto.address,
       source: dto.source,
     });
-
     await this.aiActionsService.finalize(requestId, 'customers', created.id);
     return created;
+  }
+
+  async updateFromAi(customerId: number, updateData: Partial<CreateCustomerFromAiDto>) {
+    if (updateData.cpf) {
+      updateData.cpf = updateData.cpf.replace(/\D/g, '');
+    }
+    await this.customersService.update(customerId, updateData);
+    return { success: true };
   }
 }

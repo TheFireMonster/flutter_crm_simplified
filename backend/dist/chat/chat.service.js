@@ -70,7 +70,7 @@ let ChatService = class ChatService {
                     changes,
                 });
             }
-            return updated;
+            return { success: true, message: 'Informações atualizadas com sucesso!' };
         }
         const created = await this.customersService.create({ ...updateData });
         conv.customerId = created.id;
@@ -81,7 +81,7 @@ let ChatService = class ChatService {
             changedBy: changedBy || 'chat',
             changes: { created: updateData },
         });
-        return created;
+        return { success: true, message: 'Cliente criado com sucesso!' };
     }
 };
 exports.ChatService = ChatService;

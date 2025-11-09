@@ -126,7 +126,7 @@ describe('ChatService', () => {
 
       expect(conversationRepo.findOne).toHaveBeenCalledWith({ where: { linkId: 'link1' } });
       expect(customersService.update).toHaveBeenCalledWith(1, { name: 'JoÃ£o Silva' });
-      expect(result).toEqual(updatedCustomer);
+      expect(result).toEqual({ success: true, message: 'Informações atualizadas com sucesso!' });
     });
 
     it('deve criar novo customer se conversation nÃ£o tem customerId', async () => {
@@ -140,7 +140,7 @@ describe('ChatService', () => {
 
       expect(customersService.create).toHaveBeenCalledWith({ name: 'Maria' });
       expect(conversationRepo.save).toHaveBeenCalledWith({ ...mockConv, customerId: 2 });
-      expect(result).toEqual(newCustomer);
+      expect(result).toEqual({ success: true, message: 'Cliente criado com sucesso!' });
     });
   });
 });

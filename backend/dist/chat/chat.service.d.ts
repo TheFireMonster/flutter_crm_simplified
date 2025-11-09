@@ -11,5 +11,8 @@ export declare class ChatService {
     constructor(messageRepo: Repository<Message>, conversationRepo: Repository<Conversation>, customersService: CustomersService, auditRepo: Repository<CustomerAudit>);
     saveMessage(conversationId: string, sender: string, text: string): Promise<Message>;
     getRecentMessages(conversationId: string, limit?: number): Promise<Message[]>;
-    updateCustomerForConversation(conversationLinkId: string, updateData: Partial<any>, changedBy?: string): Promise<import("../customers/entities/customers.entity").Customer>;
+    updateCustomerForConversation(conversationLinkId: string, updateData: Partial<any>, changedBy?: string): Promise<{
+        success: boolean;
+        message: string;
+    }>;
 }

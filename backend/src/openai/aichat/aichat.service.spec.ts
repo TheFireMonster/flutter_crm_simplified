@@ -16,7 +16,7 @@ describe('AIChatService', () => {
   const configMock = { get: jest.fn().mockImplementation((k) => (k === 'MOCK_AI' ? 'true' : 'test-api-key')) } as any;
   const serviceServiceMock = { findAll: jest.fn().mockResolvedValue([{ serviceName: 'Consulta' }]) } as any;
   const appointmentsServiceMock = { getAll: jest.fn().mockResolvedValue([{ title: 'Consulta', appointmentDate: '2025-10-10' }]) } as any;
-  const customersAiMock = { createFromAi: jest.fn() } as any;
+  const customersAiMock = { createFromAi: jest.fn(), updateFromAi: jest.fn() } as any;
   const customersServiceMock = { findAll: jest.fn().mockResolvedValue([{ name: 'Cliente Teste' }]) } as any;
   const appointmentsAiMock = { createFromAi: jest.fn() } as any;
 
@@ -73,4 +73,25 @@ describe('AIChatService', () => {
     expect(errorSpy).toHaveBeenCalledWith('AIChatService.ask error', expect.objectContaining({ response: expect.objectContaining({ status: 429 }) }));
     errorSpy.mockRestore();
   });
+
+    it('deve atualizar cliente via function_call update_customer_info', async () => {
+      (httpMock.post as jest.Mock).mockReturnValueOnce(of({
+        data: {
+          choices: [{
+            message: {
+              function_call: {
+                name: 'update_customer_info',
+                arguments: JSON.stringify({ customerId: 42, email: 'novo@email.com', cpf: '123.456.789-00' })
+              }
+            }
+          }]
+        }
+      }));
+
+    customersAiMock.updateFromAi.mockResolvedValue({ success: true });
+
+    const result = await service.ask('Atualize o email e CPF do cliente');
+  expect(customersAiMock.updateFromAi).toHaveBeenCalledWith(42, { email: 'novo@email.com', cpf: '123.456.789-00' });
+    expect(result).toBe('Informações do cliente atualizadas com sucesso!');
+    });
 });

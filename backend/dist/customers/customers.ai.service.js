@@ -40,6 +40,13 @@ let CustomersAiService = class CustomersAiService {
         await this.aiActionsService.finalize(requestId, 'customers', created.id);
         return created;
     }
+    async updateFromAi(customerId, updateData) {
+        if (updateData.cpf) {
+            updateData.cpf = updateData.cpf.replace(/\D/g, '');
+        }
+        await this.customersService.update(customerId, updateData);
+        return { success: true };
+    }
 };
 exports.CustomersAiService = CustomersAiService;
 exports.CustomersAiService = CustomersAiService = __decorate([
