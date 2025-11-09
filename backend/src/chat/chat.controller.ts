@@ -41,14 +41,6 @@ export class ChatController {
     return { success: true, customerName: conv.customerName, AIChatActive: conv.AIChatActive };
   }
 
-  @Get('conversations')
-  async listConversations() {
-    // Retorna todas as conversas
-    return this.conversationRepo.find({
-      order: { createdAt: 'DESC' },
-    });
-  }
-
   @Get('conversations/:linkId')
   async getConversation(@Param('linkId') linkId: string) {
     const conv = await this.conversationRepo.findOne({ where: { linkId } });

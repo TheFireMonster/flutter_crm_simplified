@@ -118,13 +118,21 @@ class _CostumersPageState extends State<CostumersPage> {
         'cep': _cepController.text.trim(),
       }),
     );
-    if (!mounted) return;
     if (response.statusCode == 200 || response.statusCode == 201) {
-      _clearFormFields();
+  _nameController.clear();
+  _emailController.clear();
+  _cpfController.clear();
+  _phoneController.clear();
+  _addressController.clear();
+  _sourceController.clear();
+  _dateOfBirthController.clear();
+  _stateController.clear();
+  _cepController.clear();
       await fetchCustomers();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Cliente registrado!')));
     } else {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao registrar cliente')));
     }
   }
@@ -147,13 +155,13 @@ class _CostumersPageState extends State<CostumersPage> {
         'cep': _cepController.text.trim(),
       }),
     );
-    if (!mounted) return;
     if (response.statusCode == 200) {
       _clearFormFields();
       await fetchCustomers();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Cliente atualizado')));
     } else {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao atualizar cliente')));
     }
   }
@@ -219,18 +227,11 @@ class _CostumersPageState extends State<CostumersPage> {
               style: TextButton.styleFrom(foregroundColor: Colors.green[700]),
               child: Text('Cancelar'),
             ),
-            ElevatedButton(
-              onPressed: () async {
-                Navigator.of(context).pop();
-                final id = customer['id'];
-                if (id != null) await _deleteCustomer(id);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-              ),
-              child: Text('Excluir'),
-            ),
+            ElevatedButton(onPressed: () async {
+              Navigator.of(context).pop();
+              final id = customer['id'];
+              if (id != null) await _deleteCustomer(id);
+            }, child: Text('Excluir')),
           ],
         );
       }
@@ -240,28 +241,26 @@ class _CostumersPageState extends State<CostumersPage> {
   Future<void> _deleteCustomer(dynamic id) async {
     final uri = Uri.parse('/customers/${id.toString()}');
     final resp = await http.delete(uri);
-    if (!mounted) return;
-    final prefs = await SharedPreferences.getInstance();
-    final idsJson = prefs.getString('customerIds');
-    final namesJson = prefs.getString('customerNames');
-    Map<String, dynamic> ids = idsJson != null ? jsonDecode(idsJson) : {};
-    Map<String, dynamic> names = namesJson != null ? jsonDecode(namesJson) : {};
-    ids.removeWhere((key, value) => value.toString() == id.toString());
-    names.removeWhere((key, value) => value.toString() == id.toString());
-    await prefs.setString('customerIds', jsonEncode(ids));
-    await prefs.setString('customerNames', jsonEncode(names));
+  final prefs = await SharedPreferences.getInstance();
+  final idsJson = prefs.getString('customerIds');
+  final namesJson = prefs.getString('customerNames');
+  Map<String, dynamic> ids = idsJson != null ? jsonDecode(idsJson) : {};
+  Map<String, dynamic> names = namesJson != null ? jsonDecode(namesJson) : {};
+  ids.removeWhere((key, value) => value.toString() == id.toString());
+  names.removeWhere((key, value) => value.toString() == id.toString());
+  await prefs.setString('customerIds', jsonEncode(ids));
+  await prefs.setString('customerNames', jsonEncode(names));
 
-    if (!mounted) return;
-    setState(() {
-      _customers.removeWhere((c) => c['id'].toString() == id.toString());
-    });
-
-    if (!mounted) return;
     if (resp.statusCode == 200 || resp.statusCode == 204) {
+      await fetchCustomers();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Cliente excluído')));
     } else if (resp.statusCode == 404) {
+      await fetchCustomers();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Cliente não encontrado (já foi excluído)')));
     } else {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro ao excluir cliente: ${resp.statusCode}')));
     }
   }

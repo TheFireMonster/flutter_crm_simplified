@@ -49,41 +49,18 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
   Future<void> loadMessageHistory(String conversationId) async {
-    String? token = accessTokens[conversationId];
-    debugPrint('[TOKEN] Tentando carregar token para $conversationId: $token');
+    final token = accessTokens[conversationId];
     if (token == null) {
-      debugPrint('⚠️ Token não disponível para carregar histórico de $conversationId. Buscando do backend...');
-
-      final response = await http.get(
-        Uri.parse('/chat/conversations/$conversationId'),
-        headers: {'Content-Type': 'application/json'},
-      );
-      debugPrint('[TOKEN] Resposta completa do backend para $conversationId: ${response.body}');
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        token = data['accessToken'] ?? data['access_token'];
-        debugPrint('[TOKEN] Recebido do backend para $conversationId: $token');
-        if (token != null) {
-          accessTokens[conversationId] = token;
-          await saveChatLinks();
-          debugPrint('[TOKEN] Salvo em accessTokens[$conversationId] e persistido.');
-        } else {
-          debugPrint('❌ Não foi possível obter token para conversa $conversationId');
-          return;
-        }
-      } else {
-        debugPrint('❌ Falha ao buscar conversa $conversationId: ${response.statusCode}');
-        return;
-      }
+      debugPrint('⚠️ Token não disponível para carregar histórico de $conversationId');
+      return;
     }
-    debugPrint('[TOKEN] Usando token para $conversationId: $token');
     try {
-      final historyResponse = await http.get(
+      final response = await http.get(
         Uri.parse('/chat/history/$conversationId/$token'),
         headers: {'Content-Type': 'application/json'},
       );
-      if (historyResponse.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(historyResponse.body);
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
         setState(() {
           messages = data.map((msg) {
             DateTime msgDate;
@@ -99,22 +76,8 @@ class _ChatPageState extends State<ChatPage> {
             );
           }).toList();
         });
-      } else if (historyResponse.statusCode == 403) {
+      } else if (response.statusCode == 403) {
         debugPrint('❌ Token inválido para conversa $conversationId');
-      }
-      else if (historyResponse.statusCode == 404 || (historyResponse.body.contains('Conversa não encontrada') || historyResponse.body.contains('Link inválido'))) {
-        debugPrint('🧹 Limpando cache: conversa $conversationId não existe mais no backend.');
-        setState(() {
-          generatedChatLinks.removeWhere((link) => link.contains(conversationId));
-          customerNames.remove(conversationId);
-          customerIds.remove(conversationId);
-          accessTokens.remove(conversationId);
-          if (linkId == conversationId) {
-            linkId = null;
-            messages.clear();
-          }
-        });
-        await saveChatLinks();
       }
     } catch (e) {
       if (mounted) {
@@ -135,6 +98,7 @@ class _ChatPageState extends State<ChatPage> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       generatedChatLinks = prefs.getStringList('chatLinks') ?? [];
+      
       final namesJson = prefs.getString('customerNames');
       if (namesJson != null) {
         customerNames = Map<String, String>.from(jsonDecode(namesJson));
@@ -146,26 +110,22 @@ class _ChatPageState extends State<ChatPage> {
       final tokensJson = prefs.getString('accessTokens');
       if (tokensJson != null) {
         accessTokens = Map<String, String>.from(jsonDecode(tokensJson));
-        debugPrint('[TOKEN] Tokens carregados do SharedPreferences: $accessTokens');
-      } else {
-        debugPrint('[TOKEN] Nenhum token encontrado no SharedPreferences.');
       }
     });
   }
 
   Future<void> saveChatLinks() async {
     final prefs = await SharedPreferences.getInstance();
-  await prefs.setStringList('chatLinks', generatedChatLinks);
-  await prefs.setString('customerNames', jsonEncode(customerNames));
-  await prefs.setString('customerIds', jsonEncode(customerIds));
-  await prefs.setString('accessTokens', jsonEncode(accessTokens));
-  debugPrint('[TOKEN] Tokens salvos no SharedPreferences: $accessTokens');
+    await prefs.setStringList('chatLinks', generatedChatLinks);
+    await prefs.setString('customerNames', jsonEncode(customerNames));
+    await prefs.setString('customerIds', jsonEncode(customerIds));
+    await prefs.setString('accessTokens', jsonEncode(accessTokens));
   }
   bool isGeneratingLink = false;
   final TextEditingController _customerNameController = TextEditingController();
   late io.Socket socket;
   bool isSocketConnected = false;
-  bool isSocketConnecting = true;
+  bool isSocketConnecting = true; // Novo estado para mostrar "Conectando..."
   List<Message> messages = [];
   Timer? _connectionCheckTimer;
 
@@ -186,15 +146,18 @@ class _ChatPageState extends State<ChatPage> {
     super.initState();
     connectToServer();
     loadChatLinks();
+    
+    // Verifica periodicamente o estado da conexão
     _connectionCheckTimer = Timer.periodic(Duration(seconds: 3), (timer) {
       if (mounted && socket.connected != isSocketConnected) {
         setState(() {
           isSocketConnected = socket.connected;
-          isSocketConnecting = false;
+          isSocketConnecting = false; // Se está verificando, já passou da fase de "conectando"
         });
         debugPrint('🔄 Estado atualizado: ${socket.connected}');
       }
     });
+    
     if (widget.conversationId != null && widget.conversationId!.isNotEmpty) {
       linkId = widget.conversationId;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -433,16 +396,13 @@ class _ChatPageState extends State<ChatPage> {
                           setState(() { isGeneratingLink = true; });
                           try {
                             final info = await fetchConversationInfo(null, name);
-                            debugPrint('[TOKEN] JSON completo recebido do backend na criação: $info');
                             linkId = info['linkId'];
                             final accessToken = info['accessToken'];
                             final newLink = info['url'];
-                            debugPrint('[TOKEN] Recebido do backend na criação: $accessToken para linkId $linkId');
                             setState(() {
                               generatedChatLinks.add(newLink);
                               customerNames[linkId!] = name;
                               accessTokens[linkId!] = accessToken;
-                              debugPrint('[TOKEN] Salvo em accessTokens[$linkId]: $accessToken');
                               if (info.containsKey('customerId') && info['customerId'] != null) {
                                 customerIds[linkId!] = info['customerId'];
                               }
@@ -617,10 +577,7 @@ class _ChatPageState extends State<ChatPage> {
                                           ),
                                           TextButton(
                                             onPressed: () => Navigator.of(context).pop(true),
-                                            style: TextButton.styleFrom(
-                                              backgroundColor: Colors.red,
-                                              foregroundColor: Colors.white,
-                                            ),
+                                            style: TextButton.styleFrom(foregroundColor: Colors.red),
                                             child: Text('Excluir'),
                                           ),
                                         ],
@@ -698,6 +655,7 @@ class _ChatPageState extends State<ChatPage> {
                           SizedBox(width: 8),
                           GestureDetector(
                             onTap: () {
+                              // Atualiza o estado com o estado real do socket
                               if (mounted) {
                                 setState(() {
                                   isSocketConnected = socket.connected;
@@ -742,6 +700,7 @@ class _ChatPageState extends State<ChatPage> {
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(
+                                  // show day-first date format (DD/MM/YYYY)
                                   DateFormat('dd/MM/yyyy').format(message.date),
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
