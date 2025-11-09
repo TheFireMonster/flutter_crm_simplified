@@ -84,7 +84,6 @@ export class ChatController {
 
   @Get('history/:linkId/:token')
   async getHistory(@Param('linkId') linkId: string, @Param('token') token: string) {
-    // Validate that conversation exists and token matches
     const conv = await this.conversationRepo.findOne({ where: { linkId } });
     if (!conv) {
       return { error: 'Conversa não encontrada. Link inválido.' };
