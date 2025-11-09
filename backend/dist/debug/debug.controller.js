@@ -28,9 +28,9 @@ let DebugController = class DebugController {
     }
     async aiAction(body) {
         if (body.type === 'customer') {
-            return this.customersAi.createDraftFromAi(body.payload);
+            return this.customersAi.createFromAi(body.payload);
         }
-        return this.appointmentsAi.createDraftFromAi(body.payload);
+        return this.appointmentsAi.createFromAi(body.payload);
     }
     async getAiAction(requestId) {
         return this.aiActionsService.findByRequestId(requestId);

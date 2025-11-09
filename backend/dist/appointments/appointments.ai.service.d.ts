@@ -7,5 +7,5 @@ export declare class AppointmentsAiService {
     private appointmentsService;
     private customersService;
     constructor(aiActionsService: AiActionsService, appointmentsService: AppointmentsService, customersService: CustomersService);
-    createDraftFromAi(dto: CreateAppointmentFromAiDto): Promise<import("../ai-actions/entities/ai-action.entity").AiAction | import("./entities/appointments.entity").Appointment | null>;
+    createFromAi(dto: CreateAppointmentFromAiDto): Promise<import("../ai-actions/entities/ai-action.entity").AiAction | import("./entities/appointments.entity").Appointment | null>;
 }

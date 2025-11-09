@@ -54,19 +54,20 @@ describe('ChatController', () => {
   });
 
   it('deve criar conversa', async () => {
-    const conv = { linkId: 'uuid', customerName: 'Cliente' };
+    const conv = { linkId: 'uuid', customerName: 'Cliente', accessToken: '3912d8f9' };
     conversationRepo.create.mockReturnValue(conv);
     conversationRepo.save.mockResolvedValue(conv);
   const result = await controller.createConversation({ customerName: 'Cliente' });
   expect(result.linkId).toBe('uuid');
   expect(result.url).toEqual(expect.stringContaining('/chat/uuid'));
-    expect(conversationRepo.create).toHaveBeenCalledWith({ linkId: expect.any(String), customerName: 'Cliente' });
+    expect(conversationRepo.create).toHaveBeenCalledWith({ linkId: expect.any(String), customerName: 'Cliente', accessToken: expect.any(String) });
     expect(conversationRepo.save).toHaveBeenCalled();
   });
 
   it('deve obter histórico de mensagens', async () => {
+    conversationRepo.findOne.mockResolvedValue({ linkId: 'abc', id: 'conv1', accessToken: 'token123' });
     messageRepo.find.mockResolvedValue([{ content: 'msg1' }, { content: 'msg2' }]);
-    const result = await controller.getHistory('abc');
+    const result = await controller.getHistory('abc', 'token123');
     expect(result).toEqual([{ content: 'msg1' }, { content: 'msg2' }]);
     expect(messageRepo.find).toHaveBeenCalledWith({
       where: { conversation: { linkId: 'abc' } },

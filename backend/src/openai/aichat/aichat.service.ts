@@ -188,7 +188,7 @@ export class AIChatService {
           }
           
           if (fnName === 'create_appointment') {
-            const created = await this.appointmentsAiService.createDraftFromAi(args);
+            const created = await this.appointmentsAiService.createFromAi(args);
             return `Agendamento criado com sucesso: ${JSON.stringify(created)}`;
           }
         } catch (e) {

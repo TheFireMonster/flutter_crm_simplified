@@ -21,7 +21,7 @@ describe('CustomersAiService', () => {
 
   it('deve criar um cliente a partir do DTO da IA e finalizar a ação', async () => {
     const dto = { name: 'Teste', email: 't@t.com', requestId: 'r1' } as any;
-    const created = await service.createDraftFromAi(dto);
+    const created = await service.createFromAi(dto);
     expect(created).toBeDefined();
     expect((created as any).id).toBe(123);
     expect(aiActionsMock.finalize).toHaveBeenCalledWith('r1', 'customers', 123);
@@ -31,7 +31,7 @@ describe('CustomersAiService', () => {
     aiActionsMock.reserve.mockImplementation(() => new Promise((res) => setTimeout(() => res({ inserted: true, record: null }), 1500)));
     jest.useFakeTimers();
     const dto = { name: 'Teste 2', email: 't2@t.com', requestId: 'r5' } as any;
-    const p = service.createDraftFromAi(dto);
+    const p = service.createFromAi(dto);
     jest.advanceTimersByTime(1500);
     const created = await p;
     expect(created).toBeDefined();
@@ -42,6 +42,6 @@ describe('CustomersAiService', () => {
   it('deve propagar erros de aiActions.reserve (por exemplo, 429)', async () => {
     aiActionsMock.reserve.mockImplementation(() => Promise.reject({ response: { status: 429, data: 'rate limit' } }));
     const dto = { name: 'Teste 3', email: 't3@t.com', requestId: 'r6' } as any;
-    await expect(service.createDraftFromAi(dto)).rejects.toEqual({ response: { status: 429, data: 'rate limit' } });
+    await expect(service.createFromAi(dto)).rejects.toEqual({ response: { status: 429, data: 'rate limit' } });
   });
 });

@@ -46,7 +46,7 @@ let CustomersService = class CustomersService {
         if (result.affected === 0) {
             throw new common_2.NotFoundException(`Cliente do ID ${id} não encontrado`);
         }
-        return this.customersRepository.delete(id);
+        return { success: true, message: `Cliente ${id} removido com sucesso` };
     }
     async findByName(name) {
         return this.customersRepository.findOne({ where: { name } });

@@ -5,5 +5,5 @@ export declare class CustomersAiService {
     private customersService;
     private aiActionsService;
     constructor(customersService: CustomersService, aiActionsService: AiActionsService);
-    createDraftFromAi(dto: CreateCustomerFromAiDto): Promise<import("./entities/customers.entity").Customer | import("../ai-actions/entities/ai-action.entity").AiAction | null>;
+    createFromAi(dto: CreateCustomerFromAiDto): Promise<import("./entities/customers.entity").Customer | import("../ai-actions/entities/ai-action.entity").AiAction | null>;
 }

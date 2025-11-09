@@ -23,7 +23,7 @@ let AppointmentsAiService = class AppointmentsAiService {
         this.appointmentsService = appointmentsService;
         this.customersService = customersService;
     }
-    async createDraftFromAi(dto) {
+    async createFromAi(dto) {
         const requestId = dto.requestId || `ai-${Date.now()}`;
         const { inserted, record } = await this.aiActionsService.reserve(requestId, 'create_appointment', dto);
         if (!inserted) {

@@ -70,7 +70,7 @@ describe('CustomersService', () => {
     repo.delete.mockResolvedValue({ affected: 1 });
     const result = await service.remove(1);
     expect(repo.delete).toHaveBeenCalledWith({ id: 1 });
-    expect(result).toEqual({ affected: 1 });
+    expect(result).toEqual({ success: true, message: 'Cliente 1 removido com sucesso' });
   });
 
   it('deve lançar se cliente não for encontrado ao remover', async () => {

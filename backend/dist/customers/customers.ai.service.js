@@ -20,7 +20,7 @@ let CustomersAiService = class CustomersAiService {
         this.customersService = customersService;
         this.aiActionsService = aiActionsService;
     }
-    async createDraftFromAi(dto) {
+    async createFromAi(dto) {
         const requestId = dto.requestId || `ai-${Date.now()}`;
         const { inserted, record } = await this.aiActionsService.reserve(requestId, 'create_customer', dto);
         if (!inserted) {

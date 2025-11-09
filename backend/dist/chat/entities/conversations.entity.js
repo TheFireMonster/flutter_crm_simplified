@@ -56,6 +56,6 @@ __decorate([
     __metadata("design:type", Array)
 ], Conversation.prototype, "messages", void 0);
 exports.Conversation = Conversation = __decorate([
-    (0, typeorm_1.Entity)()
+    (0, typeorm_1.Entity)('conversations')
 ], Conversation);
 //# sourceMappingURL=conversations.entity.js.map

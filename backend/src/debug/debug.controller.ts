@@ -14,9 +14,9 @@ export class DebugController {
   @Post('ai-action')
   async aiAction(@Body() body: { type: 'customer' | 'appointment'; payload: any }) {
     if (body.type === 'customer') {
-      return this.customersAi.createDraftFromAi(body.payload);
+      return this.customersAi.createFromAi(body.payload);
     }
-    return this.appointmentsAi.createDraftFromAi(body.payload);
+    return this.appointmentsAi.createFromAi(body.payload);
   }
 
   @Get('ai-action/:requestId')

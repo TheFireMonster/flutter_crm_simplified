@@ -190,7 +190,7 @@ let AIChatService = class AIChatService {
                         return `Informações do cliente atualizadas com sucesso: ${JSON.stringify(updated)}`;
                     }
                     if (fnName === 'create_appointment') {
-                        const created = await this.appointmentsAiService.createDraftFromAi(args);
+                        const created = await this.appointmentsAiService.createFromAi(args);
                         return `Agendamento criado com sucesso: ${JSON.stringify(created)}`;
                     }
                 }

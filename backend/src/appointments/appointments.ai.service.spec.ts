@@ -25,7 +25,7 @@ describe('AppointmentsAiService', () => {
   it('deve criar um agendamento a partir do payload da IA e finalizar', async () => {
     const now = new Date().toISOString();
     const dto = { customerId: 1, startAt: now, durationMinutes: 60, requestId: 'r2' } as any;
-    const created = await service.createDraftFromAi(dto);
+    const created = await service.createFromAi(dto);
     expect(created).toBeDefined();
     expect((created as any).id).toBe(456);
     expect(aiActionsMock.finalize).toHaveBeenCalledWith('r2', 'appointments', 456);
@@ -37,7 +37,7 @@ describe('AppointmentsAiService', () => {
 
     const now = new Date().toISOString();
     const dto = { customerId: 1, startAt: now, durationMinutes: 60, requestId: 'r3' } as any;
-    const created = await service.createDraftFromAi(dto);
+    const created = await service.createFromAi(dto);
     expect(created).toBeDefined();
     expect((created as any).id).toBe(456);
     expect(appointmentsServiceMock.hasOverlap).toHaveBeenCalled();
@@ -47,6 +47,6 @@ describe('AppointmentsAiService', () => {
     aiActionsMock.reserve.mockImplementation(() => Promise.reject({ response: { status: 429, data: 'rate limit' } }));
     const now = new Date().toISOString();
     const dto = { customerId: 1, startAt: now, durationMinutes: 60, requestId: 'r4' } as any;
-    await expect(service.createDraftFromAi(dto)).rejects.toEqual({ response: { status: 429, data: 'rate limit' } });
+    await expect(service.createFromAi(dto)).rejects.toEqual({ response: { status: 429, data: 'rate limit' } });
   });
 });

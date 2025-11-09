@@ -63,7 +63,7 @@ export class AppointmentsController {
 				appointmentDate: dateOnly,
 				startTime: startTime,
 				endTime: endTime,
-					duration: durationMin,
+				duration: durationMin,
 				location: body.location,
 				customerId: body.customerId,
 				customerName: body.customerName,

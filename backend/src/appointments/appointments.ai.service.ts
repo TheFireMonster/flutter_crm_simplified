@@ -12,7 +12,7 @@ export class AppointmentsAiService {
     private customersService: CustomersService,
   ) {}
 
-  public async createDraftFromAi(dto: CreateAppointmentFromAiDto) {
+  public async createFromAi(dto: CreateAppointmentFromAiDto) {
     const requestId = dto.requestId || `ai-${Date.now()}`;
     const { inserted, record } = await this.aiActionsService.reserve(requestId, 'create_appointment', dto);
 

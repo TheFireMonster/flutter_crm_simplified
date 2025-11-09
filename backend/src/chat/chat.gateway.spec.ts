@@ -47,7 +47,7 @@ describe('ChatGateway', () => {
 
     expect(repoMock.findOne).toHaveBeenCalled();
     expect(chatServiceMock.saveMessage).toHaveBeenCalled();
-  expect(aiChatMock.ask).toHaveBeenCalledWith('hello', 'conv1', undefined);
+  expect(aiChatMock.ask).toHaveBeenCalledWith('hello', 'conv1', undefined, undefined);
     expect((gateway.server.emit as jest.Mock).mock.calls.length).toBeGreaterThan(0);
     expect(errorSpy).toHaveBeenCalled();
     expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('onMessage: conversation link1'));

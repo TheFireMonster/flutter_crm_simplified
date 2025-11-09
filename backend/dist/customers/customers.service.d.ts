@@ -7,7 +7,10 @@ export declare class CustomersService {
     findAll(): Promise<Customer[]>;
     findOne(id: number): Promise<Customer>;
     update(id: number, updateData: Partial<Customer>): Promise<Customer>;
-    remove(id: number): Promise<import("typeorm").DeleteResult>;
+    remove(id: number): Promise<{
+        success: boolean;
+        message: string;
+    }>;
     findByName(name: string): Promise<Customer | null>;
     findOrCreateCustomer(payload: {
         id?: number;

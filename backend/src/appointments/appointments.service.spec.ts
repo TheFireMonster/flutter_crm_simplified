@@ -35,7 +35,7 @@ describe('AppointmentsService', () => {
   });
 
   describe('hasOverlap', () => {
-    it('deve detectar sobreposiÃ§Ã£o total', async () => {
+    it('deve detectar sobreposição total', async () => {
       const qb: any = repo.createQueryBuilder();
       qb.getOne.mockResolvedValue({ 
         id: 1, 
@@ -48,7 +48,7 @@ describe('AppointmentsService', () => {
       expect(result).toBe(true);
     });
 
-    it('deve detectar sobreposiÃ§Ã£o parcial no inÃ­cio', async () => {
+    it('deve detectar sobreposição parcial no início', async () => {
       const qb: any = repo.createQueryBuilder();
       qb.getOne.mockResolvedValue({ 
         id: 2, 
@@ -57,12 +57,12 @@ describe('AppointmentsService', () => {
         endTime: '10:30:00' 
       });
 
-      // Novo agendamento: 09:00-10:00 (sobrepÃµe com 09:30-10:00)
+      // Novo agendamento: 09:00-10:00 (sobrepõe com 09:30-10:00)
       const result = await service.hasOverlap('2025-10-17', '09:00:00', '10:00:00');
       expect(result).toBe(true);
     });
 
-    it('deve detectar sobreposiÃ§Ã£o parcial no final', async () => {
+    it('deve detectar sobreposição parcial no final', async () => {
       const qb: any = repo.createQueryBuilder();
       qb.getOne.mockResolvedValue({ 
         id: 3, 
@@ -71,12 +71,12 @@ describe('AppointmentsService', () => {
         endTime: '09:30:00' 
       });
 
-      // Novo agendamento: 09:00-10:00 (sobrepÃµe com 09:00-09:30)
+      // Novo agendamento: 09:00-10:00 (sobrepõe com 09:00-09:30)
       const result = await service.hasOverlap('2025-10-17', '09:00:00', '10:00:00');
       expect(result).toBe(true);
     });
 
-    it('deve retornar falso quando nÃ£o hÃ¡ sobreposiÃ§Ã£o', async () => {
+    it('deve retornar falso quando não há sobreposição', async () => {
       const qb: any = repo.createQueryBuilder();
       qb.getOne.mockResolvedValue(null);
 
@@ -84,7 +84,7 @@ describe('AppointmentsService', () => {
       expect(result).toBe(false);
     });
 
-    it('deve verificar consulta SQL correta para sobreposiÃ§Ã£o', async () => {
+    it('deve verificar consulta SQL correta para sobreposição', async () => {
       const qb: any = repo.createQueryBuilder();
       qb.getOne.mockResolvedValue(null);
 
@@ -100,7 +100,7 @@ describe('AppointmentsService', () => {
   });
 
   describe('create', () => {
-    it('deve criar agendamento com dados vÃ¡lidos', async () => {
+    it('deve criar agendamento com dados válidos', async () => {
       const appointmentData = {
         title: 'Consulta',
         description: 'Primeira consulta',
@@ -108,7 +108,7 @@ describe('AppointmentsService', () => {
         startTime: '09:00:00',
         endTime: '10:00:00',
         customerId: 1,
-        customerName: 'JoÃ£o Silva'
+        customerName: 'João Silva'
       };
       
       repo.create.mockReturnValue(appointmentData);

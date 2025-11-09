@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { ServiceService } from '../../services/service.service';
 import { AppointmentsService } from '../../appointments/appointments.service';
 import { CustomersAiService } from '../../customers/customers.ai.service';
+import { CustomersService } from '../../customers/customers.service';
 import { AppointmentsAiService } from '../../appointments/appointments.ai.service';
 import { of, Observable } from 'rxjs';
 import { ChatService } from '../../chat/chat.service';
@@ -15,8 +16,9 @@ describe('AIChatService', () => {
   const configMock = { get: jest.fn().mockImplementation((k) => (k === 'MOCK_AI' ? 'true' : 'test-api-key')) } as any;
   const serviceServiceMock = { findAll: jest.fn().mockResolvedValue([{ serviceName: 'Consulta' }]) } as any;
   const appointmentsServiceMock = { getAll: jest.fn().mockResolvedValue([{ title: 'Consulta', appointmentDate: '2025-10-10' }]) } as any;
-  const customersAiMock = { createDraftFromAi: jest.fn() } as any;
-  const appointmentsAiMock = { createDraftFromAi: jest.fn() } as any;
+  const customersAiMock = { createFromAi: jest.fn() } as any;
+  const customersServiceMock = { findAll: jest.fn().mockResolvedValue([{ name: 'Cliente Teste' }]) } as any;
+  const appointmentsAiMock = { createFromAi: jest.fn() } as any;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -27,6 +29,7 @@ describe('AIChatService', () => {
         { provide: ServiceService, useValue: serviceServiceMock },
         { provide: AppointmentsService, useValue: appointmentsServiceMock },
         { provide: CustomersAiService, useValue: customersAiMock },
+        { provide: CustomersService, useValue: customersServiceMock },
         { provide: AppointmentsAiService, useValue: appointmentsAiMock },
     { provide: ChatService, useValue: { getRecentMessages: jest.fn().mockResolvedValue([]) } },
       ],

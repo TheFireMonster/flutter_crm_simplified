@@ -10,5 +10,8 @@ export declare class CustomersController {
     export(): Promise<Customer[]>;
     findOne(id: string): Promise<Customer>;
     update(id: string, body: CreateCustomerDto): Promise<Customer>;
-    remove(id: string): Promise<import("typeorm").DeleteResult>;
+    remove(id: string): Promise<{
+        success: boolean;
+        message: string;
+    }>;
 }
