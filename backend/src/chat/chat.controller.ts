@@ -52,7 +52,7 @@ export class ChatController {
   async createConversation(@Body() dto: CreateConversationDto) {
     try {
       const linkId = uuidv4();
-      const accessToken = randomBytes(4).toString('hex'); // 8 caracteres hexadecimais
+      const accessToken = randomBytes(4).toString('hex');
       const apiBase = process.env.API_BASE_URL || 'http://localhost:3000';
 
   const customer = await (this.customersService ? this.customersService.findOrCreateCustomer({ id: dto?.customerId, name: dto?.customerName }) : null);

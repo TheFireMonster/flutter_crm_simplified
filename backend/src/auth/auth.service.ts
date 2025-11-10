@@ -38,7 +38,6 @@ export class AuthService {
       });
       await this.userRepo.save(user);
       
-      // Mark registration code as used if provided
       if (registrationCode) {
         await this.registrationService.markCodeAsUsed(registrationCode, decoded.email);
       }

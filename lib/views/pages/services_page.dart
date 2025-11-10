@@ -28,9 +28,6 @@ class _ServicePageState extends State<ServicePage> {
   Future<void> fetchServices() async {
     try {
       final response = await http.get(Uri.parse('/services'));
-      print('Services response status: ${response.statusCode}');
-      print('Services response body (first 200 chars): ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}');
-      
       if (response.statusCode == 200) {
         final decoded = json.decode(response.body);
         if (decoded is List) {
@@ -39,12 +36,8 @@ class _ServicePageState extends State<ServicePage> {
           });
         }
       } else {
-        print('Failed to fetch services: ${response.statusCode}');
-        print('Response body: ${response.body}');
       }
-    } catch (e, stackTrace) {
-      print('Error fetching services: $e');
-      print('Stack trace: $stackTrace');
+  } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erro ao carregar serviços')),
@@ -78,8 +71,6 @@ class _ServicePageState extends State<ServicePage> {
           SnackBar(content: Text('Serviço registrado com sucesso!')),
         );
       } else {
-        print('Failed to register service: ${response.statusCode}');
-        print('Response body: ${response.body}');
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Falha ao registrar serviço: ${response.statusCode}')),
@@ -87,7 +78,6 @@ class _ServicePageState extends State<ServicePage> {
       }
     } catch (e) {
       setState(() { isLoading = false; });
-      print('Error registering service: $e');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erro ao registrar serviço')),

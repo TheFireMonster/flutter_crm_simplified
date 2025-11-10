@@ -146,8 +146,7 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController _customerNameController = TextEditingController();
   late io.Socket socket;
   bool isSocketConnected = false;
-  bool isSocketConnecting = true; // Novo estado para mostrar "Conectando..."
-  List<Message> messages = [];
+  bool isSocketConnecting = true;
   Timer? _connectionCheckTimer;
 
   final Set<String> _receivedMessageIds = {};
@@ -247,11 +246,12 @@ class _ChatPageState extends State<ChatPage> {
 
     socket.onConnect((_) {
       debugPrint('✅ Socket conectado!');
-      if (mounted)
+      if (mounted) {
         setState(() {
           isSocketConnected = true;
           isSocketConnecting = false;
         });
+      }
       if (linkId != null) {
         final token = accessTokens[linkId];
         if (token != null) {
@@ -272,27 +272,30 @@ class _ChatPageState extends State<ChatPage> {
 
     socket.onConnectError((err) {
       debugPrint('❌ Erro de conexão: $err');
-      if (mounted)
+      if (mounted) {
         setState(() {
           isSocketConnected = false;
           isSocketConnecting = false;
         });
+      }
     });
     socket.onError((err) {
       debugPrint('❌ Erro no socket: $err');
-      if (mounted)
+      if (mounted) {
         setState(() {
           isSocketConnected = false;
           isSocketConnecting = false;
         });
+      }
     });
     socket.onDisconnect((_) {
       debugPrint('🔌 Socket desconectado');
-      if (mounted)
+      if (mounted) {
         setState(() {
           isSocketConnected = false;
           isSocketConnecting = false;
         });
+      }
     });
 
     socket.on('receive_message', (data) {
@@ -821,7 +824,6 @@ class _ChatPageState extends State<ChatPage> {
                           SizedBox(width: 8),
                           GestureDetector(
                             onTap: () {
-                              // Atualiza o estado com o estado real do socket
                               if (mounted) {
                                 setState(() {
                                   isSocketConnected = socket.connected;

@@ -25,9 +25,8 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   List<Map<String, dynamic>> _appointments = [];
-  int? _selectedSlot; // slot index (0..n) where each slot = 30 minutes
+  int? _selectedSlot;
   final TextEditingController _nameController = TextEditingController();
-  // use discrete duration selector (minutes)
   int _selectedDuration = 30;
   List<Map<String, dynamic>> _customers = [];
   Map<String, dynamic>? _selectedCustomer;
@@ -242,7 +241,6 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
       setState(() {
         _customers = data.map<Map<String, dynamic>>((c) => Map<String, dynamic>.from(c)).toList();
       });
-      // merge any chat-created customers persisted locally
       await _mergeChatCustomersIfAny();
     }
   }
@@ -278,7 +276,6 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
   }
 
   Future<void> _mergeChatCustomersIfAny() async {
-    // helper called after fetching server customers to ensure locally persisted chat customers are merged
     final prefs = await SharedPreferences.getInstance();
     final idsJson = prefs.getString('customerIds');
     final namesJson = prefs.getString('customerNames');
@@ -425,8 +422,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
       );
       return;
     }
-  final durMin = duration; // duration is already int
-    // check if any of the hours this appointment would occupy are already taken
+  final durMin = duration;
     final slotsNeeded = (durMin + 29) ~/ 30;
     for (int s = 0; s < slotsNeeded; s++) {
       final slotIdx = _selectedSlot! + s;
@@ -437,7 +433,6 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
         return;
       }
     }
-  // combine selected day with selected slot (30-minute increments)
     final slotMinutes = 8 * 60 + _selectedSlot! * 30;
     final apptDate = DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day, slotMinutes ~/ 60, slotMinutes % 60);
     debugPrint('🕐 Criando agendamento: slot=$_selectedSlot, slotMinutes=$slotMinutes, apptDate=$apptDate');

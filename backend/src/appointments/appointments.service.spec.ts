@@ -57,7 +57,6 @@ describe('AppointmentsService', () => {
         endTime: '10:30:00' 
       });
 
-      // Novo agendamento: 09:00-10:00 (sobrepõe com 09:30-10:00)
       const result = await service.hasOverlap('2025-10-17', '09:00:00', '10:00:00');
       expect(result).toBe(true);
     });
@@ -71,7 +70,6 @@ describe('AppointmentsService', () => {
         endTime: '09:30:00' 
       });
 
-      // Novo agendamento: 09:00-10:00 (sobrepõe com 09:00-09:30)
       const result = await service.hasOverlap('2025-10-17', '09:00:00', '10:00:00');
       expect(result).toBe(true);
     });

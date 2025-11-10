@@ -46,7 +46,6 @@ class _RegisterPageState extends State<RegisterPage> {
           registrationCode: widget.registrationCode,
         );
         if (user != null) {
-          // Fazer logout após cadastro para que usuário precise fazer login
           await authService.firebaseAuth.signOut();
           if (!mounted) return;
           context.go('/login');

@@ -64,15 +64,17 @@ class _ChatPageCustomerState extends State<ChatPageCustomer> {
     });
 
     socket.onConnect((_){ 
-      if (mounted) setState(() {
-        isSocketConnected = true;
-        isSocketConnecting = false;
-      }); 
-      socket.emit('join_conversation', {
-        'conversationId': widget.conversationId,
-        'token': widget.accessToken,
-      }); 
-    });
+        if (mounted) {
+          setState(() {
+            isSocketConnected = true;
+            isSocketConnecting = false;
+          }); 
+          socket.emit('join_conversation', {
+            'conversationId': widget.conversationId,
+            'token': widget.accessToken,
+          }); 
+        }
+      });
     
     socket.on('error', (data) {
       final message = data['message'] ?? 'Erro desconhecido';
@@ -88,22 +90,28 @@ class _ChatPageCustomerState extends State<ChatPageCustomer> {
     });
     
     socket.onConnectError((err){ 
-      if (mounted) setState(() {
-        isSocketConnected = false;
-        isSocketConnecting = false;
-      }); 
+      if (mounted) {
+        setState(() {
+          isSocketConnected = false;
+          isSocketConnecting = false;
+        }); 
+      }
     });
     socket.onError((err){ 
-      if (mounted) setState(() {
-        isSocketConnected = false;
-        isSocketConnecting = false;
-      }); 
+      if (mounted) {
+        setState(() {
+          isSocketConnected = false;
+          isSocketConnecting = false;
+        }); 
+      }
     });
     socket.onDisconnect((_){ 
-      if (mounted) setState(() {
-        isSocketConnected = false;
-        isSocketConnecting = false;
-      }); 
+      if (mounted) {
+        setState(() {
+          isSocketConnected = false;
+          isSocketConnecting = false;
+        }); 
+      }
     });
 
     socket.on('receive_message', (data) {
@@ -164,7 +172,6 @@ class _ChatPageCustomerState extends State<ChatPageCustomer> {
     if (resp.statusCode == 200) {
       final dynamic responseBody = jsonDecode(resp.body);
       
-      // Check if response contains error
       if (responseBody is Map && responseBody.containsKey('error')) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
