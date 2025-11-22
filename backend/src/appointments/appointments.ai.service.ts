@@ -66,8 +66,6 @@ export class AppointmentsAiService {
     if (createdId) {
       await this.aiActionsService.finalize(requestId, 'appointments', createdId);
     }
-
-
     return createdEntity || created;
   }
 }

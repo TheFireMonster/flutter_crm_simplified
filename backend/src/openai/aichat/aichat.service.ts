@@ -42,20 +42,21 @@ export class AIChatService {
   }
 
   const productList = services.map(p => p.serviceName).join(', ');
-    const appointmentList = appointments.map(a => `${a.title} em ${a.appointmentDate}`).join('; ');
+  const appointmentList = appointments.map(a => `${a.title} em ${a.appointmentDate}`).join('; ');
 
-    let systemPrompt =
-      'Você é um assistente CRM útil. Sempre responda em português. ' +
-      'Produtos/Serviços disponíveis: ' + productList + '. ' +
-      'Use o ' + appointmentList + ' como referência dos dias e horários indisponíveis. Caso não encontre um agendamento criado em determinado dia ou horário, informe que está disponível. ' +
-      'Ajude os clientes/pacientes a agendar consultas e resolver problemas. ' +
-      'IMPORTANTE: No início da conversa, após cumprimentar o cliente, solicite educadamente o EMAIL e CPF dele para completar o cadastro. Diga algo como: "Para melhor atendê-lo, poderia me informar seu email e CPF?". ' +
-      'Quando o cliente fornecer essas informações, USE IMEDIATAMENTE A FUNÇÃO update_customer_info para salvar no sistema. ' +
-      'APÓS atualizar as informações do cliente com sucesso, SEMPRE pergunte se ele deseja agendar uma consulta. Por exemplo: "Ótimo! Suas informações foram atualizadas. Gostaria de agendar uma consulta agora?". ' +
-      'Quando o cliente quiser marcar um agendamento, pergunte a ele qual o dia e o horário caso ele não tenha dito. Depois USE A FUNÇÃO create_appointment para criar o agendamento. ' +
-      'Quando o cliente fornecer informações adicionais (telefone, endereço, data de nascimento, etc.), USE A FUNÇÃO update_customer_info para atualizar o cadastro. ' +
-      'Você TEM PERMISSÃO para criar agendamentos e atualizar informações de clientes usando as funções disponíveis. ' +
-      'Não presuma coisas sobre as quais você não tem certeza. Se não souber a resposta, diga que não sabe.';
+  let systemPrompt =
+    'Você é um assistente CRM útil. Sempre responda em português. ' +
+    'Produtos/Serviços disponíveis: ' + productList + '. ' +
+    'Considere apenas os agendamentos listados como horários ocupados. Não invente indisponibilidades. Se o horário não estiver na lista, está disponível. ' +
+    'Horários de funcionamento: segunda a sexta, das 8h às 18h. Não atendemos em feriados. Considere apenas esses horários como disponíveis. ' +
+    'Ajude os clientes/pacientes a agendar consultas e resolver problemas. ' +
+    'IMPORTANTE: No início da conversa, após cumprimentar o cliente, solicite educadamente o EMAIL e CPF dele para completar o cadastro. Diga algo como: "Para melhor atendê-lo, poderia me informar seu email e CPF?". ' +
+    'Quando o cliente fornecer essas informações, USE IMEDIATAMENTE A FUNÇÃO update_customer_info para salvar no sistema. ' +
+    'APÓS atualizar as informações do cliente com sucesso, SEMPRE pergunte se ele deseja agendar uma consulta. Por exemplo: "Ótimo! Suas informações foram atualizadas. Posso agendar uma consulta para você?". ' +
+    'Quando o cliente quiser marcar um agendamento, pergunte apenas o dia e horário caso ele não tenha dito. Não pergunte sobre serviço, sempre agende o serviço padrão. Ao criar o agendamento, defina a duração como 1 hora e use o serviço padrão. ' +
+    'Quando o cliente fornecer informações adicionais (telefone, endereço, data de nascimento, etc.), USE A FUNÇÃO update_customer_info para atualizar o cadastro. ' +
+    'Você TEM PERMISSÃO para criar agendamentos e atualizar informações de clientes usando as funções disponíveis. ' +
+    'Não presuma coisas sobre as quais você não tem certeza. Se não souber a resposta, diga que não sabe.';
     if (customerName) {
       systemPrompt += `\nNome do cliente: ${customerName}. Use isto para personalizar respostas quando apropriado.`;
     }
@@ -178,16 +179,28 @@ export class AIChatService {
         try {
           const fnName = message.function_call.name;
           const args = JSON.parse(message.function_call.arguments || '{}');
-          
+
           if (fnName === 'update_customer_info') {
             const { customerId, ...updateData } = args;
-            await this.customersAiService.updateFromAi(customerId, updateData);
-            return `Informações do cliente atualizadas com sucesso! Gostaria de agendar uma consulta agora?`;
+            const result = await this.customersAiService.updateFromAi(customerId, updateData);
+            if (result && result.success) {
+              return `Pronto! Suas informações foram atualizadas com sucesso. Posso te ajudar a agendar uma consulta ou tirar alguma dúvida?`;
+            } else {
+              return `Ops! Não consegui atualizar seus dados agora. Você pode conferir as informações e tentar novamente, ou me enviar os dados corretos?`;
+            }
           }
-          
+
           if (fnName === 'create_appointment') {
-            await this.appointmentsAiService.createFromAi(args);
-            return `Agendamento criado com sucesso!`;
+            if (!args.serviceName) {
+              args.serviceName = services.length > 0 ? services[0].serviceName : 'Consulta';
+            }
+            args.durationMinutes = 60;
+            const result = await this.appointmentsAiService.createFromAi(args);
+            if (result && result.id) {
+              return `Pronto! Sua consulta está agendada. Se precisar de mais alguma coisa, estou à disposição!`;
+            } else {
+              return `Não consegui agendar nesse horário. Que tal escolher outro horário? Estou aqui para ajudar!`;
+            }
           }
         } catch (e) {
           console.error('Failed to handle function_call', e);
