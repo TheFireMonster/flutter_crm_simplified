@@ -51,7 +51,8 @@ export class AIChatService {
       'Ajude os clientes/pacientes a agendar consultas e resolver problemas. ' +
       'IMPORTANTE: No início da conversa, após cumprimentar o cliente, solicite educadamente o EMAIL e CPF dele para completar o cadastro. Diga algo como: "Para melhor atendê-lo, poderia me informar seu email e CPF?". ' +
       'Quando o cliente fornecer essas informações, USE IMEDIATAMENTE A FUNÇÃO update_customer_info para salvar no sistema. ' +
-      'Quando o cliente quiser marcar um agendamento, USE A FUNÇÃO create_appointment para criar o agendamento. ' +
+      'APÓS atualizar as informações do cliente com sucesso, SEMPRE pergunte se ele deseja agendar uma consulta. Por exemplo: "Ótimo! Suas informações foram atualizadas. Gostaria de agendar uma consulta agora?". ' +
+      'Quando o cliente quiser marcar um agendamento, pergunte a ele qual o dia e o horário caso ele não tenha dito. Depois USE A FUNÇÃO create_appointment para criar o agendamento. ' +
       'Quando o cliente fornecer informações adicionais (telefone, endereço, data de nascimento, etc.), USE A FUNÇÃO update_customer_info para atualizar o cadastro. ' +
       'Você TEM PERMISSÃO para criar agendamentos e atualizar informações de clientes usando as funções disponíveis. ' +
       'Não presuma coisas sobre as quais você não tem certeza. Se não souber a resposta, diga que não sabe.';
@@ -181,7 +182,7 @@ export class AIChatService {
           if (fnName === 'update_customer_info') {
             const { customerId, ...updateData } = args;
             await this.customersAiService.updateFromAi(customerId, updateData);
-            return `Informações do cliente atualizadas com sucesso!`;
+            return `Informações do cliente atualizadas com sucesso! Gostaria de agendar uma consulta agora?`;
           }
           
           if (fnName === 'create_appointment') {
