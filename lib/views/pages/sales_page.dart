@@ -22,9 +22,9 @@ class _SalesPageState extends State<SalesPage> {
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _customerNameController = TextEditingController();
   final TextEditingController _customerEmailController = TextEditingController();
-  Map<String, String> _chatCustomerNames = {}; // linkId -> name
+  Map<String, String> _chatCustomerNames = {};
   String? _selectedChatCustomerLinkId;
-  Map<String, String> _chatCustomerIds = {}; // linkId -> backend customerId as string
+  Map<String, String> _chatCustomerIds = {};
   List<dynamic> _services = [];
   int? _selectedServiceId;
 
@@ -59,8 +59,6 @@ class _SalesPageState extends State<SalesPage> {
           data = [];
         }
         _services = data;
-        if (_services.isNotEmpty) {
-        }
         if (mounted) setState(() {});
       }
     } catch (e) {
@@ -76,15 +74,88 @@ class _SalesPageState extends State<SalesPage> {
         final Map<String, dynamic> map = jsonDecode(namesJson);
         _chatCustomerNames = map.map((k, v) => MapEntry(k, v.toString()));
         if (_chatCustomerNames.isNotEmpty) _selectedChatCustomerLinkId = _chatCustomerNames.keys.first;
-        if (mounted) setState(() {});
       }
       final idsJson = prefs.getString('customerIds');
       if (idsJson != null) {
         final Map<String, dynamic> idmap = jsonDecode(idsJson);
         _chatCustomerIds = idmap.map((k, v) => MapEntry(k, v.toString()));
       }
+      
+      await _cleanupDeletedCustomers();
+      
+      if (mounted) setState(() {});
     } catch (e) {
       if (mounted) setState(() { errorMessage = 'Failed loading chat customers: $e'; });
+    }
+  }
+
+  Future<void> _cleanupDeletedCustomers() async {
+    try {
+      final response = await http.get(Uri.parse('/customers'));
+      if (response.statusCode != 200) return;
+      
+      final List<dynamic> backendCustomers = jsonDecode(response.body);
+      final validCustomerIds = backendCustomers
+          .map((c) => c['id']?.toString())
+          .where((id) => id != null)
+          .toSet();
+      
+      final prefs = await SharedPreferences.getInstance();
+      final idsJson = prefs.getString('customerIds');
+      final namesJson = prefs.getString('customerNames');
+      final tokensJson = prefs.getString('accessTokens');
+      final linksJson = prefs.getStringList('chatLinks');
+      
+      if (idsJson == null || namesJson == null) return;
+      
+      Map<String, dynamic> ids = jsonDecode(idsJson);
+      Map<String, dynamic> names = jsonDecode(namesJson);
+      Map<String, dynamic> tokens = tokensJson != null ? jsonDecode(tokensJson) : {};
+      List<String> links = linksJson ?? [];
+      
+      final List<String> linkIdsToRemove = [];
+      
+      ids.forEach((linkId, custId) {
+        final custIdStr = custId?.toString();
+        if (custIdStr != null && custIdStr.isNotEmpty && !validCustomerIds.contains(custIdStr)) {
+          linkIdsToRemove.add(linkId);
+          debugPrint('🧹 [VENDAS] Removendo cliente deletado: $linkId (ID: $custIdStr)');
+        }
+      });
+      
+      for (final linkId in linkIdsToRemove) {
+        ids.remove(linkId);
+        names.remove(linkId);
+        tokens.remove(linkId);
+        _chatCustomerNames.remove(linkId);
+        _chatCustomerIds.remove(linkId);
+        
+        links.removeWhere((link) => link.contains(linkId));
+      }
+      
+      if (linkIdsToRemove.isNotEmpty) {
+        await prefs.setString('customerIds', jsonEncode(ids));
+        await prefs.setString('customerNames', jsonEncode(names));
+        await prefs.setString('accessTokens', jsonEncode(tokens));
+        await prefs.setStringList('chatLinks', links);
+        
+        if (_selectedChatCustomerLinkId != null && linkIdsToRemove.contains(_selectedChatCustomerLinkId)) {
+          _selectedChatCustomerLinkId = _chatCustomerNames.keys.isNotEmpty ? _chatCustomerNames.keys.first : null;
+        }
+        
+        debugPrint('✅ [VENDAS] Limpeza concluída: ${linkIdsToRemove.length} cliente(s) removido(s)');
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${linkIdsToRemove.length} cliente(s) removido(s) da lista'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ Erro ao limpar clientes deletados: $e');
     }
   }
 
@@ -115,9 +186,11 @@ class _SalesPageState extends State<SalesPage> {
     } catch (e) {
       if (mounted) setState(() { errorMessage = 'Failed to load sales: $e'; });
     } finally {
-      if (mounted) setState(() {
+      if (mounted) {
+        setState(() {
         loading = false;
       });
+      }
     }
   }
 
@@ -167,7 +240,6 @@ class _SalesPageState extends State<SalesPage> {
                                       children: [
                                     Text('Registrar venda de serviço', style: Theme.of(context).textTheme.titleMedium),
                                     const SizedBox(height: 8),
-                                // Services dropdown (optional). Selecting fills service + price.
                                 _services.isEmpty
                                     ? TextFormField(
                                         controller: _serviceController,
@@ -211,7 +283,6 @@ class _SalesPageState extends State<SalesPage> {
                                           });
                                         },
                                         validator: (v) {
-                                          // if user picked 'Other' or nothing, ensure manual field is filled
                                           if ((v == null || v == 0) && (_serviceController.text.trim().isEmpty)) return 'Obrigatório';
                                           return null;
                                         },
@@ -293,7 +364,6 @@ class _SalesPageState extends State<SalesPage> {
                                     final custName = sale['customerName'] ?? '';
                                     String created = sale['saleDate'] ?? '';
                                     try {
-                                      // Use day-first format (DD/MM/YYYY) with 24h time to match local expectation
                                       created = DateFormat('dd/MM/yyyy HH:mm').format(DateTime.parse(created).toLocal());
                                     } catch (_) {}
                                     final total = sale['price'] ?? sale['amount'] ?? 0;
@@ -345,7 +415,7 @@ class _SalesPageState extends State<SalesPage> {
       return;
     }
 
-    int? _toNullableInt(dynamic v) {
+    int? toNullableInt(dynamic v) {
       if (v == null) return null;
       if (v is int) return v;
       final s = v.toString();
@@ -360,8 +430,8 @@ class _SalesPageState extends State<SalesPage> {
     if (customerEmail.isNotEmpty) payload['customerEmail'] = customerEmail;
     if (_selectedChatCustomerLinkId != null && _chatCustomerIds.containsKey(_selectedChatCustomerLinkId)) {
       final v = _chatCustomerIds[_selectedChatCustomerLinkId];
-      final parsed = _toNullableInt(v);
-  if (parsed != null) payload['customerId'] = parsed;
+      final parsed = toNullableInt(v);
+      if (parsed != null) payload['customerId'] = parsed;
     }
 
     try {
@@ -377,7 +447,6 @@ class _SalesPageState extends State<SalesPage> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Venda criada')));
       } else {
-        
         String userMsg = 'Falha ao criar venda';
         try {
           final parsed = jsonDecode(resp.body);

@@ -13,59 +13,94 @@ export class AppointmentsAiService {
   ) {}
 
   public async createFromAi(dto: CreateAppointmentFromAiDto) {
+    console.log('🎯 AppointmentsAiService.createFromAi iniciado com:', JSON.stringify(dto, null, 2));
+    
     const requestId = dto.requestId || `ai-${Date.now()}`;
-    const { inserted, record } = await this.aiActionsService.reserve(requestId, 'create_appointment', dto);
-
-    if (!inserted) {
-      if (record?.resultTable === 'appointments' && record?.resultId) {
-        const existing = await this.appointmentsService.getAll(); 
-        return existing.find(a => a.id === record.resultId) || record;
-      }
-      return record;
-    }
-
-    const title = dto.serviceName || 'Appointment';
-  const description = dto.notes || '';
-
-    const pad = (n: number) => n.toString().padStart(2, '0');
-    const toLocalTimeString = (d: Date) => `${pad(d.getHours())}:${pad(d.getMinutes())}:00`;
-
-    let start = new Date(dto.startAt);
-    const duration = (dto.durationMinutes && dto.durationMinutes > 0) ? dto.durationMinutes : 60;
-    let startTime: string = toLocalTimeString(start);
-    let endTime: string | undefined = toLocalTimeString(new Date(start.getTime() + duration * 60000));
-
-    const appointmentDate = dto.startAt.split('T')[0];
-    const maxAttempts = 24;
-    let attempts = 0;
+    console.log('🔑 Request ID:', requestId);
+    
     try {
-      while (await this.appointmentsService.hasOverlap(appointmentDate, startTime, endTime) && attempts < maxAttempts) {
-        start = new Date(start.getTime() + duration * 60000);
-        startTime = toLocalTimeString(start);
-        endTime = toLocalTimeString(new Date(start.getTime() + duration * 60000));
-        attempts++;
+      const { inserted, record } = await this.aiActionsService.reserve(requestId, 'create_appointment', dto);
+      console.log('📝 aiActionsService.reserve resultado:', { inserted, record });
+
+      if (!inserted) {
+        console.log('⚠️ Agendamento já existe (não inserido)');
+        if (record?.resultTable === 'appointments' && record?.resultId) {
+          const existing = await this.appointmentsService.getAll(); 
+          return existing.find(a => a.id === record.resultId) || record;
+        }
+        return record;
       }
-    } catch (e) {
-      console.error('Error checking appointment overlap, proceeding with original time', e);
+
+      const title = dto.serviceName || 'Consulta';
+      const description = dto.notes || '';
+
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      const toLocalTimeString = (d: Date) => `${pad(d.getHours())}:${pad(d.getMinutes())}:00`;
+
+      let start = new Date(dto.startAt);
+      console.log('📅 Data de início parseada:', start.toISOString());
+      
+      const duration = (dto.durationMinutes && dto.durationMinutes > 0) ? dto.durationMinutes : 60;
+      console.log('⏱️ Duração:', duration, 'minutos');
+      
+      let startTime: string = toLocalTimeString(start);
+      let endTime: string = toLocalTimeString(new Date(start.getTime() + duration * 60000));
+
+      const appointmentDate = dto.startAt.split('T')[0];
+      console.log('📆 Data do agendamento:', appointmentDate);
+      console.log('🕐 Horário início:', startTime);
+      console.log('🕐 Horário fim:', endTime);
+
+      const maxAttempts = 24;
+      let attempts = 0;
+      try {
+        console.log('🔍 Verificando conflitos de horário...');
+        while (await this.appointmentsService.hasOverlap(appointmentDate, startTime, endTime) && attempts < maxAttempts) {
+          attempts++;
+          console.log(`⚠️ Conflito detectado. Tentativa ${attempts}/${maxAttempts} - ajustando horário...`);
+          start = new Date(start.getTime() + duration * 60000);
+          startTime = toLocalTimeString(start);
+          endTime = toLocalTimeString(new Date(start.getTime() + duration * 60000));
+        }
+        
+        if (attempts > 0) {
+          console.log(`✅ Novo horário encontrado após ${attempts} tentativas:`, startTime, '-', endTime);
+        } else {
+          console.log('✅ Horário livre, sem conflitos');
+        }
+      } catch (e) {
+        console.error('❌ Erro ao verificar conflitos, continuando com horário original:', e);
+      }
+
+      console.log('💾 Criando agendamento no banco...');
+      const created = await this.appointmentsService.create({
+        title,
+        description,
+        appointmentDate,
+        startTime: startTime,
+        endTime: endTime,
+        duration: duration,
+        location: undefined,
+        customerId: dto.customerId,
+      });
+
+      console.log('✅ Agendamento criado:', created);
+
+      const createdEntity = Array.isArray(created) ? created[0] : created;
+      const createdId = createdEntity ? (createdEntity as any).id : null;
+
+      if (createdId) {
+        console.log('🔗 Finalizando aiAction com ID:', createdId);
+        await this.aiActionsService.finalize(requestId, 'appointments', createdId);
+      } else {
+        console.error('❌ Agendamento criado mas sem ID!');
+      }
+      
+      return createdEntity || created;
+    } catch (error) {
+      console.error('❌ ERRO em AppointmentsAiService.createFromAi:', error);
+      console.error('Stack:', error.stack);
+      throw error;
     }
-
-    const created = await this.appointmentsService.create({
-      title,
-      description,
-      appointmentDate,
-      startTime: startTime,
-      endTime: endTime,
-      duration: duration,
-      location: undefined,
-      customerId: dto.customerId,
-    });
-
-    const createdEntity = Array.isArray(created) ? created[0] : created;
-    const createdId = createdEntity ? (createdEntity as any).id : null;
-
-    if (createdId) {
-      await this.aiActionsService.finalize(requestId, 'appointments', createdId);
-    }
-    return createdEntity || created;
   }
 }
