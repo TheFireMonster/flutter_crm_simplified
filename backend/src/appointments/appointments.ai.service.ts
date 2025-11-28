@@ -36,8 +36,15 @@ export class AppointmentsAiService {
       const pad = (n: number) => n.toString().padStart(2, '0');
       const toLocalTimeString = (d: Date) => `${pad(d.getHours())}:${pad(d.getMinutes())}:00`;
 
-      let start = new Date(dto.startAt);
-      console.log('📅 Data de início parseada:', start.toISOString());
+        let start = new Date(dto.startAt);
+        const now = new Date();
+        if (start.getFullYear() < now.getFullYear()) {
+          start.setFullYear(now.getFullYear());
+          const iso = start.toISOString();
+          dto.startAt = iso;
+          console.log('⚠️ Ano ajustado para o atual:', iso);
+        }
+        console.log('📅 Data de início parseada:', start.toISOString());
 
       const duration = (dto.durationMinutes && dto.durationMinutes > 0) ? dto.durationMinutes : 60;
       console.log('⏱️ Duração:', duration, 'minutos');

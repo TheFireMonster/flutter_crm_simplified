@@ -1,0 +1,20 @@
+{
+    "sqltools.connections": [
+        {
+            "pgOptions": {
+                "ssl": {
+                    "rejectUnauthorized": true
+                }
+            },
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "dpg-d4ku9fhr0fns738dq2v0-a.oregon-postgres.render.com",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "username": "crm_db_new_1h5x_user",
+            "database": "crm_db_new_1h5x",
+            "password": "ZKoJghJ42YiBfrm3LsEZE82tzD4OuY2l",
+            "name": "crm db"
+        }
+    ]
+}

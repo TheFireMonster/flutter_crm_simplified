@@ -57,6 +57,7 @@ export class AIChatService {
       'Quando o cliente quiser marcar um agendamento, pergunte: 1) Qual dia deseja? 2) Qual horário prefere? ' +
       'NÃO pergunte sobre serviço ou duração - sempre use o serviço padrão com 60 minutos de duração. ' +
       'FORMATO DE DATA: Quando o cliente disser "amanhã", "próxima segunda", etc, calcule a data correta no formato ISO (YYYY-MM-DDTHH:mm:ss). ' +
+      "IMPORTANTE, USE SEMPRE A DATA DO ANO ATUAL. Por exemplo, se hoje é 2025-11-20 e o cliente disser '25 de dezembro', interprete como '2025-12-25'. " +
       'IMPORTANTE: Use SEMPRE o formato ISO-8601 completo para datas, exemplo: 2025-11-25T14:00:00 (não use apenas a data). ' +
       'Quando o cliente fornecer informações adicionais (telefone, endereço, data de nascimento, etc.), USE A FUNÇÃO update_customer_info para atualizar o cadastro. ' +
       'Você TEM PERMISSÃO para criar agendamentos e atualizar informações de clientes usando as funções disponíveis. ' +
