@@ -10,14 +10,13 @@ export class AppointmentsAiService {
     private aiActionsService: AiActionsService,
     private appointmentsService: AppointmentsService,
     private customersService: CustomersService,
-  ) {}
-
+  ) { }
   public async createFromAi(dto: CreateAppointmentFromAiDto) {
     console.log('🎯 AppointmentsAiService.createFromAi iniciado com:', JSON.stringify(dto, null, 2));
-    
+
     const requestId = dto.requestId || `ai-${Date.now()}`;
     console.log('🔑 Request ID:', requestId);
-    
+
     try {
       const { inserted, record } = await this.aiActionsService.reserve(requestId, 'create_appointment', dto);
       console.log('📝 aiActionsService.reserve resultado:', { inserted, record });
@@ -25,7 +24,7 @@ export class AppointmentsAiService {
       if (!inserted) {
         console.log('⚠️ Agendamento já existe (não inserido)');
         if (record?.resultTable === 'appointments' && record?.resultId) {
-          const existing = await this.appointmentsService.getAll(); 
+          const existing = await this.appointmentsService.getAll();
           return existing.find(a => a.id === record.resultId) || record;
         }
         return record;
@@ -39,10 +38,10 @@ export class AppointmentsAiService {
 
       let start = new Date(dto.startAt);
       console.log('📅 Data de início parseada:', start.toISOString());
-      
+
       const duration = (dto.durationMinutes && dto.durationMinutes > 0) ? dto.durationMinutes : 60;
       console.log('⏱️ Duração:', duration, 'minutos');
-      
+
       let startTime: string = toLocalTimeString(start);
       let endTime: string = toLocalTimeString(new Date(start.getTime() + duration * 60000));
 
@@ -62,7 +61,7 @@ export class AppointmentsAiService {
           startTime = toLocalTimeString(start);
           endTime = toLocalTimeString(new Date(start.getTime() + duration * 60000));
         }
-        
+
         if (attempts > 0) {
           console.log(`✅ Novo horário encontrado após ${attempts} tentativas:`, startTime, '-', endTime);
         } else {
@@ -95,7 +94,7 @@ export class AppointmentsAiService {
       } else {
         console.error('❌ Agendamento criado mas sem ID!');
       }
-      
+
       return createdEntity || created;
     } catch (error) {
       console.error('❌ ERRO em AppointmentsAiService.createFromAi:', error);

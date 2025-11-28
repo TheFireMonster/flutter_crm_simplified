@@ -21,7 +21,7 @@ export class AIChatService {
     private readonly customersService: CustomersService,
     private readonly appointmentsAiService: AppointmentsAiService,
     private readonly chatService: ChatService,
-  ) {}
+  ) { }
 
   async ask(prompt: string, conversationId?: string, customerName?: string, customerId?: number): Promise<string> {
     const apiKey = this.configService.get<string>('OPENAI_API_KEY');
@@ -61,7 +61,7 @@ export class AIChatService {
       'Quando o cliente fornecer informações adicionais (telefone, endereço, data de nascimento, etc.), USE A FUNÇÃO update_customer_info para atualizar o cadastro. ' +
       'Você TEM PERMISSÃO para criar agendamentos e atualizar informações de clientes usando as funções disponíveis. ' +
       'CRÍTICO: Sempre confirme com o cliente antes de criar o agendamento dizendo "Perfeito! Vou agendar para [dia] às [hora]. Confirma?"';
-      
+
     if (customerName) {
       systemPrompt += `\nNome do cliente: ${customerName}. Use isto para personalizar respostas.`;
     }
@@ -161,7 +161,7 @@ export class AIChatService {
       if (message?.function_call) {
         console.log('🔧 IA chamou função:', message.function_call.name);
         console.log('📋 Argumentos:', message.function_call.arguments);
-        
+
         try {
           const fnName = message.function_call.name;
           const args = JSON.parse(message.function_call.arguments || '{}');
@@ -179,7 +179,7 @@ export class AIChatService {
 
           if (fnName === 'create_appointment') {
             console.log('📅 Tentando criar agendamento com args:', JSON.stringify(args, null, 2));
-            
+
             if (!args.customerId) {
               console.error('❌ customerId não fornecido!');
               return 'Desculpe, preciso do seu cadastro completo antes de agendar. Pode me informar seu email e CPF?';
@@ -198,7 +198,7 @@ export class AIChatService {
             try {
               const result = await this.appointmentsAiService.createFromAi(args);
               console.log('📊 Resultado do agendamento:', result);
-              
+
               if (result && (result.id || result[0]?.id)) {
                 const appointmentId = result.id || result[0]?.id;
                 console.log('✅ Agendamento criado com ID:', appointmentId);
