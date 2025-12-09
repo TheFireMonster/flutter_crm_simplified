@@ -44,6 +44,14 @@ export class AIChatService {
     const productList = services.map(p => p.serviceName).join(', ');
     const appointmentList = appointments.map(a => `${a.title} em ${a.appointmentDate} às ${a.startTime}`).join('; ');
 
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth() + 1;
+    const currentDay = currentDate.getDate();
+    const todayFormatted = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(currentDay).padStart(2, '0')}`;
+    
+    console.log(`Sistema iniciado com data: ${todayFormatted} (Ano: ${currentYear})`);
+
     let systemPrompt =
       'Você é um assistente CRM útil. Sempre responda em português. ' +
       'Produtos/Serviços disponíveis: ' + productList + '. ' +
@@ -56,9 +64,14 @@ export class AIChatService {
       'APÓS atualizar as informações do cliente com sucesso, SEMPRE pergunte se ele deseja agendar uma consulta. ' +
       'Quando o cliente quiser marcar um agendamento, pergunte: 1) Qual dia deseja? 2) Qual horário prefere? ' +
       'NÃO pergunte sobre serviço ou duração - sempre use o serviço padrão com 60 minutos de duração. ' +
-      'FORMATO DE DATA: Quando o cliente disser "amanhã", "próxima segunda", etc, calcule a data correta no formato ISO (YYYY-MM-DDTHH:mm:ss). ' +
-      "IMPORTANTE, USE SEMPRE A DATA DO ANO ATUAL. Por exemplo, se hoje é 2025-11-20 e o cliente disser '25 de dezembro', interprete como '2025-12-25'. " +
-      'IMPORTANTE: Use SEMPRE o formato ISO-8601 completo para datas, exemplo: 2025-11-25T14:00:00 (não use apenas a data). ' +
+      `DATA E HORA ATUAL: HOJE É ${todayFormatted} (ANO ${currentYear}). ` +
+      `CRÍTICO: SEMPRE use o ano ${currentYear} para TODAS as datas futuras. NUNCA use 2023, 2024 ou qualquer outro ano. ` +
+      `FORMATO OBRIGATÓRIO: YYYY-MM-DDTHH:mm:ss onde YYYY = ${currentYear}. ` +
+      `Exemplos CORRETOS: ` +
+      `- Cliente diz "amanhã às 14h" → "${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(currentDay + 1).padStart(2, '0')}T14:00:00" ` +
+      `- Cliente diz "25 de dezembro" → "${currentYear}-12-25T10:00:00" ` +
+      `- Cliente diz "próxima segunda" → "${currentYear}-[MÊS]-[DIA]T09:00:00" ` +
+      `VALIDAÇÃO: Antes de chamar create_appointment, verifique se o ano na data é ${currentYear}. ` +
       'Quando o cliente fornecer informações adicionais (telefone, endereço, data de nascimento, etc.), USE A FUNÇÃO update_customer_info para atualizar o cadastro. ' +
       'Você TEM PERMISSÃO para criar agendamentos e atualizar informações de clientes usando as funções disponíveis. ' +
       'CRÍTICO: Sempre confirme com o cliente antes de criar o agendamento dizendo "Perfeito! Vou agendar para [dia] às [hora]. Confirma?"';
@@ -110,7 +123,7 @@ export class AIChatService {
         },
         {
           name: 'create_appointment',
-          description: 'Cria um novo agendamento para o cliente. Use SEMPRE data e hora completas no formato ISO-8601 (exemplo: 2025-11-25T14:00:00)',
+          description: `Cria um novo agendamento para o cliente. ATENÇÃO: Use SEMPRE o ano ${currentYear} no formato ISO-8601 COMPLETO.`,
           parameters: {
             type: 'object',
             properties: {
@@ -120,7 +133,7 @@ export class AIChatService {
               },
               startAt: {
                 type: 'string',
-                description: 'Data e hora de início no formato ISO-8601 COMPLETO (ex: 2025-11-25T14:00:00). SEMPRE inclua hora, minuto e segundo.'
+                description: `Data e hora no formato ISO-8601 COMPLETO. OBRIGATÓRIO usar ano ${currentYear}. Exemplo: ${currentYear}-12-25T14:00:00. NUNCA use 2023 ou 2024.`
               },
               durationMinutes: {
                 type: 'integer',
@@ -136,7 +149,7 @@ export class AIChatService {
         }
       ];
 
-      console.log('🤖 Chamando OpenAI com histórico de', messages.length, 'mensagens');
+      console.log('Chamando OpenAI com histórico de', messages.length, 'mensagens');
 
       const response = await firstValueFrom(
         this.httpService.post(
@@ -160,8 +173,8 @@ export class AIChatService {
       const message = choice?.message;
 
       if (message?.function_call) {
-        console.log('🔧 IA chamou função:', message.function_call.name);
-        console.log('📋 Argumentos:', message.function_call.arguments);
+        console.log('IA chamou função:', message.function_call.name);
+        console.log('Argumentos:', message.function_call.arguments);
 
         try {
           const fnName = message.function_call.name;
@@ -169,7 +182,7 @@ export class AIChatService {
 
           if (fnName === 'update_customer_info') {
             const { customerId, ...updateData } = args;
-            console.log('📝 Atualizando cliente', customerId, 'com:', updateData);
+            console.log('Atualizando cliente', customerId, 'com:', updateData);
             const result = await this.customersAiService.updateFromAi(customerId, updateData);
             if (result && result.success) {
               return `Pronto! Suas informações foram atualizadas com sucesso. Posso te ajudar a agendar uma consulta ou tirar alguma dúvida?`;
@@ -179,42 +192,55 @@ export class AIChatService {
           }
 
           if (fnName === 'create_appointment') {
-            console.log('📅 Tentando criar agendamento com args:', JSON.stringify(args, null, 2));
+            console.log('Tentando criar agendamento com args:', JSON.stringify(args, null, 2));
 
             if (!args.customerId) {
-              console.error('❌ customerId não fornecido!');
+              console.error('customerId não fornecido!');
               return 'Desculpe, preciso do seu cadastro completo antes de agendar. Pode me informar seu email e CPF?';
             }
 
             if (!args.startAt || !args.startAt.includes('T')) {
-              console.error('❌ startAt em formato incorreto:', args.startAt);
+              console.error('startAt em formato incorreto:', args.startAt);
               return 'Desculpe, houve um erro ao processar a data. Pode me informar o dia e horário que deseja agendar novamente?';
+            }
+
+            let dateToValidate = new Date(args.startAt);
+            const expectedYear = new Date().getFullYear();
+            
+            if (dateToValidate.getFullYear() !== expectedYear) {
+              console.error(`ANO INCORRETO DETECTADO: ${dateToValidate.getFullYear()} (esperado: ${expectedYear})`);
+              console.error(`Data original: ${args.startAt}`);
+              
+              dateToValidate.setFullYear(expectedYear);
+              args.startAt = dateToValidate.toISOString();
+              
+              console.log(`Data corrigida para: ${args.startAt}`);
             }
 
             args.durationMinutes = 60;
             args.serviceName = 'Consulta';
 
-            console.log('✅ Chamando appointmentsAiService.createFromAi com:', args);
+            console.log('Chamando appointmentsAiService.createFromAi com:', args);
 
             try {
               const result = await this.appointmentsAiService.createFromAi(args);
-              console.log('📊 Resultado do agendamento:', result);
+              console.log('Resultado do agendamento:', result);
 
               if (result && (result.id || result[0]?.id)) {
                 const appointmentId = result.id || result[0]?.id;
-                console.log('✅ Agendamento criado com ID:', appointmentId);
+                console.log('Agendamento criado com ID:', appointmentId);
                 return `Pronto! Sua consulta está agendada. Se precisar de mais alguma coisa, estou à disposição!`;
               } else {
-                console.error('❌ Resultado do agendamento não contém ID:', result);
+                console.error('Resultado do agendamento não contém ID:', result);
                 return `Não consegui agendar nesse horário. Que tal escolher outro horário? Estou aqui para ajudar!`;
               }
             } catch (error) {
-              console.error('❌ Erro ao criar agendamento:', error);
+              console.error('Erro ao criar agendamento:', error);
               return `Ops! Tive um problema ao criar o agendamento. Pode tentar novamente com outro horário?`;
             }
           }
         } catch (e) {
-          console.error('❌ Failed to handle function_call', e);
+          console.error('Failed to handle function_call', e);
           return `Desculpe, ocorreu um erro ao processar sua solicitação: ${e.message}`;
         }
       }

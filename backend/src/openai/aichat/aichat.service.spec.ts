@@ -92,6 +92,6 @@ describe('AIChatService', () => {
 
     const result = await service.ask('Atualize o email e CPF do cliente');
   expect(customersAiMock.updateFromAi).toHaveBeenCalledWith(42, { email: 'novo@email.com', cpf: '123.456.789-00' });
-    expect(result).toBe('Informações do cliente atualizadas com sucesso!');
+    expect(result).toBe('Pronto! Suas informações foram atualizadas com sucesso. Posso te ajudar a agendar uma consulta ou tirar alguma dúvida?');
     });
 });
